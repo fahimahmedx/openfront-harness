@@ -1,0 +1,38 @@
+{
+  "name": "openfront-llm-harness",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "inst": "npm ci --ignore-scripts && npm --prefix OpenFrontIO run inst",
+    "build": "concurrently --kill-others-on-fail \"tsc --noEmit\" \"vite build\"",
+    "start": "tsx --tsconfig OpenFrontIO/tsconfig.json src/Server.ts",
+    "test": "vitest run tests",
+    "sample": "tsx --tsconfig OpenFrontIO/tsconfig.json src/GenerateSample.ts",
+    "verify:sample": "tsx --tsconfig OpenFrontIO/tsconfig.json src/VerifySample.ts",
+    "refresh:sample": "cross-env REFRESH_SAMPLE=true tsx --tsconfig OpenFrontIO/tsconfig.json src/VerifySample.ts",
+    "format": "prettier --ignore-unknown --write ."
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "marked": "^18.0.5",
+    "tsx": "^4.21.0",
+    "zod": "^4.4.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.4",
+    "@types/ejs": "^3.1.5",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.12.0",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "prettier": "^3.8.3",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.5"
+  }
+}

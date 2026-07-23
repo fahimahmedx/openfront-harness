@@ -1,0 +1,185 @@
+# I Put an LLM Inside a Deterministic Strategy Game—and Made Every Move Replayable
+
+I wanted an agent project that was more convincing than a chat box wrapped around an API. The result is an LLM harness for [OpenFront](https://openfront.io/), an open-source real-time strategy game: one model plays a fixed match on Japan against three built-in nations, and anyone can replay the entire game while inspecting what the model saw, chose, cost, and changed.
+
+The interesting part was not getting a model to return a command. It was building a trustworthy boundary between a probabilistic service and a deterministic game.
+
+## The constraint that shaped the project
+
+I want this harness to become a benchmark with a leaderboard. That changes the engineering question from “can an LLM play?” to “can two runs be compared honestly?”
+
+The current `japan-v2` scenario therefore fixes everything I can reasonably fix:
+
+- OpenFront v0.32.9 at one exact commit;
+- Japan at Normal size;
+- Free For All with one LLM and three Medium nation players;
+- game seed `JAPAN01A`;
+- a Kanto spawn at tile `(1613, 1133)`;
+- Hokkaido, Shikoku, and Kansai as opponents;
+- one decision every 100 ticks;
+- exactly two action slots;
+- a 120-decision and 20-simulated-minute ceiling.
+
+If one of those values changes, it is a new scenario—not a quiet configuration tweak.
+
+## I used the game, not a simplified clone
+
+The fastest route would have been to model OpenFront as a small grid and declare success when an LLM moved around it. That would have discarded the hard and useful parts: real attacks, boats, structures, diplomacy, built-in AI, timing, map geometry, victory logic, state hashes, and native replay.
+
+Instead, the harness runs OpenFront's deterministic core directly in Node. The LLM occupies the normal human-player path. Its choices become ordinary OpenFront intents, and the existing client renderer plays the resulting `GameRecord`.
+
+I kept this integration outside the game repository. `OpenFrontIO/` remains a clean checkout of the pinned tag. The harness imports the core from that read-only tree, owns its own server and UI, and builds the renderer externally. A small Vite transform adds the replay-tick event in memory and fails if its pinned source marker moves; it never patches the checkout on disk.
+
+This cost more integration work, but it means the replay is evidence. It is not a video generated after the fact and it is not an animation driven by a second approximation of the rules.
+
+## The model never writes raw game commands
+
+Giving a model an intent schema and hoping it fills every field correctly is a fragile interface. It also lets the model propose actions that the current state cannot support.
+
+At each decision point, the harness builds a deterministic menu of currently legal candidates. It covers explicit holds, neutral expansion, attacks at several troop levels, boats, retreats, structures, upgrades, and diplomacy. Every candidate has a stable ID, a human-readable label, and the exact native intent it will produce.
+
+Version 2 also treats the two action slots as one resource decision. Troop actions split a shared surplus above a game-mechanic-aware reserve, so two choices cannot independently spend percentages of the same garrison. The observation states troop capacity, current absolute growth, reserve mode, safe spend, and relative opponent strength instead of expecting the model to infer all of that from two raw integers.
+
+The model sees a normalized observation plus that menu and must return exactly two different IDs:
+
+```json
+{
+  "strategy": "Expand early, then protect the coast.",
+  "actions": ["expand:neutral:50", "build:port:…"]
+}
+```
+
+OpenRouter enforces a strict JSON Schema. The harness then validates the response again with Zod and checks both IDs against the menu it actually sent. A malformed or invented action is retried once. If the retry also fails, both slots become holds. Five consecutive complete failures stop the run.
+
+This changed how I think about agents: the most important prompt is often the API you design around the prompt.
+
+## Determinism has layers
+
+The game is deterministic for a given start configuration and intent sequence. The hosted model is not deterministic in the same strong sense.
+
+I record two different seeds because they solve different problems:
+
+- the game seed controls the environment;
+- the model seed asks the provider for more repeatable sampling.
+
+The model route is also pinned to one provider with fallbacks disabled. That reduces hidden variance, but it does not freeze a hosted model's weights or infrastructure. A future benchmark cannot claim bit-for-bit model reproducibility from a seed alone. It needs to treat the submitted action trace as the reproducible object and replay that trace server-side against a content-addressed game build.
+
+That distinction—deterministic environment versus deterministic policy—is probably the most important thing I learned.
+
+## Replay became the observability system
+
+A normal agent log tells me what a model requested. A game replay tells me what the system actually simulated.
+
+Each artifact contains:
+
+- the exact scenario, source commit, model, provider, prompt version, and seeds;
+- every normalized observation and legal candidate menu;
+- selected and applied action IDs;
+- validation fallback, latency, token usage, and reported cost;
+- winner, placement, terminal tick, simulated time, and final state hash;
+- a native OpenFront replay record.
+
+During playback, a trace panel follows the replay tick. It shows the latest public strategy note, both actions, state summary, latency, tokens, and cost next to the real renderer.
+
+The replay record stores only turns with intents or periodic hashes, while retaining the original total turn count. That keeps the bundled artifact small without weakening the engine's normal reconstruction path.
+
+I also added a no-network verification command. It feeds the bundled sample's recorded decisions back through the game and requires the final winner, terminal tick, and state hash to match. This is a much stronger fixture than “the JSON parsed successfully.”
+
+## A real sample, including the failures
+
+I deliberately bundled a real run rather than a hand-written golden path. The default model was `openai/gpt-5.6-luna` through OpenRouter's OpenAI route.
+
+The sample produced:
+
+| Metric                        |             Result |
+| ----------------------------- | -----------------: |
+| Model decisions while alive   |                106 |
+| Prompt tokens                 |            180,599 |
+| Completion tokens             |             20,095 |
+| Reported inference cost       |        $0.31777925 |
+| Decisions requiring a retry   |                 15 |
+| Complete validation fallbacks |                  8 |
+| Average model latency         |       3.35 seconds |
+| Winner                        |          LLM Agent |
+| LLM placement                 |                1st |
+| Terminal tick                 |             10,561 |
+| Simulated time                |      1,056 seconds |
+| Final state hash              | `4090602815772241` |
+
+The v2 LLM won. That is an encouraging regression result, but one match is anecdotal rather than proof that the policy is generally strong. The more important harness result is mechanical: across all 106 decisions, the combined troop commitments selected for the two slots never exceeded the observation's shared spendable budget. Ordinary attacks passed the 55% readiness and troop-advantage gates, and bounded counterattacks never exceeded the recorded incoming force.
+
+The run was not cosmetically cleaned up. Fifteen decisions needed the allowed retry and eight still fell back to two holds after both responses failed validation. The artifact records those failures and their billable usage, then continues through the same deterministic game path. The original v1 sample also remains useful historical evidence: it finished fourth after repeatedly draining its garrison, which is what exposed the shared-resource defect fixed by v2.
+
+## Bugs that only appeared at the boundaries
+
+Several of the best lessons came from integration failures.
+
+### Strict provider routing exposed a parameter mismatch
+
+My first live sample made no billable calls. Every request returned “no endpoints found.” The selected model supported structured output, reasoning, and a seed, so the request looked valid at a glance.
+
+The live endpoint metadata showed the actual mismatch: the pinned OpenAI route advertised `max_tokens`, while I sent `max_completion_tokens`, which was available on the Azure route. Because `require_parameters` was enabled and fallback was disabled, OpenRouter correctly refused to route the request.
+
+Strictness created an early failure instead of silently dropping a parameter or switching infrastructure. That was exactly the behavior a benchmark needs.
+
+### Living players are not all players
+
+The first completed artifact said the eliminated LLM finished first. The reason was subtle: OpenFront's `players()` method returns living players only. Sorting that list and looking for the dead human produced index `-1`, which my defensive `Math.max` turned into first place.
+
+The fix was to record each player's elimination tick from `allPlayers()` and derive placement from elimination order. The sample now correctly reports fourth.
+
+### Two legal actions could spend the same troops twice
+
+The v1 menu described each attack as a percentage of “current troops,” but both slots were materialized from the same snapshot. A `75%` expansion followed by `25%` therefore committed the entire garrison; `75% + 50%` asked the core for 125%, and the second execution consumed whatever remained. The model repeated that pattern while calling a 1–2% capacity position a “large reserve.”
+
+This was an interface defect, not just weak play. In v2, exact troop amounts come from a shared two-slot surplus above deterministic reserve floors. Ordinary attacks also require recovery to 55% capacity, a troop advantage over the target, and a meaningful commitment. Incoming attacks switch the menu to bounded counters rather than opening an unrestricted all-in exception.
+
+### “Legal when proposed” is not “valid when executed”
+
+The action menu is derived from one state snapshot, but OpenFront applies intents inside a changing simulation. In the sample, two Defense Post build intents were legal candidates when proposed and were later rejected by the core as state changed.
+
+The harness keeps the attempted native intents in the artifact and lets the game remain authoritative. A future artifact schema should capture explicit post-execution outcomes instead of today's more limited “queued as a legal core intent” annotation.
+
+### Production HTML was not actually static
+
+The local dashboard worked, and the production build succeeded, but a server smoke test showed literal EJS expressions in script URLs. OpenFront's Vite pipeline intentionally emits runtime placeholders so its normal server can apply a hashed asset manifest and optional CDN prefix.
+
+Serving the built HTML with `sendFile` was therefore wrong. The harness server now renders both HTML entry points against the runtime asset manifest and caches the result. This is the kind of defect a type-check and unit test cannot find.
+
+## Treating cost and abuse controls as product features
+
+The deployed app can spend money, so operational limits are part of correctness.
+
+Before a model request, the harness estimates a conservative worst-case price for both possible attempts. A run cannot begin the next decision if that reservation would cross $1. It also stops at ten wall-clock minutes, 120 live decisions, or five consecutive model failures.
+
+Public Railway deployment allows one active match globally, five launches per UTC day, and one launch per source network per day. It stores an HMAC of the IP rather than the raw address. Run files and quota state use atomic writes on a Railway Volume.
+
+Those limits are intentionally simple. They fit a portfolio deployment, not a horizontally scaled service. The design document says so explicitly.
+
+## What I would build next
+
+The harness is ready to demonstrate an inspectable agent run, but a credible leaderboard needs more:
+
+1. Define a public scoring formula that separates outcome, placement, survival, cost, and latency.
+2. Add several hidden, versioned seeds to reduce memorization.
+3. Accept signed action traces and replay every submission server-side.
+4. Pin a content-addressed engine/container for each season.
+5. Split model/provider configurations into explicit divisions.
+6. Record post-execution action results, not only accepted queue intents.
+7. Add browser-level replay screenshots and visual regression tests.
+8. Move jobs and artifacts to shared infrastructure before horizontal scaling.
+
+I would not start by adding more models. The hard part is making one result interpretable and reproducible. Once that contract is solid, adding competitors is easy.
+
+## The takeaway
+
+An agent demo becomes substantially more credible when a viewer can answer four questions:
+
+1. What did the model know?
+2. What was it allowed to do?
+3. What did the real system execute?
+4. Can I replay and verify the result?
+
+This project is my answer for a strategy game. The model is only one component. The harness—the constraints, legal-action boundary, artifacts, replay, verification, cost controls, and honest failure modes—is the actual product.
+
+The complete trade-offs are documented in the [design decision log](/docs/decisions). The harness is published under compatible AGPL terms and preserves OpenFront's attribution and asset licensing notices; the OpenFront checkout itself remains untouched.

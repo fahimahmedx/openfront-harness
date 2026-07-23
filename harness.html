@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A deterministic harness where an LLM plays OpenFront on Japan and every match can be replayed."
+    />
+    <title>OpenFront LLM Harness</title>
+    <script type="module" src="/src/client/Dashboard.ts"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <nav>
+        <a class="brand" href="/">OF<span>×</span>LLM</a>
+        <div class="nav-links">
+          <a href="/docs/writeup">Write-up</a>
+          <a href="/docs/decisions">Design decisions</a>
+          <a id="source-link" class="hidden" href="#">Source</a>
+          <a href="https://github.com/openfrontio/OpenFrontIO">Upstream</a>
+        </div>
+      </nav>
+
+      <section class="hero">
+        <p class="eyebrow">DETERMINISTIC STRATEGY AGENT</p>
+        <h1>An LLM plays <em>OpenFront</em>.<br />You inspect every move.</h1>
+        <p class="lede">
+          One fixed Japan scenario, a bounded legal action space, and complete
+          intent-based replays. Built as a transparent first step toward an LLM
+          strategy benchmark.
+        </p>
+        <div class="hero-actions">
+          <button id="run-button">Run the benchmark</button>
+          <a id="sample-button" class="secondary hidden" href="#"
+            >Watch sample replay</a
+          >
+        </div>
+        <p id="quota" class="quiet">Loading scenario…</p>
+      </section>
+
+      <section id="progress" class="panel hidden" aria-live="polite"></section>
+
+      <section class="preset panel">
+        <div>
+          <p class="eyebrow">IMMUTABLE PRESET</p>
+          <h2>Japan v1</h2>
+        </div>
+        <div id="scenario-grid" class="metric-grid"></div>
+      </section>
+
+      <section class="runs-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">REPRODUCIBLE ARTIFACTS</p>
+            <h2>Match replays</h2>
+          </div>
+          <button id="refresh-button" class="text-button">Refresh</button>
+        </div>
+        <div id="runs" class="runs-grid"></div>
+      </section>
+
+      <section class="architecture panel">
+        <p class="eyebrow">HOW IT WORKS</p>
+        <div class="flow">
+          <div>
+            <strong>01</strong><span>Observe deterministic core state</span>
+          </div>
+          <div>
+            <strong>02</strong><span>Enumerate legal candidate actions</span>
+          </div>
+          <div>
+            <strong>03</strong><span>Ask for exactly two action IDs</span>
+          </div>
+          <div>
+            <strong>04</strong><span>Record intents, hashes, and usage</span>
+          </div>
+          <div>
+            <strong>05</strong><span>Replay through OpenFront's renderer</span>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <span>Built on OpenFront v0.32.9</span>
+        <span>OpenFront source: AGPL-3.0 · assets: CC BY-SA 4.0</span>
+        <span>© OpenFront and Contributors</span>
+      </footer>
+    </main>
+  </body>
+</html>
