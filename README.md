@@ -25,12 +25,17 @@ The exact scenario is documented in [design-decision.md](design-decision.md), an
 Requirements: Node.js 24 and npm.
 
 ```bash
+git clone --recurse-submodules https://github.com/fahimahmedx/openfront-harness.git
+cd openfront-harness
 npm run inst
 cp example.env .env
 # Add OPENROUTER_API_KEY to .env
 npm run build
 RATE_LIMIT_SALT=local-development npm start
 ```
+
+For an existing clone, fetch the pinned OpenFront source with
+`git submodule update --init --recursive` before installing dependencies.
 
 Open `http://localhost:3000`. The server reads the workspace-level `.env`; no environment file is added to the OpenFront checkout.
 
