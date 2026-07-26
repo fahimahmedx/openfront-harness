@@ -65,7 +65,7 @@ class HarnessReplayPanel extends HTMLElement {
       }
 
       .panel {
-        max-height: calc(100vh - 28px);
+        max-height: calc(100vh - 112px);
         overflow: auto;
         border: 1px solid var(--line-strong);
         border-radius: 5px;
@@ -402,13 +402,13 @@ class HarnessReplayPanel extends HTMLElement {
         :host {
           top: auto;
           right: 8px;
-          bottom: 8px;
+          bottom: calc(82px + env(safe-area-inset-bottom));
           left: 8px;
           width: auto;
         }
 
         .panel {
-          max-height: min(64vh, 560px);
+          max-height: min(56vh, calc(100vh - 180px));
         }
 
         .panel-header {

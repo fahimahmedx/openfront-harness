@@ -1,4 +1,5 @@
 import { GameRecordSchema } from "../../OpenFrontIO/src/core/Schemas";
+import { installHarnessReplayControls } from "./ReplayPlaybackControls";
 import { installHarnessReplayPanel } from "./ReplayTracePanel";
 
 async function startHarnessReplay() {
@@ -21,6 +22,7 @@ async function startHarnessReplay() {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     installHarnessReplayPanel(runId);
+    installHarnessReplayControls(gameRecord.info.num_turns);
     document.dispatchEvent(
       new CustomEvent("join-lobby", {
         detail: {
