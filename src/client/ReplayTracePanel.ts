@@ -1,3 +1,5 @@
+import { renderTroops } from "../../OpenFrontIO/src/client/Utils";
+
 type PublicDecision = {
   index: number;
   tick: number;
@@ -626,7 +628,7 @@ class HarnessReplayPanel extends HTMLElement {
     observation.className = "observation";
     const observationLabel = document.createElement("span");
     observationLabel.className = "section-label";
-    observationLabel.textContent = "Observed player state";
+    observationLabel.textContent = "Observed player state · pre-action";
     const players = document.createElement("div");
     players.className = "players";
     const entries = [
@@ -647,7 +649,9 @@ class HarnessReplayPanel extends HTMLElement {
       name.append(String(player.name));
       const state = document.createElement("span");
       state.className = "player-state";
-      state.textContent = `${Number(player.tiles).toLocaleString()} tiles · ${Math.floor(Number(player.troops)).toLocaleString()} troops`;
+      state.textContent = `${Number(player.tiles).toLocaleString()} tiles · ${renderTroops(Number(player.troops))} troops`;
+      state.title =
+        "Available garrison troops observed before this decision's actions executed";
       row.append(name, state);
       players.append(row);
     });
