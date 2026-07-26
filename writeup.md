@@ -38,7 +38,9 @@ Giving a model an intent schema and hoping it fills every field correctly is a f
 
 At each decision point, the harness builds a deterministic menu of currently legal candidates. It covers explicit holds, neutral expansion, attacks at several troop levels, boats, retreats, structures, upgrades, and diplomacy. Every candidate has a stable ID, a human-readable label, and the exact native intent it will produce.
 
-Version 2 also treats the two action slots as one resource decision. Troop actions split a shared surplus above a game-mechanic-aware reserve, so two choices cannot independently spend percentages of the same garrison. The observation states troop capacity, current absolute growth, reserve mode, safe spend, and relative opponent strength instead of expecting the model to infer all of that from two raw integers.
+Version 2 also treats the two action slots as one resource decision. It first subtracts a capacity-based reserve from current troops, then divides the remaining surplus across both slots. Expansion preserves 15% of capacity; combat preserves 35%; emergency defense preserves 15%. Each troop candidate is 25%, 50%, 75%, or 100% of one slot's budget, so two choices cannot independently spend percentages of the same garrison.
+
+The menu also encodes the strategic preconditions the raw v1 interface hid. Ordinary attacks appear only after recovery to 55% capacity, only when the LLM has more troops than the target, and only when a candidate can commit at least 20% of the defender's force. Hostile incoming troops take precedence: expansion and unrelated offense disappear, while counterattacks are capped by the safe slot budget and the recorded incoming force. The observation states troop capacity, absolute growth per second, incoming and outgoing troops, reserve mode and floor, safe spend per slot, and relative opponent strength instead of expecting the model to infer all of that from two raw integers.
 
 The model sees a normalized observation plus that menu and must return exactly two different IDs:
 
@@ -106,9 +108,11 @@ The sample produced:
 | Simulated time                |      1,056 seconds |
 | Final state hash              | `4090602815772241` |
 
-The v2 LLM won. That is an encouraging regression result, but one match is anecdotal rather than proof that the policy is generally strong. The more important harness result is mechanical: across all 106 decisions, the combined troop commitments selected for the two slots never exceeded the observation's shared spendable budget. Ordinary attacks passed the 55% readiness and troop-advantage gates, and bounded counterattacks never exceeded the recorded incoming force.
+The v2 LLM won. That is an encouraging regression result, but one match is anecdotal rather than proof that the policy is generally strong. The more important harness result is mechanical: across all 106 decisions, the combined troop commitments selected for the two slots never exceeded the observation's shared spendable budget. Ordinary land attacks passed the 55% readiness and troop-advantage gates, and bounded counterattacks never exceeded the recorded incoming force.
 
 The run was not cosmetically cleaned up. Fifteen decisions needed the allowed retry and eight still fell back to two holds after both responses failed validation. The artifact records those failures and their billable usage, then continues through the same deterministic game path. The original v1 sample also remains useful historical evidence: it finished fourth after repeatedly draining its garrison, which is what exposed the shared-resource defect fixed by v2.
+
+I then replayed the artifact without network access. The engine reproduced the LLM victory at tick 10,561 with final state hash `4090602815772241`. The focused suite passed all 10 tests, TypeScript checking passed, and the production client built successfully. Those checks establish that the v2 contract is enforced and that this trajectory is reproducible; they do not turn one victory into a broad benchmark claim.
 
 ## Bugs that only appeared at the boundaries
 
@@ -126,7 +130,7 @@ Strictness created an early failure instead of silently dropping a parameter or 
 
 The first completed artifact said the eliminated LLM finished first. The reason was subtle: OpenFront's `players()` method returns living players only. Sorting that list and looking for the dead human produced index `-1`, which my defensive `Math.max` turned into first place.
 
-The fix was to record each player's elimination tick from `allPlayers()` and derive placement from elimination order. The sample now correctly reports fourth.
+The fix was to record each player's elimination tick from `allPlayers()` and derive placement from elimination order. The corrected v1 artifact reported the eliminated LLM in fourth place; the replacement v2 sample reports first because the core actually declared the LLM the winner.
 
 ### Two legal actions could spend the same troops twice
 
@@ -136,7 +140,7 @@ This was an interface defect, not just weak play. In v2, exact troop amounts com
 
 ### “Legal when proposed” is not “valid when executed”
 
-The action menu is derived from one state snapshot, but OpenFront applies intents inside a changing simulation. In the sample, two Defense Post build intents were legal candidates when proposed and were later rejected by the core as state changed.
+The action menu is derived from one state snapshot, but OpenFront applies intents inside a changing simulation. During verification, a Defense Post and a Factory intent were legal candidates when proposed and were later rejected by the core as state changed.
 
 The harness keeps the attempted native intents in the artifact and lets the game remain authoritative. A future artifact schema should capture explicit post-execution outcomes instead of today's more limited “queued as a legal core intent” annotation.
 

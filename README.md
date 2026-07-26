@@ -1,4 +1,4 @@
-# OpenFront LLM Harness
+# OpenFront Harness
 
 A deterministic, inspectable harness in which one LLM plays a fixed OpenFront match on Japan against three built-in medium-difficulty nations. Every run produces a complete OpenFront replay plus a decision-by-decision trace of observations, legal actions, selected intents, latency, tokens, cost, hashes, and outcome.
 
