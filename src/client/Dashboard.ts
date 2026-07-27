@@ -32,6 +32,9 @@ const proofDecisions = document.querySelector<HTMLElement>("#proof-decisions")!;
 const proofTime = document.querySelector<HTMLElement>("#proof-time")!;
 const proofCost = document.querySelector<HTMLElement>("#proof-cost")!;
 const demoResult = document.querySelector<HTMLElement>("#demo-result")!;
+const heroRunId =
+  document.querySelector<HTMLElement>("[data-hero-run-id]")?.dataset
+    .heroRunId ?? null;
 
 let currentScenarioId: string | null = null;
 let cachedRuns: RunSummary[] = [];
@@ -81,13 +84,16 @@ function updateSample(sample: RunSummary): void {
   sampleLinks.forEach((link) => {
     link.href = sample.replayUrl;
   });
-  const outcome = sample.llmWon
+}
+
+function updateHeroRun(run: RunSummary): void {
+  const outcome = run.llmWon
     ? "LLM victory"
-    : `${ordinal(sample.finalPlacement)} place`;
+    : `${ordinal(run.finalPlacement)} place`;
   proofOutcome.textContent = outcome;
-  proofDecisions.textContent = sample.decisionCount.toLocaleString();
-  proofTime.textContent = `${(sample.ticks / 10 / 60).toFixed(1)} min`;
-  proofCost.textContent = `$${sample.costUsd.toFixed(3)}`;
+  proofDecisions.textContent = run.decisionCount.toLocaleString();
+  proofTime.textContent = `${(run.ticks / 10 / 60).toFixed(1)} min`;
+  proofCost.textContent = `$${run.costUsd.toFixed(3)}`;
   demoResult.textContent = outcome;
 }
 
@@ -154,6 +160,9 @@ function renderRuns(): void {
   const sample =
     scenarioRuns.find((run) => run.status === "sample") ??
     cachedRuns.find((run) => run.status === "sample");
+  const heroRun = cachedRuns.find((run) => run.runId === heroRunId);
+
+  if (heroRun) updateHeroRun(heroRun);
 
   if (sample) {
     updateSample(sample);
