@@ -389,6 +389,7 @@ export class HarnessRunner {
                 null,
               promptVersion: OpenRouterAgent.promptVersion(),
               seed: OpenRouterAgent.modelSeed(),
+              reasoningEffort: OpenRouterAgent.reasoningEffort(),
             },
             startedAt: startedAt.toISOString(),
             completedAt: completedAt.toISOString(),

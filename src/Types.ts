@@ -120,6 +120,9 @@ export const RunArtifactSchema = z.object({
     provider: z.string().nullable(),
     promptVersion: z.enum(["agent-v1", "agent-v2", "agent-v3", "agent-v4"]),
     seed: z.literal(3209),
+    reasoningEffort: z
+      .enum(["none", "minimal", "low", "medium", "high", "xhigh", "max"])
+      .optional(),
   }),
   startedAt: z.string(),
   completedAt: z.string(),

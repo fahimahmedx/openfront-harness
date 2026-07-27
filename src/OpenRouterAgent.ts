@@ -16,6 +16,7 @@ const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
 const PROMPT_VERSION = "agent-v4" as const;
 const MODEL_SEED = 3209 as const;
+const REASONING_EFFORT = "none" as const;
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_COMPLETION_TOKENS = 512;
 const MAX_RETRY_CONTENT_CHARS = 2_000;
@@ -258,6 +259,10 @@ export class OpenRouterAgent {
     return MODEL_SEED;
   }
 
+  static reasoningEffort() {
+    return REASONING_EFFORT;
+  }
+
   private async loadPricing(): Promise<void> {
     if (this.pricingLoaded) return;
     this.pricingLoaded = true;
@@ -474,7 +479,7 @@ export class OpenRouterAgent {
           // `max_completion_tokens`. `require_parameters` makes this distinction
           // significant, so use the parameter supported by the pinned endpoint.
           max_tokens: MAX_COMPLETION_TOKENS,
-          reasoning: { effort: "low" },
+          reasoning: { effort: REASONING_EFFORT },
           response_format: {
             type: "json_schema",
             json_schema: {

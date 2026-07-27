@@ -105,6 +105,7 @@ afterEach(() => {
 describe("OpenRouter action output", () => {
   it("versions the slot-based request contract as agent-v4", () => {
     expect(OpenRouterAgent.promptVersion()).toBe("agent-v4");
+    expect(OpenRouterAgent.reasoningEffort()).toBe("none");
   });
 
   it("constrains each named slot to its legal action IDs", () => {
@@ -228,6 +229,7 @@ describe("OpenRouter action output", () => {
     const secondRequest = JSON.parse(
       String((fetchMock.mock.calls[1][1] as RequestInit).body),
     ) as {
+      reasoning: { effort: string };
       messages: Array<{ role: string; content: string }>;
       response_format: {
         json_schema: {
@@ -242,6 +244,7 @@ describe("OpenRouter action output", () => {
       stream: boolean;
       stream_options: { include_usage: boolean };
     };
+    expect(secondRequest.reasoning).toEqual({ effort: "none" });
     expect(secondRequest.stream).toBe(true);
     expect(secondRequest.stream_options).toEqual({ include_usage: true });
     expect(secondRequest.messages[secondRequest.messages.length - 2]).toEqual({
