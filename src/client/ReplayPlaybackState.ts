@@ -4,11 +4,6 @@ export const REPLAY_TICKS_PER_SECOND = 10;
 
 export const replayRates = [
   {
-    id: "slow",
-    label: "0.5×",
-    multiplier: ReplaySpeedMultiplier.slow,
-  },
-  {
     id: "normal",
     label: "1×",
     multiplier: ReplaySpeedMultiplier.normal,

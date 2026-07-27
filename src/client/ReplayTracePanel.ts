@@ -39,21 +39,20 @@ class HarnessReplayPanel extends HTMLElement {
     root.innerHTML = `<style>
       :host {
         --paper: #f3f1ea;
+        --raised: #faf9f4;
         --ink: #101614;
-        --muted: #91a098;
-        --faint: #66766e;
-        --line: #2c4037;
-        --line-strong: #496056;
-        --signal: #64e2aa;
-        --panel: #0b1713;
-        --panel-raised: #10211a;
-        --warning: #e39a62;
+        --muted: #5f6863;
+        --faint: #858d88;
+        --line: #d2d6ce;
+        --line-strong: #aeb5ad;
+        --signal: #1e7a5a;
+        --warning: #b7602a;
         position: fixed;
         z-index: 100000;
         top: 14px;
         right: 14px;
         width: min(430px, calc(100vw - 28px));
-        color: var(--paper);
+        color: var(--ink);
         font: 13px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         font-synthesis: none;
       }
@@ -78,9 +77,9 @@ class HarnessReplayPanel extends HTMLElement {
         flex-direction: column;
         border: 1px solid var(--line-strong);
         border-radius: 5px;
-        background: rgba(11, 23, 19, .97);
-        box-shadow: 0 24px 70px rgba(0, 0, 0, .5);
-        scrollbar-color: var(--line-strong) var(--panel);
+        background: rgba(243, 241, 234, .98);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, .28);
+        scrollbar-color: var(--line-strong) var(--paper);
         backdrop-filter: blur(12px);
       }
 
@@ -95,7 +94,7 @@ class HarnessReplayPanel extends HTMLElement {
         gap: 20px;
         min-height: 58px;
         border-bottom: 1px solid var(--line);
-        background: rgba(11, 23, 19, .98);
+        background: rgba(243, 241, 234, .98);
         padding: 12px 15px;
       }
 
@@ -108,7 +107,7 @@ class HarnessReplayPanel extends HTMLElement {
 
       .brand-mark {
         flex: none;
-        color: #f6f6f1;
+        color: var(--ink);
         font-size: 12px;
         font-weight: 900;
         letter-spacing: -.04em;
@@ -155,7 +154,7 @@ class HarnessReplayPanel extends HTMLElement {
       nav a:hover,
       nav button:hover {
         border-color: var(--signal);
-        color: #fff;
+        color: var(--ink);
       }
 
       .recording-bar {
@@ -184,14 +183,14 @@ class HarnessReplayPanel extends HTMLElement {
         height: 7px;
         border-radius: 50%;
         background: var(--signal);
-        box-shadow: 0 0 0 4px rgba(100, 226, 170, .1);
+        box-shadow: 0 0 0 4px rgba(30, 122, 90, .12);
       }
 
       main {
         min-height: 0;
         overflow: auto;
         padding: 18px 15px 16px;
-        scrollbar-color: var(--line-strong) var(--panel);
+        scrollbar-color: var(--line-strong) var(--paper);
       }
 
       .empty-state {
@@ -242,8 +241,8 @@ class HarnessReplayPanel extends HTMLElement {
 
       h2 {
         margin: 10px 0 0;
-        color: #f5f5f0;
-        font-size: 22px;
+        color: var(--ink);
+        font-size: 20px;
         font-weight: 720;
         letter-spacing: -.035em;
         line-height: 1.16;
@@ -261,8 +260,8 @@ class HarnessReplayPanel extends HTMLElement {
         align-items: center;
         gap: 8px;
         margin-top: 14px;
-        border: 1px solid rgba(227, 154, 98, .42);
-        background: rgba(227, 154, 98, .07);
+        border: 1px solid rgba(183, 96, 42, .42);
+        background: rgba(183, 96, 42, .08);
         padding: 8px 10px;
         color: var(--warning);
         font: 800 8px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -287,7 +286,7 @@ class HarnessReplayPanel extends HTMLElement {
         gap: 10px;
         margin-top: 8px;
         border: 1px solid var(--line);
-        background: var(--panel-raised);
+        background: var(--raised);
       }
 
       .action-index {
@@ -305,7 +304,7 @@ class HarnessReplayPanel extends HTMLElement {
 
       .action-title {
         display: block;
-        color: #eef2ef;
+        color: var(--ink);
         font-size: 11px;
         font-weight: 700;
         line-height: 1.45;
@@ -315,7 +314,7 @@ class HarnessReplayPanel extends HTMLElement {
       .action-detail {
         display: block;
         margin-top: 4px;
-        color: #a8b5af;
+        color: var(--muted);
         font: 600 8px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         letter-spacing: .02em;
       }
@@ -333,7 +332,7 @@ class HarnessReplayPanel extends HTMLElement {
         grid-template-columns: repeat(3, 1fr);
         border-block: 1px solid var(--line-strong);
         margin-top: 8px;
-        background: #0d1d17;
+        background: var(--raised);
       }
 
       .stats div {
@@ -358,7 +357,7 @@ class HarnessReplayPanel extends HTMLElement {
       }
 
       .stats b {
-        color: #f2f4f2;
+        color: var(--ink);
         font-size: 10px;
         white-space: nowrap;
       }
@@ -373,19 +372,10 @@ class HarnessReplayPanel extends HTMLElement {
         margin-top: 10px;
       }
 
-      .agent-identity {
-        display: flex;
-        align-items: baseline;
-        color: var(--signal);
-        font-size: 11px;
-        font-weight: 680;
-        padding-bottom: 7px;
-      }
-
       .self-stats {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        border-block: 1px solid rgba(44, 64, 55, .75);
+        border-block: 1px solid var(--line);
       }
 
       .self-stat {
@@ -394,7 +384,7 @@ class HarnessReplayPanel extends HTMLElement {
       }
 
       .self-stat + .self-stat {
-        border-left: 1px solid rgba(44, 64, 55, .75);
+        border-left: 1px solid var(--line);
         padding-inline: 10px 0;
       }
 
@@ -417,7 +407,7 @@ class HarnessReplayPanel extends HTMLElement {
       .self-stat-value strong {
         min-width: 0;
         overflow: hidden;
-        color: #eef2ef;
+        color: var(--ink);
         font-size: 12px;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -436,21 +426,12 @@ class HarnessReplayPanel extends HTMLElement {
       .playback-footer {
         flex: none;
         border-top: 1px solid var(--line-strong);
+        background: var(--paper);
       }
 
       ::slotted(harness-replay-playback) {
         display: block;
         width: 100%;
-      }
-
-      .agent-badge {
-        display: inline-block;
-        margin-right: 6px;
-        border: 1px solid rgba(100, 226, 170, .5);
-        padding: 1px 3px;
-        font: 800 6px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        letter-spacing: .08em;
-        vertical-align: 2px;
       }
 
       .collapsed .recording-bar,
@@ -492,7 +473,7 @@ class HarnessReplayPanel extends HTMLElement {
         nav { gap: 9px; }
         nav a, nav button { font-size: 9px; }
         .run-id { display: none; }
-        h2 { font-size: 19px; }
+        h2 { font-size: 18px; }
         .stats div { padding-inline: 6px; }
       }
 
@@ -632,7 +613,7 @@ class HarnessReplayPanel extends HTMLElement {
     strategyBlock.className = "strategy-block";
     const strategyLabel = document.createElement("span");
     strategyLabel.className = "section-label";
-    strategyLabel.textContent = "Public strategy note";
+    strategyLabel.textContent = "Agent Decision";
     const title = document.createElement("h2");
     title.textContent = decision.strategy;
     const provider = document.createElement("p");
@@ -711,15 +692,9 @@ class HarnessReplayPanel extends HTMLElement {
     observation.className = "observation";
     const observationLabel = document.createElement("span");
     observationLabel.className = "section-label";
-    observationLabel.textContent = "Observed agent state · pre-action";
+    observationLabel.textContent = "Agent State";
     const summary = document.createElement("div");
     summary.className = "agent-summary";
-    const identity = document.createElement("div");
-    identity.className = "agent-identity";
-    const badge = document.createElement("span");
-    badge.className = "agent-badge";
-    badge.textContent = "AGENT";
-    identity.append(badge, String(decision.observation.self.name));
 
     const previousSelf =
       this.current > 0
@@ -767,7 +742,7 @@ class HarnessReplayPanel extends HTMLElement {
       stat.append(label, valueRow);
       selfStats.append(stat);
     });
-    summary.append(identity, selfStats);
+    summary.append(selfStats);
     observation.append(observationLabel, summary);
 
     this.body.append(meta, strategyBlock, actions, stats, observation);

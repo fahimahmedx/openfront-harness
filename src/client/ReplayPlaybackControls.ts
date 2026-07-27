@@ -38,15 +38,16 @@ class HarnessReplayPlayback extends HTMLElement {
     root.innerHTML = `<style>
       :host {
         --paper: #f3f1ea;
-        --muted: #91a098;
-        --faint: #66766e;
-        --line: #2c4037;
-        --line-strong: #496056;
-        --signal: #64e2aa;
-        --panel: #0b1713;
+        --raised: #faf9f4;
+        --ink: #101614;
+        --muted: #5f6863;
+        --faint: #858d88;
+        --line: #d2d6ce;
+        --line-strong: #aeb5ad;
+        --signal: #1e7a5a;
         display: block;
         width: 100%;
-        color: var(--paper);
+        color: var(--ink);
         font: 12px/1.35 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         font-synthesis: none;
       }
@@ -64,21 +65,20 @@ class HarnessReplayPlayback extends HTMLElement {
 
       .transport {
         overflow: hidden;
-        background: rgba(11, 23, 19, .98);
+        background: var(--paper);
       }
 
       .progress {
         position: relative;
         height: 4px;
         overflow: hidden;
-        background: rgba(145, 160, 152, .18);
+        background: var(--line);
       }
 
       .progress-fill {
         width: 0;
         height: 100%;
         background: var(--signal);
-        box-shadow: 0 0 12px rgba(100, 226, 170, .42);
         transition: width 80ms linear;
       }
 
@@ -96,16 +96,16 @@ class HarnessReplayPlayback extends HTMLElement {
         flex: none;
         display: grid;
         place-items: center;
-        border: 1px solid rgba(100, 226, 170, .5);
+        border: 1px solid rgba(30, 122, 90, .5);
         border-radius: 50%;
-        background: rgba(100, 226, 170, .1);
+        background: rgba(30, 122, 90, .08);
         color: var(--signal);
         cursor: pointer;
       }
 
       .toggle:hover:not(:disabled) {
         border-color: var(--signal);
-        background: rgba(100, 226, 170, .17);
+        background: rgba(30, 122, 90, .14);
       }
 
       .toggle svg {
@@ -144,7 +144,7 @@ class HarnessReplayPlayback extends HTMLElement {
 
       .rates {
         display: grid;
-        grid-template-columns: repeat(4, minmax(42px, 1fr));
+        grid-template-columns: repeat(3, minmax(42px, 1fr));
         gap: 5px;
       }
 
@@ -161,12 +161,12 @@ class HarnessReplayPlayback extends HTMLElement {
 
       .rate:hover:not(:disabled) {
         border-color: var(--line-strong);
-        color: #fff;
+        color: var(--ink);
       }
 
       .rate[aria-pressed="true"] {
-        border-color: rgba(100, 226, 170, .7);
-        background: rgba(100, 226, 170, .12);
+        border-color: rgba(30, 122, 90, .7);
+        background: rgba(30, 122, 90, .1);
         color: var(--signal);
       }
 
@@ -203,7 +203,7 @@ class HarnessReplayPlayback extends HTMLElement {
 
         .rates {
           flex: 1 1 auto;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(3, 1fr);
           gap: 3px;
         }
 

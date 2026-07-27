@@ -13,7 +13,6 @@ describe("replay playback state", () => {
     expect(
       replayRates.map(({ label, multiplier }) => ({ label, multiplier })),
     ).toEqual([
-      { label: "0.5×", multiplier: ReplaySpeedMultiplier.slow },
       { label: "1×", multiplier: ReplaySpeedMultiplier.normal },
       { label: "2×", multiplier: ReplaySpeedMultiplier.fast },
       { label: "Max", multiplier: ReplaySpeedMultiplier.fastest },
