@@ -10,6 +10,7 @@ import { Intent } from "../OpenFrontIO/src/core/Schemas";
 import { SCENARIO } from "./Scenario";
 import {
   DecisionRecord,
+  isRepeatableLegalAction,
   LegalAction,
   Observation,
   ObservationSchema,
@@ -267,8 +268,8 @@ export function ordinaryAttackEligible(
   targetTroops: number,
 ): boolean {
   return (
-    currentTroops / Math.max(1, maxTroops) >=
-      TROOP_POLICY.combatTriggerRatio && currentTroops > targetTroops
+    currentTroops / Math.max(1, maxTroops) >= TROOP_POLICY.combatTriggerRatio &&
+    currentTroops > targetTroops
   );
 }
 
@@ -306,11 +307,7 @@ function troopPolicyState(game: Game, player: Player): TroopBudget {
     opponents.some(
       (opponent) =>
         !player.sharesBorderWith(opponent) &&
-        ordinaryAttackEligible(
-          player.troops(),
-          maxTroops,
-          opponent.troops(),
-        ) &&
+        ordinaryAttackEligible(player.troops(), maxTroops, opponent.troops()) &&
         boatDestination(game, player, opponent) !== null,
     );
   const mode = selectTroopPolicyMode({
@@ -418,8 +415,7 @@ export function createLegalActions(game: Game, player: Player): LegalAction[] {
             ({ troops }) =>
               troops >=
               Math.ceil(
-                opponent.troops() *
-                  TROOP_POLICY.minimumAttackToDefenderRatio,
+                opponent.troops() * TROOP_POLICY.minimumAttackToDefenderRatio,
               ),
           )
         : [];
@@ -636,17 +632,24 @@ export function resolveDecisionActions(
   const byId = new Map(
     candidates.map((candidate) => [candidate.id, candidate]),
   );
-  const seen = new Set<string>();
+  const uses = new Map<string, number>();
   let fallback = false;
   const resolved = [0, 1].map((slot) => {
     const id = selectedIds[slot];
-    const candidate =
-      id === undefined || seen.has(id) ? undefined : byId.get(id);
-    if (candidate === undefined) {
+    const candidate = id === undefined ? undefined : byId.get(id);
+    const slotHoldId = `hold:${slot + 1}`;
+    const allowedInSlot =
+      candidate !== undefined &&
+      (candidate.category !== "hold" || candidate.id === slotHoldId);
+    const priorUses = id === undefined ? 0 : (uses.get(id) ?? 0);
+    const repeatAllowed =
+      candidate !== undefined &&
+      (priorUses === 0 || isRepeatableLegalAction(candidate));
+    if (!allowedInSlot || !repeatAllowed) {
       fallback = true;
-      return byId.get(`hold:${slot + 1}`)!;
+      return byId.get(slotHoldId)!;
     }
-    seen.add(id);
+    uses.set(id!, priorUses + 1);
     return candidate;
   });
   return { actions: resolved, fallback };

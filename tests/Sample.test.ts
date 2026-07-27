@@ -26,5 +26,12 @@ describe("bundled sample", () => {
       model: { ...sample.model, promptVersion: "agent-v1" },
     });
     expect(legacy.model.promptVersion).toBe("agent-v1");
+
+    const current = RunArtifactSchema.parse({
+      ...sample,
+      model: { ...sample.model, promptVersion: "agent-v4" },
+    });
+    expect(current.model.promptVersion).toBe("agent-v4");
+    expect(current.decisions[0].attemptFailures).toEqual([]);
   });
 });

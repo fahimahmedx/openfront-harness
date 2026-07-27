@@ -20,6 +20,12 @@ type PublicDecision = {
   model: string;
   provider: string | null;
   fallback: boolean;
+  attemptFailures?: Array<{
+    attempt: number;
+    code: string;
+    message: string;
+    rejectedActionIds: string[];
+  }>;
   observation: {
     elapsedSeconds: number;
     timeRemainingSeconds: number;
@@ -266,6 +272,7 @@ class HarnessReplayPanel extends HTMLElement {
         color: var(--warning);
         font: 800 8px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         letter-spacing: .1em;
+        overflow-wrap: anywhere;
         text-transform: uppercase;
       }
 
@@ -621,12 +628,28 @@ class HarnessReplayPanel extends HTMLElement {
     provider.textContent = `${decision.model}${decision.provider ? ` via ${decision.provider}` : ""}`;
     strategyBlock.append(strategyLabel, title, provider);
 
-    if (decision.fallback) {
+    if (decision.fallback || decision.attemptFailures?.length) {
       const warning = document.createElement("div");
       warning.className = "warning";
       const dot = document.createElement("i");
       dot.setAttribute("aria-hidden", "true");
-      warning.append(dot, "Validation fallback used");
+      const failures =
+        decision.attemptFailures
+          ?.map((failure) => {
+            const ids = failure.rejectedActionIds.length
+              ? ` (${failure.rejectedActionIds.join(", ")})`
+              : "";
+            return `Attempt ${failure.attempt}: ${failure.code}${ids}`;
+          })
+          .join(" · ") ?? "";
+      const status = decision.fallback
+        ? "Validation fallback used"
+        : "Recovered after retry";
+      warning.title =
+        decision.attemptFailures
+          ?.map((failure) => failure.message)
+          .join("\n") ?? "";
+      warning.append(dot, failures ? `${status} · ${failures}` : status);
       strategyBlock.append(warning);
     }
 

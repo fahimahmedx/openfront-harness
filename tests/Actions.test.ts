@@ -11,6 +11,12 @@ const candidates: LegalAction[] = [
     label: "Expand",
     intent: { type: "attack", targetID: null, troops: 25 },
   },
+  {
+    id: "alliance:request:opponent",
+    category: "diplomacy",
+    label: "Request alliance",
+    intent: { type: "allianceRequest", recipient: "opponent" },
+  },
 ];
 
 describe("fixed action slots", () => {
@@ -26,13 +32,29 @@ describe("fixed action slots", () => {
     expect(result.fallback).toBe(false);
   });
 
-  test("replaces duplicate and unknown selections with slot holds", () => {
-    expect(
-      resolveDecisionActions(
-        ["expand:neutral:25", "expand:neutral:25"],
-        candidates,
-      ).actions.map((action) => action.id),
-    ).toEqual(["expand:neutral:25", "hold:2"]);
+  test("allows the same repeatable troop action in both slots", () => {
+    const result = resolveDecisionActions(
+      ["expand:neutral:25", "expand:neutral:25"],
+      candidates,
+    );
+    expect(result.actions.map((action) => action.id)).toEqual([
+      "expand:neutral:25",
+      "expand:neutral:25",
+    ]);
+    expect(result.fallback).toBe(false);
+  });
+
+  test("replaces repeated non-repeatable and unknown selections with slot holds", () => {
+    const repeatedDiplomacy = resolveDecisionActions(
+      ["alliance:request:opponent", "alliance:request:opponent"],
+      candidates,
+    );
+    expect(repeatedDiplomacy.actions.map((action) => action.id)).toEqual([
+      "alliance:request:opponent",
+      "hold:2",
+    ]);
+    expect(repeatedDiplomacy.fallback).toBe(true);
+
     expect(
       resolveDecisionActions(["unknown", "hold:2"], candidates).actions.map(
         (action) => action.id,

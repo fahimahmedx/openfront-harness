@@ -248,6 +248,7 @@ export class HarnessRunner {
               : "queued as a legal core intent",
           ) as [string, string],
           attempts: agentResult.attempts,
+          attemptFailures: agentResult.attemptFailures,
           fallback: completeFailure || resolved.fallback,
           latencyMs: agentResult.latencyMs,
           promptTokens: agentResult.promptTokens,

@@ -1,6 +1,6 @@
 # OpenFront LLM Harness — Design Decisions
 
-Status: implemented for benchmark scenario `japan-v2` on 2026-07-22. Existing `japan-v1` artifacts remain replay-compatible.
+Status: implemented for benchmark scenario `japan-v2`; the slot-based `agent-v4` output contract was added on 2026-07-26. Existing `japan-v1` and `agent-v1` through `agent-v3` artifacts remain replay-compatible.
 
 This document records every material decision made for the harness. A scenario-affecting change must create a new scenario ID instead of silently changing an existing benchmark, because future leaderboard results need to remain comparable.
 
@@ -62,11 +62,11 @@ This document records every material decision made for the harness. A scenario-a
 
 ## 8. Exactly two action slots
 
-**Decision:** Require exactly two distinct legal action IDs per decision. `hold:1` and `hold:2` make inaction explicit.
+**Decision:** Require exactly two named action slots, `action1` and `action2`. Each slot has its own legal-ID enum and its own hold. Expansion, attack, and boat candidates may be selected in both slots because their troop amount is already bounded to one slot's half of the shared safe budget. Repeated build, upgrade, retreat, diplomacy, or hold actions are normalized deterministically to the appropriate slot hold.
 
-**Pros:** Every model gets the same action bandwidth; output validation is simple; the trace clearly distinguishes an intentional hold from missing output.
+**Pros:** Every model gets the same action bandwidth; choosing the strongest safe troop action in both slots is valid rather than a model error; slot-specific enums prevent the wrong hold ID; repeated non-repeatable side effects cannot reach the core; the trace clearly distinguishes an intentional hold from missing output.
 
-**Cons:** Some states need one or three useful actions; simultaneous intents can conflict; the artificial slot count is not a native UI constraint.
+**Cons:** Some states need one or three useful actions; two same-target troop intents may be strategically redundant even though they are budget-safe; simultaneous intents can conflict; the artificial slot count is not a native UI constraint.
 
 ## 9. Server-generated legal action menu with shared troop reserves
 
@@ -96,11 +96,11 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 ## 12. Structured output plus local validation
 
-**Decision:** Use OpenRouter JSON Schema output in strict mode, then parse with Zod and verify that both IDs are distinct members of the exact candidate set.
+**Decision:** Use OpenRouter JSON Schema output in strict mode. Build separate `action1` and `action2` enum properties from the current candidate menu, excluding the other slot's hold from each property. Parse independently with Zod and verify membership for each slot locally. Include `maxUses` in the candidate view so repeatable troop actions are explicit. This slot-based request contract is prompt version `agent-v4`; it replaces v3's array-level distinctness rule, which conflicted with the two-slot troop budget and could not be expressed with the pinned provider's strict-schema subset.
 
-**Pros:** Defense in depth catches malformed JSON, extra fields, duplicate slots, and invented actions; application types and API schema agree; failure behavior is measurable.
+**Pros:** The provider prevents invented and wrong-slot IDs during generation; property names encode slot identity without unsupported JSON Schema keywords; local validation remains defense in depth; application types and API schema agree; failure behavior is measurable.
 
-**Cons:** Strict structured output narrows compatible endpoints; schema requests add tokens and provider coupling; local validation still needs retry logic.
+**Cons:** Strict structured output and dynamic enums narrow compatible endpoints; schema requests add tokens and provider coupling; repeatability remains a harness-owned semantic rule; local validation and retry logic remain necessary because the provider boundary is untrusted.
 
 ## 13. Default model and pinned provider route
 
@@ -120,11 +120,11 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 ## 15. Retry once, then hold
 
-**Decision:** Retry one failed/invalid model request. If both attempts fail, apply two holds. Abort after five consecutive complete decision failures. Count usage from invalid billable responses as well as successful responses.
+**Decision:** Retry one failed/invalid model request. For a validation failure, include the rejected response and its specific error in the retry conversation so the second attempt can correct itself; do not persist the raw rejected response. Record every failed attempt with its attempt number, stable failure code, message, and any rejected action IDs. Record provider refusals and token-limit truncation separately, and allow 512 completion tokens to reduce reasoning-only or truncated responses. Preserve the legacy duplicate failure code for old artifacts even though repeated troop selections are valid in v4. If both attempts fail, apply two holds. Abort after five consecutive complete decision failures. Count usage from invalid billable responses as well as successful responses.
 
-**Pros:** A transient or malformed response does not immediately destroy a match; deterministic holds preserve replay validity; consecutive-failure aborts prevent a dead integration from consuming the full runtime; accounting remains honest.
+**Pros:** A transient or malformed response does not immediately destroy a match; corrective context makes the retry materially different from the failed request; structured diagnostics make replay failures auditable; deterministic holds preserve replay validity; consecutive-failure aborts prevent a dead integration from consuming the full runtime; accounting remains honest.
 
-**Cons:** A retry increases latency and cost; holding can materially change the outcome; HTTP failures without usage data cannot be priced locally.
+**Cons:** A retry increases latency, prompt size, and cost; echoing rejected output back to the same provider slightly enlarges the request; holding can materially change the outcome; HTTP failures without usage data cannot be priced locally.
 
 ## 16. Stop inference after elimination
 
@@ -184,7 +184,7 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 ## 23. Bundle a real-model v2 sample
 
-**Decision:** Ship one gzipped `japan-v2` sample generated by the default live model. Provide a no-network verifier that replays its recorded actions and requires winner, terminal tick, and final hash to match. Continue accepting legacy `japan-v1`/`agent-v1` artifacts for replay, but require the bundled sample itself to use `japan-v2`/`agent-v2`.
+**Decision:** Ship one gzipped `japan-v2` sample generated by the default live model. Provide a no-network verifier that replays its recorded actions and requires winner, terminal tick, and final hash to match. Continue accepting legacy `japan-v1`/`agent-v1` artifacts for replay. Keep the immutable bundled winning sample identified as `agent-v2`; new live runs use `agent-v4`, and replacing the sample requires a new real model run rather than rewriting its recorded decisions.
 
 **Pros:** Recruiters can inspect the result without a key or waiting; deployment remains useful when generation is disabled; the verifier turns the sample into a reproducibility fixture.
 
@@ -192,11 +192,11 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 ## 24. Versioned, transparent artifacts
 
-**Decision:** Store schema-versioned JSON containing full normalized observations, candidate menus, decisions, metrics, outcome, and replay, compressed with gzip.
+**Decision:** Store schema-versioned JSON containing full normalized observations, candidate menus, decisions, per-attempt validation diagnostics, metrics, outcome, and replay, compressed with gzip. Diagnostic entries contain stable codes and rejected action IDs but not raw model responses. Default missing diagnostic arrays to empty when parsing older artifacts.
 
-**Pros:** Data is portable, auditable, and easy to analyze; replay and agent trace cannot become detached; gzip reduces the bundled sample substantially.
+**Pros:** Data is portable, auditable, and easy to analyze; replay and agent trace cannot become detached; failures can be classified without retaining unnecessary raw output; old artifacts remain viewable; gzip reduces the bundled sample substantially.
 
-**Cons:** Full observations duplicate state and can grow; JSON is less query-efficient than a database; schema evolution needs explicit migrations.
+**Cons:** Full observations duplicate state and can grow; rejected IDs expose a small part of invalid output; JSON is less query-efficient than a database; schema evolution needs explicit migrations.
 
 ## 25. Atomic filesystem persistence on a Railway Volume
 

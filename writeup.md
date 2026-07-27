@@ -42,16 +42,19 @@ Version 2 also treats the two action slots as one resource decision. It first su
 
 The menu also encodes the strategic preconditions the raw v1 interface hid. Ordinary attacks appear only after recovery to 55% capacity, only when the LLM has more troops than the target, and only when a candidate can commit at least 20% of the defender's force. Hostile incoming troops take precedence: expansion and unrelated offense disappear, while counterattacks are capped by the safe slot budget and the recorded incoming force. The observation states troop capacity, absolute growth per second, incoming and outgoing troops, reserve mode and floor, safe spend per slot, and relative opponent strength instead of expecting the model to infer all of that from two raw integers.
 
-The model sees a normalized observation plus that menu and must return exactly two different IDs:
+The model sees a normalized observation plus that menu and must fill two named slots:
 
 ```json
 {
   "strategy": "Expand early, then protect the coast.",
-  "actions": ["expand:neutral:50", "build:port:…"]
+  "action1": "expand:neutral:100",
+  "action2": "expand:neutral:100"
 }
 ```
 
-OpenRouter enforces a strict JSON Schema. The harness then validates the response again with Zod and checks both IDs against the menu it actually sent. A malformed or invented action is retried once. If the retry also fails, both slots become holds. Five consecutive complete failures stop the run.
+OpenRouter enforces a strict JSON Schema. In the current `agent-v4` contract, that schema is generated from the current menu, with separate legal-ID enums for `action1` and `action2`. Troop candidates advertise `maxUses: 2` and may fill both slots because each exact commitment was calculated from one half of the shared safe budget. Other actions have `maxUses: 1`; repeating one deterministically turns the second use into a hold.
+
+A malformed or invented action is retried once. The retry includes the rejected JSON and a specific validation error, instead of blindly sending the same request again. If it also fails, both slots become holds. Every failed attempt is recorded with a stable error code and any rejected IDs, while the raw rejected response is not persisted. Provider refusals and token-limit truncation have distinct diagnostics. Five consecutive complete failures stop the run.
 
 This changed how I think about agents: the most important prompt is often the API you design around the prompt.
 
@@ -77,7 +80,8 @@ Each artifact contains:
 - the exact scenario, source commit, model, provider, prompt version, and seeds;
 - every normalized observation and legal candidate menu;
 - selected and applied action IDs;
-- validation fallback, latency, token usage, and reported cost;
+- for `agent-v3` and newer runs, per-attempt validation codes and rejected IDs; older artifacts default this list to empty;
+- fallback status, latency, token usage, and reported cost;
 - winner, placement, terminal tick, simulated time, and final state hash;
 - a native OpenFront replay record.
 
@@ -110,9 +114,11 @@ The sample produced:
 
 The v2 LLM won. That is an encouraging regression result, but one match is anecdotal rather than proof that the policy is generally strong. The more important harness result is mechanical: across all 106 decisions, the combined troop commitments selected for the two slots never exceeded the observation's shared spendable budget. Ordinary land attacks passed the 55% readiness and troop-advantage gates, and bounded counterattacks never exceeded the recorded incoming force.
 
-The run was not cosmetically cleaned up. Fifteen decisions needed the allowed retry and eight still fell back to two holds after both responses failed validation. The artifact records those failures and their billable usage, then continues through the same deterministic game path. The original v1 sample also remains useful historical evidence: it finished fourth after repeatedly draining its garrison, which is what exposed the shared-resource defect fixed by v2.
+The run was not cosmetically cleaned up. Fifteen decisions needed the allowed retry and eight still fell back to two holds after both responses failed validation. The immutable sample predates the structured diagnostics, so it retains the older combined “unknown or duplicate action ID” message and does not contain the rejected raw response needed to classify Decision 2 retroactively. A later v3 audit showed why distinctness was the wrong rule: every duplicate selected the `100%` version of a troop action twice, exactly consuming the two safe slot budgets. The v4 contract makes that choice valid while retaining precise diagnostics for genuine provider failures. The sample still records its fallbacks and billable usage, then continues through the same deterministic game path. The original v1 sample also remains useful historical evidence: it finished fourth after repeatedly draining its garrison, which is what exposed the shared-resource defect fixed by v2.
 
-I then replayed the artifact without network access. The engine reproduced the LLM victory at tick 10,561 with final state hash `4090602815772241`. The focused suite passed all 10 tests, TypeScript checking passed, and the production client built successfully. Those checks establish that the v2 contract is enforced and that this trajectory is reproducible; they do not turn one victory into a broad benchmark claim.
+I validated v4 with a fresh live run rather than relying only on unit tests. The model reused a troop action in 75 of 84 decisions—18 expansions, 55 land attacks or counters, and two boats. All 75 stayed within the shared spendable budget, none caused a duplicate validation failure or action fallback, and the LLM won at tick 8,321. One provider request timed out and succeeded on retry; that remained a genuine transport failure rather than an action-contract failure.
+
+I then replayed the artifact without network access. The engine reproduced the LLM victory at tick 10,561 with final state hash `4090602815772241`. The suite passed all 25 tests, TypeScript checking passed, and the production client built successfully. Those checks establish that the v2 trajectory remains reproducible and the v4 output boundary is enforced; they do not turn one victory into a broad benchmark claim.
 
 ## Bugs that only appeared at the boundaries
 

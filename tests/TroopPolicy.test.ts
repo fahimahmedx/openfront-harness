@@ -14,10 +14,7 @@ import {
   TROOP_POLICY,
 } from "../src/ObservationActions";
 import { promptFor } from "../src/OpenRouterAgent";
-import {
-  createScenarioStartInfo,
-  SCENARIO,
-} from "../src/Scenario";
+import { createScenarioStartInfo, SCENARIO } from "../src/Scenario";
 import { LegalAction } from "../src/Types";
 
 function troopCommitment(candidate: LegalAction): number {
@@ -84,9 +81,7 @@ describe("troop policy", () => {
     const amounts = budgetedTroopAmounts(budget, cap);
     expect(Math.max(...amounts.map((item) => item.troops))).toBe(6_000);
     expect(
-      amounts.every(
-        (item) => item.troops <= 6_000 && item.troops <= 35_000,
-      ),
+      amounts.every((item) => item.troops <= 6_000 && item.troops <= 35_000),
     ).toBe(true);
     expect(counterTroopCap(8_000, 20_000)).toBe(8_000);
   });
@@ -127,12 +122,7 @@ describe("troop policy", () => {
     const player = runner.game.playerByClientID(SCENARIO.clientID)!;
 
     for (let decision = 0; decision < 20; decision++) {
-      const observation = createObservation(
-        runner.game,
-        player,
-        decision,
-        [],
-      );
+      const observation = createObservation(runner.game, player, decision, []);
       const candidates = createLegalActions(runner.game, player);
       const self = observation.self as Record<string, number | string>;
       const currentTroops = Number(self.troops);
@@ -143,7 +133,7 @@ describe("troop policy", () => {
       );
 
       for (let first = 0; first < troopCandidates.length; first++) {
-        for (let second = first + 1; second < troopCandidates.length; second++) {
+        for (let second = first; second < troopCandidates.length; second++) {
           expect(
             troopCommitment(troopCandidates[first]) +
               troopCommitment(troopCandidates[second]),

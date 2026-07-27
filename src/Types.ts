@@ -21,11 +21,36 @@ export const LegalActionSchema = z.object({
 });
 export type LegalAction = z.infer<typeof LegalActionSchema>;
 
+export function isRepeatableLegalAction(action: LegalAction): boolean {
+  return (
+    action.category === "expand" ||
+    action.category === "attack" ||
+    action.category === "boat"
+  );
+}
+
 export const AgentDecisionSchema = z.object({
   strategy: z.string().trim().max(160),
   actions: z.array(z.string().min(1).max(160)).length(2),
 });
 export type AgentDecision = z.infer<typeof AgentDecisionSchema>;
+
+export const AgentAttemptFailureSchema = z.object({
+  attempt: z.number().int().min(1).max(2),
+  code: z.enum([
+    "empty_response",
+    "invalid_json",
+    "invalid_shape",
+    "unknown_action_id",
+    "duplicate_action_id",
+    "truncated_response",
+    "refusal",
+    "request_error",
+  ]),
+  message: z.string().min(1).max(500),
+  rejectedActionIds: z.array(z.string().min(1).max(160)).max(2).default([]),
+});
+export type AgentAttemptFailure = z.infer<typeof AgentAttemptFailureSchema>;
 
 export const ObservationSchema = z.object({
   scenarioId: z.string(),
@@ -51,6 +76,7 @@ export const DecisionRecordSchema = z.object({
   appliedActionIds: z.array(z.string()).length(2),
   outcomes: z.array(z.string()).length(2),
   attempts: z.number().int().min(1).max(2),
+  attemptFailures: z.array(AgentAttemptFailureSchema).default([]),
   fallback: z.boolean(),
   latencyMs: z.number().nonnegative(),
   promptTokens: z.number().int().nonnegative(),
@@ -79,7 +105,7 @@ export const RunArtifactSchema = z.object({
     requested: z.string(),
     resolved: z.string(),
     provider: z.string().nullable(),
-    promptVersion: z.enum(["agent-v1", "agent-v2"]),
+    promptVersion: z.enum(["agent-v1", "agent-v2", "agent-v3", "agent-v4"]),
     seed: z.literal(3209),
   }),
   startedAt: z.string(),
@@ -118,6 +144,7 @@ export interface RunProgress {
 export interface AgentResult {
   decision: AgentDecision | null;
   attempts: number;
+  attemptFailures: AgentAttemptFailure[];
   latencyMs: number;
   promptTokens: number;
   completionTokens: number;
