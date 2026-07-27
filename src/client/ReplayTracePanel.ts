@@ -722,14 +722,8 @@ class HarnessReplayPanel extends HTMLElement {
 
     const stats = document.createElement("div");
     stats.className = "stats";
-    const finalAttempt =
-      decision.attemptTimings?.[decision.attemptTimings.length - 1];
     const statValues = [
       ["Latency", formatLatency(decision.latencyMs)],
-      ["TTFT", formatLatency(finalAttempt?.timeToFirstTokenMs)],
-      ["Generation", formatLatency(finalAttempt?.generationMs)],
-      ["TPOT", formatLatency(finalAttempt?.timePerOutputTokenMs)],
-      ["Queue", formatLatency(finalAttempt?.queueMs)],
       [
         "Tokens",
         (decision.promptTokens + decision.completionTokens).toLocaleString(),
