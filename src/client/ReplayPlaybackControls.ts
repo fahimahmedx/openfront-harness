@@ -44,16 +44,11 @@ class HarnessReplayPlayback extends HTMLElement {
         --line-strong: #496056;
         --signal: #64e2aa;
         --panel: #0b1713;
-        position: fixed;
-        z-index: 100001;
-        bottom: max(12px, env(safe-area-inset-bottom));
-        left: 50%;
-        width: min(620px, calc(100vw - 24px));
+        display: block;
+        width: 100%;
         color: var(--paper);
         font: 12px/1.35 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         font-synthesis: none;
-        pointer-events: none;
-        transform: translateX(-50%);
       }
 
       * { box-sizing: border-box; }
@@ -69,12 +64,7 @@ class HarnessReplayPlayback extends HTMLElement {
 
       .transport {
         overflow: hidden;
-        border: 1px solid var(--line-strong);
-        border-radius: 7px;
-        background: rgba(11, 23, 19, .97);
-        box-shadow: 0 16px 48px rgba(0, 0, 0, .48);
-        pointer-events: auto;
-        backdrop-filter: blur(12px);
+        background: rgba(11, 23, 19, .98);
       }
 
       .progress {
@@ -191,11 +181,6 @@ class HarnessReplayPlayback extends HTMLElement {
       }
 
       @media (max-width: 480px) {
-        :host {
-          bottom: max(8px, env(safe-area-inset-bottom));
-          width: calc(100vw - 16px);
-        }
-
         .controls {
           min-height: 52px;
           gap: 7px;
@@ -452,11 +437,15 @@ if (!customElements.get("harness-replay-playback")) {
   customElements.define("harness-replay-playback", HarnessReplayPlayback);
 }
 
-export function installHarnessReplayControls(totalTicks: number) {
+export function installHarnessReplayControls(
+  totalTicks: number,
+  container: HTMLElement = document.body,
+) {
   if (document.querySelector("harness-replay-playback")) return;
   const controls = document.createElement(
     "harness-replay-playback",
   ) as HarnessReplayPlayback;
   controls.setTotalTicks(totalTicks);
-  document.body.append(controls);
+  controls.slot = "playback";
+  container.append(controls);
 }

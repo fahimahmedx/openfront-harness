@@ -1,4 +1,10 @@
 import { renderTroops } from "../../OpenFrontIO/src/client/Utils";
+import {
+  formatLatency,
+  presentReplayAction,
+  ReplayActionCandidate,
+  statDelta,
+} from "./ReplayTraceState";
 
 type PublicDecision = {
   index: number;
@@ -6,6 +12,7 @@ type PublicDecision = {
   strategy: string;
   appliedActionIds: string[];
   outcomes: string[];
+  candidates: ReplayActionCandidate[];
   latencyMs: number;
   promptTokens: number;
   completionTokens: number;
@@ -65,8 +72,10 @@ class HarnessReplayPanel extends HTMLElement {
       }
 
       .panel {
-        max-height: calc(100vh - 112px);
-        overflow: auto;
+        max-height: calc(100vh - 28px);
+        display: flex;
+        overflow: hidden;
+        flex-direction: column;
         border: 1px solid var(--line-strong);
         border-radius: 5px;
         background: rgba(11, 23, 19, .97);
@@ -76,7 +85,8 @@ class HarnessReplayPanel extends HTMLElement {
       }
 
       .panel-header {
-        position: sticky;
+        position: relative;
+        flex: none;
         z-index: 2;
         top: 0;
         display: flex;
@@ -149,6 +159,7 @@ class HarnessReplayPanel extends HTMLElement {
       }
 
       .recording-bar {
+        flex: none;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -177,7 +188,10 @@ class HarnessReplayPanel extends HTMLElement {
       }
 
       main {
+        min-height: 0;
+        overflow: auto;
         padding: 18px 15px 16px;
+        scrollbar-color: var(--line-strong) var(--panel);
       }
 
       .empty-state {
@@ -289,50 +303,64 @@ class HarnessReplayPanel extends HTMLElement {
         padding: 10px 10px 9px 0;
       }
 
-      .action code {
+      .action-title {
         display: block;
         color: #eef2ef;
-        font: 650 11px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.45;
         overflow-wrap: anywhere;
       }
 
-      .action small {
+      .action-detail {
         display: block;
         margin-top: 4px;
+        color: #a8b5af;
+        font: 600 8px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        letter-spacing: .02em;
+      }
+
+      .action-outcome {
+        display: block;
+        margin-top: 3px;
         color: var(--muted);
-        font-size: 10px;
+        font-size: 9px;
         line-height: 1.4;
       }
 
       .stats {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        border-top: 1px solid var(--line-strong);
-        border-left: 1px solid var(--line-strong);
+        border-block: 1px solid var(--line-strong);
         margin-top: 8px;
+        background: #0d1d17;
       }
 
       .stats div {
         min-width: 0;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 6px;
         border-right: 1px solid var(--line-strong);
-        border-bottom: 1px solid var(--line-strong);
-        background: #0d1d17;
-        padding: 10px;
+        padding: 7px 8px;
+      }
+
+      .stats div:last-child {
+        border-right: 0;
       }
 
       .stats span {
-        display: block;
         color: var(--faint);
         font: 750 7px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        letter-spacing: .12em;
+        letter-spacing: .08em;
         text-transform: uppercase;
       }
 
       .stats b {
-        display: block;
-        margin-top: 7px;
         color: #f2f4f2;
-        font-size: 12px;
+        font-size: 10px;
+        white-space: nowrap;
       }
 
       .observation {
@@ -341,42 +369,78 @@ class HarnessReplayPanel extends HTMLElement {
         padding-top: 16px;
       }
 
-      .players {
+      .agent-summary {
         margin-top: 10px;
       }
 
-      .player {
-        display: grid;
-        grid-template-columns: minmax(90px, .7fr) 1.3fr;
-        gap: 12px;
+      .agent-identity {
+        display: flex;
         align-items: baseline;
-        padding: 7px 0;
-        border-bottom: 1px solid rgba(44, 64, 55, .58);
-        color: var(--muted);
-      }
-
-      .player:last-child {
-        border-bottom: 0;
-      }
-
-      .player-name {
-        min-width: 0;
-        overflow: hidden;
+        color: var(--signal);
         font-size: 11px;
         font-weight: 680;
+        padding-bottom: 7px;
+      }
+
+      .self-stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        border-block: 1px solid rgba(44, 64, 55, .75);
+      }
+
+      .self-stat {
+        min-width: 0;
+        padding: 9px 10px 9px 0;
+      }
+
+      .self-stat + .self-stat {
+        border-left: 1px solid rgba(44, 64, 55, .75);
+        padding-inline: 10px 0;
+      }
+
+      .self-stat-label {
+        display: block;
+        color: var(--faint);
+        font: 750 7px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+
+      .self-stat-value {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 4px;
+      }
+
+      .self-stat-value strong {
+        min-width: 0;
+        overflow: hidden;
+        color: #eef2ef;
+        font-size: 12px;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
 
-      .player-state {
-        color: #a8b5af;
-        font: 600 9px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        text-align: right;
+      .delta {
+        flex: none;
+        font: 750 8px/1.3 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       }
 
-      .player.self .player-name,
-      .player.self .player-state {
-        color: var(--signal);
+      .delta.up { color: var(--signal); }
+      .delta.down { color: var(--warning); }
+      .delta.flat { color: var(--muted); }
+      .delta.unavailable { color: var(--faint); }
+
+      .playback-footer {
+        flex: none;
+        border-top: 1px solid var(--line-strong);
+      }
+
+      ::slotted(harness-replay-playback) {
+        display: block;
+        width: 100%;
       }
 
       .agent-badge {
@@ -390,7 +454,8 @@ class HarnessReplayPanel extends HTMLElement {
       }
 
       .collapsed .recording-bar,
-      .collapsed main {
+      .collapsed main,
+      .collapsed .playback-footer {
         display: none;
       }
 
@@ -402,13 +467,13 @@ class HarnessReplayPanel extends HTMLElement {
         :host {
           top: auto;
           right: 8px;
-          bottom: calc(82px + env(safe-area-inset-bottom));
+          bottom: max(8px, env(safe-area-inset-bottom));
           left: 8px;
           width: auto;
         }
 
         .panel {
-          max-height: min(56vh, calc(100vh - 180px));
+          max-height: min(72vh, calc(100vh - 16px));
         }
 
         .panel-header {
@@ -428,7 +493,7 @@ class HarnessReplayPanel extends HTMLElement {
         nav a, nav button { font-size: 9px; }
         .run-id { display: none; }
         h2 { font-size: 19px; }
-        .player { grid-template-columns: minmax(80px, .65fr) 1.35fr; }
+        .stats div { padding-inline: 6px; }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -457,6 +522,9 @@ class HarnessReplayPanel extends HTMLElement {
           <strong>Reading the decision artifact…</strong>
         </div>
       </main>
+      <footer class="playback-footer">
+        <slot name="playback"></slot>
+      </footer>
     </section>`;
     this.body = root.querySelector("main")!;
     const panel = root.querySelector<HTMLElement>(".panel")!;
@@ -588,18 +656,33 @@ class HarnessReplayPanel extends HTMLElement {
     actionsLabel.textContent = "Executed actions";
     actions.append(actionsLabel);
     decision.appliedActionIds.forEach((id, index) => {
+      const presentation = presentReplayAction(
+        id,
+        decision.candidates ?? [],
+        decision.outcomes[index],
+      );
       const row = document.createElement("div");
       row.className = "action";
+      row.title = `Action ID: ${id}`;
       const actionIndex = document.createElement("span");
       actionIndex.className = "action-index";
       actionIndex.textContent = String(index + 1).padStart(2, "0");
       const actionCopy = document.createElement("div");
       actionCopy.className = "action-copy";
-      const actionId = document.createElement("code");
-      actionId.textContent = id;
+      const actionTitle = document.createElement("span");
+      actionTitle.className = "action-title";
+      actionTitle.textContent = presentation.label;
+      actionCopy.append(actionTitle);
+      if (presentation.detail) {
+        const detail = document.createElement("span");
+        detail.className = "action-detail";
+        detail.textContent = presentation.detail;
+        actionCopy.append(detail);
+      }
       const outcome = document.createElement("small");
-      outcome.textContent = decision.outcomes[index];
-      actionCopy.append(actionId, outcome);
+      outcome.className = "action-outcome";
+      outcome.textContent = presentation.outcome;
+      actionCopy.append(outcome);
       row.append(actionIndex, actionCopy);
       actions.append(row);
     });
@@ -607,7 +690,7 @@ class HarnessReplayPanel extends HTMLElement {
     const stats = document.createElement("div");
     stats.className = "stats";
     const statValues = [
-      ["Latency", `${Math.round(decision.latencyMs)}ms`],
+      ["Latency", formatLatency(decision.latencyMs)],
       [
         "Tokens",
         (decision.promptTokens + decision.completionTokens).toLocaleString(),
@@ -628,34 +711,64 @@ class HarnessReplayPanel extends HTMLElement {
     observation.className = "observation";
     const observationLabel = document.createElement("span");
     observationLabel.className = "section-label";
-    observationLabel.textContent = "Observed player state · pre-action";
-    const players = document.createElement("div");
-    players.className = "players";
-    const entries = [
-      decision.observation.self,
-      ...decision.observation.opponents,
+    observationLabel.textContent = "Observed agent state · pre-action";
+    const summary = document.createElement("div");
+    summary.className = "agent-summary";
+    const identity = document.createElement("div");
+    identity.className = "agent-identity";
+    const badge = document.createElement("span");
+    badge.className = "agent-badge";
+    badge.textContent = "AGENT";
+    identity.append(badge, String(decision.observation.self.name));
+
+    const previousSelf =
+      this.current > 0
+        ? this.decisions[this.current - 1]?.observation.self
+        : undefined;
+    const selfStats = document.createElement("div");
+    selfStats.className = "self-stats";
+    const ownStats = [
+      {
+        label: "Tiles",
+        value: Number(decision.observation.self.tiles).toLocaleString(),
+        exactValue: `${Number(decision.observation.self.tiles).toLocaleString()} tiles`,
+        delta: statDelta(
+          Number(decision.observation.self.tiles),
+          previousSelf ? Number(previousSelf.tiles) : undefined,
+        ),
+      },
+      {
+        label: "Troops",
+        value: renderTroops(Number(decision.observation.self.troops)),
+        exactValue: `${Number(decision.observation.self.troops).toLocaleString()} available garrison troops`,
+        delta: statDelta(
+          Number(decision.observation.self.troops),
+          previousSelf ? Number(previousSelf.troops) : undefined,
+        ),
+      },
     ];
-    entries.forEach((player, index) => {
-      const row = document.createElement("div");
-      row.className = `player${index === 0 ? " self" : ""}`;
-      const name = document.createElement("span");
-      name.className = "player-name";
-      if (index === 0) {
-        const badge = document.createElement("span");
-        badge.className = "agent-badge";
-        badge.textContent = "AGENT";
-        name.append(badge);
-      }
-      name.append(String(player.name));
-      const state = document.createElement("span");
-      state.className = "player-state";
-      state.textContent = `${Number(player.tiles).toLocaleString()} tiles · ${renderTroops(Number(player.troops))} troops`;
-      state.title =
-        "Available garrison troops observed before this decision's actions executed";
-      row.append(name, state);
-      players.append(row);
+    ownStats.forEach((entry) => {
+      const stat = document.createElement("div");
+      stat.className = "self-stat";
+      const label = document.createElement("span");
+      label.className = "self-stat-label";
+      label.textContent = entry.label;
+      const valueRow = document.createElement("div");
+      valueRow.className = "self-stat-value";
+      const value = document.createElement("strong");
+      value.textContent = entry.value;
+      value.title = entry.exactValue;
+      const delta = document.createElement("span");
+      delta.className = `delta ${entry.delta.direction}`;
+      delta.textContent = entry.delta.label;
+      delta.title = entry.delta.description;
+      delta.setAttribute("aria-label", entry.delta.description);
+      valueRow.append(value, delta);
+      stat.append(label, valueRow);
+      selfStats.append(stat);
     });
-    observation.append(observationLabel, players);
+    summary.append(identity, selfStats);
+    observation.append(observationLabel, summary);
 
     this.body.append(meta, strategyBlock, actions, stats, observation);
   }
@@ -665,12 +778,13 @@ if (!customElements.get("harness-replay-panel")) {
   customElements.define("harness-replay-panel", HarnessReplayPanel);
 }
 
-export function installHarnessReplayPanel(runId: string) {
-  const existing = document.querySelector("harness-replay-panel");
-  if (existing) return;
+export function installHarnessReplayPanel(runId: string): HTMLElement {
+  const existing = document.querySelector<HTMLElement>("harness-replay-panel");
+  if (existing) return existing;
   const panel = document.createElement(
     "harness-replay-panel",
   ) as HarnessReplayPanel;
   panel.setRunId(runId);
   document.body.append(panel);
+  return panel;
 }

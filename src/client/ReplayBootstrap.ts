@@ -21,8 +21,8 @@ async function startHarnessReplay() {
     await customElements.whenDefined("join-lobby-modal");
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    installHarnessReplayPanel(runId);
-    installHarnessReplayControls(gameRecord.info.num_turns);
+    const panel = installHarnessReplayPanel(runId);
+    installHarnessReplayControls(gameRecord.info.num_turns, panel);
     document.dispatchEvent(
       new CustomEvent("join-lobby", {
         detail: {
