@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatAttemptTiming,
   formatLatency,
   presentReplayAction,
   statDelta,
@@ -55,6 +56,21 @@ describe("replay trace presentation", () => {
   it("formats compact latency values", () => {
     expect(formatLatency(782)).toBe("782ms");
     expect(formatLatency(7_766)).toBe("7.8s");
+    expect(formatLatency(null)).toBe("—");
+  });
+
+  it("formats an attempt timing breakdown without inventing queue data", () => {
+    expect(
+      formatAttemptTiming({
+        attempt: 2,
+        totalMs: 2_750,
+        timeToFirstTokenMs: 1_200,
+        generationMs: 1_550,
+        completionTokens: 101,
+        timePerOutputTokenMs: 15.5,
+        queueMs: null,
+      }),
+    ).toBe("A2 2.8s / TTFT 1.2s / gen 1.6s / TPOT 16ms / queue —");
   });
 
   it("describes positive, negative, unchanged, and unavailable deltas", () => {

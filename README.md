@@ -14,7 +14,7 @@ This is a portfolio project and a first step toward a reproducible strategy-agen
 - Exactly two action slots per model decision, including explicit holds
 - Structured model output validated against both JSON Schema and the legal menu
 - Full intent-based replay in OpenFront's existing renderer
-- A synchronized trace showing the public strategy note, actions, state, latency, tokens, provider, and cost
+- A synchronized trace showing the public strategy note, actions, state, total latency, per-attempt TTFT, generation time, TPOT, tokens, provider, and cost
 - Gzipped, versioned run artifacts suitable for later benchmark ingestion
 - A bundled real-model sample that works without an API key
 

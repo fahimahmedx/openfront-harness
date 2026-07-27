@@ -1,5 +1,6 @@
 import { renderTroops } from "../../OpenFrontIO/src/client/Utils";
 import {
+  formatAttemptTiming,
   formatLatency,
   presentReplayAction,
   ReplayActionCandidate,
@@ -20,6 +21,16 @@ type PublicDecision = {
   model: string;
   provider: string | null;
   fallback: boolean;
+  attemptTimings?: Array<{
+    attempt: number;
+    totalMs: number;
+    timeToFirstTokenMs: number | null;
+    generationMs: number | null;
+    completionTokens: number;
+    timePerOutputTokenMs: number | null;
+    queueMs: number | null;
+    generationId: string | null;
+  }>;
   attemptFailures?: Array<{
     attempt: number;
     code: string;
@@ -356,6 +367,18 @@ class HarnessReplayPanel extends HTMLElement {
         border-right: 0;
       }
 
+      .stats div:nth-child(3n) {
+        border-right: 0;
+      }
+
+      .stats div:nth-child(n + 4) {
+        border-top: 1px solid var(--line-strong);
+      }
+
+      .stats div:last-child:nth-child(3n + 1) {
+        grid-column: 1 / -1;
+      }
+
       .stats span {
         color: var(--faint);
         font: 750 7px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -645,11 +668,17 @@ class HarnessReplayPanel extends HTMLElement {
       const status = decision.fallback
         ? "Validation fallback used"
         : "Recovered after retry";
-      warning.title =
-        decision.attemptFailures
-          ?.map((failure) => failure.message)
-          .join("\n") ?? "";
-      warning.append(dot, failures ? `${status} · ${failures}` : status);
+      const timingSummary = decision.attemptTimings
+        ?.map(formatAttemptTiming)
+        .join(" · ");
+      warning.title = [
+        ...(decision.attemptFailures?.map((failure) => failure.message) ?? []),
+        ...(decision.attemptTimings?.map(formatAttemptTiming) ?? []),
+      ].join("\n");
+      warning.append(
+        dot,
+        [status, failures, timingSummary].filter(Boolean).join(" · "),
+      );
       strategyBlock.append(warning);
     }
 
@@ -693,8 +722,14 @@ class HarnessReplayPanel extends HTMLElement {
 
     const stats = document.createElement("div");
     stats.className = "stats";
+    const finalAttempt =
+      decision.attemptTimings?.[decision.attemptTimings.length - 1];
     const statValues = [
       ["Latency", formatLatency(decision.latencyMs)],
+      ["TTFT", formatLatency(finalAttempt?.timeToFirstTokenMs)],
+      ["Generation", formatLatency(finalAttempt?.generationMs)],
+      ["TPOT", formatLatency(finalAttempt?.timePerOutputTokenMs)],
+      ["Queue", formatLatency(finalAttempt?.queueMs)],
       [
         "Tokens",
         (decision.promptTokens + decision.completionTokens).toLocaleString(),

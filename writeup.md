@@ -81,11 +81,13 @@ Each artifact contains:
 - every normalized observation and legal candidate menu;
 - selected and applied action IDs;
 - for `agent-v3` and newer runs, per-attempt validation codes and rejected IDs; older artifacts default this list to empty;
-- fallback status, latency, token usage, and reported cost;
+- fallback status, total latency, per-attempt client-observed TTFT, generation time, time per output token (TPOT), token usage, and reported cost;
 - winner, placement, terminal tick, simulated time, and final state hash;
 - a native OpenFront replay record.
 
 During playback, a trace panel follows the replay tick. It shows the latest public strategy note, both actions, state summary, latency, tokens, and cost next to the real renderer.
+
+Fresh runs stream structured model output to measure each attempt from the harness. The artifact records total attempt time, time to first received token, time from that token to stream completion, and TPOT as generation time divided by one fewer than the reported completion-token count. Provider queue time remains null because OpenRouter does not expose it separately; TTFT necessarily includes network transit, routing, queueing, and prompt processing. Legacy artifacts default the attempt-timing list to empty.
 
 The replay record stores only turns with intents or periodic hashes, while retaining the original total turn count. That keeps the bundled artifact small without weakening the engine's normal reconstruction path.
 

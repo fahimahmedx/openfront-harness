@@ -126,6 +126,14 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 **Cons:** A retry increases latency, prompt size, and cost; echoing rejected output back to the same provider slightly enlarges the request; holding can materially change the outcome; HTTP failures without usage data cannot be priced locally.
 
+### 15a. Measure streamed provider timing
+
+**Decision:** Stream structured responses and record client-observed timing for every attempt: total request time, time to first received model token, generation time from that token through successful stream completion, and time per output token (TPOT). Compute TPOT as generation time divided by `completionTokens - 1`, leaving it null for incomplete streams or fewer than two reported completion tokens. Keep provider queue time nullable rather than deriving a misleading estimate; OpenRouter does not expose that phase separately. Preserve the existing decision latency as the complete duration across retries and local validation.
+
+**Pros:** Normal requests, slow first-token responses, slow generation, and retry timeouts become distinguishable in replay artifacts without an additional provider-metadata request.
+
+**Cons:** Streaming adds SSE parsing and mid-stream error handling. TTFT still combines client network transit, gateway routing, provider queueing, and prompt processing, so it cannot identify true provider queue duration by itself. TPOT is an average based on provider-reported completion tokens, not a distribution of individual token arrival intervals, and may include hidden reasoning tokens.
+
 ## 16. Stop inference after elimination
 
 **Decision:** Once the LLM is eliminated, stop calling the model and fast-forward empty deterministic turns until OpenFront declares a winner or the scenario limit is reached.

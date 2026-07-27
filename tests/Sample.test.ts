@@ -33,5 +33,6 @@ describe("bundled sample", () => {
     });
     expect(current.model.promptVersion).toBe("agent-v4");
     expect(current.decisions[0].attemptFailures).toEqual([]);
+    expect(current.decisions[0].attemptTimings).toEqual([]);
   });
 });

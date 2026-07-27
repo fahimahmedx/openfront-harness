@@ -40,6 +40,7 @@ const recordedPolicy: AgentPolicy = {
           },
       attempts: record.attempts,
       attemptFailures: record.attemptFailures,
+      attemptTimings: record.attemptTimings,
       latencyMs: record.latencyMs,
       promptTokens: record.promptTokens,
       completionTokens: record.completionTokens,

@@ -1,7 +1,9 @@
 import { z } from "zod";
+import { createParser } from "eventsource-parser";
 import { SCENARIO } from "./Scenario";
 import {
   AgentAttemptFailure,
+  AgentAttemptTiming,
   AgentDecision,
   AgentDecisionSchema,
   AgentResult,
@@ -18,30 +20,43 @@ const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_COMPLETION_TOKENS = 512;
 const MAX_RETRY_CONTENT_CHARS = 2_000;
 const MAX_FAILURE_MESSAGE_CHARS = 500;
+const MAX_STREAM_BUFFER_CHARS = 1_000_000;
 
-const ResponseSchema = z.object({
-  id: z.string(),
-  model: z.string(),
-  provider: z.string().optional(),
-  choices: z
-    .array(
-      z.object({
-        finish_reason: z.string().nullable().optional(),
-        message: z.object({
-          content: z.string().nullable(),
-          refusal: z.string().nullable().optional(),
+const StreamChunkSchema = z
+  .object({
+    id: z.string().optional(),
+    model: z.string().optional(),
+    provider: z.string().optional(),
+    choices: z
+      .array(
+        z.object({
+          finish_reason: z.string().nullable().optional(),
+          delta: z
+            .object({
+              content: z.string().nullable().optional(),
+              refusal: z.string().nullable().optional(),
+              reasoning: z.string().nullable().optional(),
+            })
+            .passthrough()
+            .optional(),
         }),
-      }),
-    )
-    .min(1),
-  usage: z
-    .object({
-      prompt_tokens: z.number().int().nonnegative().optional(),
-      completion_tokens: z.number().int().nonnegative().optional(),
-      cost: z.number().nonnegative().optional(),
-    })
-    .optional(),
-});
+      )
+      .optional(),
+    usage: z
+      .object({
+        prompt_tokens: z.number().int().nonnegative().optional(),
+        completion_tokens: z.number().int().nonnegative().optional(),
+        cost: z.number().nonnegative().optional(),
+      })
+      .optional(),
+    error: z
+      .object({
+        message: z.string(),
+      })
+      .passthrough()
+      .optional(),
+  })
+  .passthrough();
 
 const ModelsSchema = z.object({
   data: z.array(
@@ -64,11 +79,22 @@ type ValidatedDecision = {
 };
 type RequestResult = Omit<
   AgentResult,
-  "attempts" | "attemptFailures" | "latencyMs"
+  "attempts" | "attemptFailures" | "attemptTimings" | "latencyMs"
 > & {
   failures: AttemptFailure[];
   rejectedContent?: string;
+  attemptTiming: AgentAttemptTiming;
 };
+
+class TimedRequestError extends Error {
+  constructor(
+    message: string,
+    readonly timing: AgentAttemptTiming,
+  ) {
+    super(message);
+    this.name = "TimedRequestError";
+  }
+}
 
 const SlotDecisionSchema = z.object({
   strategy: z.string().trim().max(160),
@@ -295,14 +321,17 @@ export class OpenRouterAgent {
     let model = this.requestedModel;
     let provider: string | null = this.provider ?? null;
     const attemptFailures: AgentAttemptFailure[] = [];
+    const attemptTimings: AgentAttemptTiming[] = [];
     let retryFeedback: RetryFeedback | undefined;
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         const result = await this.request(
           observation,
           candidates,
+          attempt,
           retryFeedback,
         );
+        attemptTimings.push(result.attemptTiming);
         promptTokens += result.promptTokens;
         completionTokens += result.completionTokens;
         costUsd += result.costUsd;
@@ -312,6 +341,7 @@ export class OpenRouterAgent {
           return {
             decision: result.decision,
             attemptFailures,
+            attemptTimings,
             promptTokens,
             completionTokens,
             costUsd,
@@ -341,6 +371,9 @@ export class OpenRouterAgent {
         };
       } catch (error) {
         lastError = error instanceof Error ? error.message : String(error);
+        if (error instanceof TimedRequestError) {
+          attemptTimings.push(error.timing);
+        }
         attemptFailures.push({
           attempt,
           code: "request_error",
@@ -356,6 +389,7 @@ export class OpenRouterAgent {
       decision: null,
       attempts: 2,
       attemptFailures,
+      attemptTimings,
       latencyMs: performance.now() - started,
       promptTokens,
       completionTokens,
@@ -369,8 +403,37 @@ export class OpenRouterAgent {
   private async request(
     observation: Observation,
     candidates: LegalAction[],
+    attempt: number,
     retryFeedback?: RetryFeedback,
   ): Promise<RequestResult> {
+    const started = performance.now();
+    let firstTokenAt: number | null = null;
+    let generationId: string | null = null;
+    let attemptCompletionTokens = 0;
+    const timing = (
+      completedAt: number,
+      streamCompleted: boolean,
+    ): AgentAttemptTiming => {
+      const generationMs =
+        streamCompleted && firstTokenAt !== null
+          ? completedAt - firstTokenAt
+          : null;
+      return {
+        attempt,
+        totalMs: completedAt - started,
+        timeToFirstTokenMs:
+          firstTokenAt === null ? null : firstTokenAt - started,
+        generationMs,
+        completionTokens: attemptCompletionTokens,
+        timePerOutputTokenMs:
+          generationMs !== null && attemptCompletionTokens > 1
+            ? generationMs / (attemptCompletionTokens - 1)
+            : null,
+        // OpenRouter does not currently expose upstream provider queue time.
+        queueMs: null,
+        generationId,
+      };
+    };
     const messages = [
       {
         role: "system",
@@ -392,86 +455,169 @@ export class OpenRouterAgent {
       });
     }
 
-    const response = await fetch(OPENROUTER_URL, {
-      method: "POST",
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": process.env.PUBLIC_BASE_URL ?? "http://localhost:3000",
-        "X-Title": "OpenFront LLM Harness",
-      },
-      body: JSON.stringify({
-        model: this.requestedModel,
-        messages,
-        seed: MODEL_SEED,
-        // The pinned OpenAI endpoint advertises `max_tokens`; Azure advertises
-        // `max_completion_tokens`. `require_parameters` makes this distinction
-        // significant, so use the parameter supported by the pinned endpoint.
-        max_tokens: MAX_COMPLETION_TOKENS,
-        reasoning: { effort: "low" },
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "openfront_agent_decision",
-            strict: true,
-            schema: actionResponseJsonSchema(candidates),
-          },
+    try {
+      const response = await fetch(OPENROUTER_URL, {
+        method: "POST",
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer":
+            process.env.PUBLIC_BASE_URL ?? "http://localhost:3000",
+          "X-Title": "OpenFront LLM Harness",
         },
-        provider: {
-          ...(this.provider ? { only: [this.provider] } : {}),
-          allow_fallbacks: false,
-          require_parameters: true,
-          data_collection: "deny",
+        body: JSON.stringify({
+          model: this.requestedModel,
+          messages,
+          seed: MODEL_SEED,
+          // The pinned OpenAI endpoint advertises `max_tokens`; Azure advertises
+          // `max_completion_tokens`. `require_parameters` makes this distinction
+          // significant, so use the parameter supported by the pinned endpoint.
+          max_tokens: MAX_COMPLETION_TOKENS,
+          reasoning: { effort: "low" },
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "openfront_agent_decision",
+              strict: true,
+              schema: actionResponseJsonSchema(candidates),
+            },
+          },
+          stream: true,
+          stream_options: { include_usage: true },
+          provider: {
+            ...(this.provider ? { only: [this.provider] } : {}),
+            allow_fallbacks: false,
+            require_parameters: true,
+            data_collection: "deny",
+          },
+        }),
+      });
+      generationId = response.headers.get("X-Generation-Id");
+      if (!response.ok) {
+        const detail = (await response.text()).slice(0, 500);
+        throw new Error(`OpenRouter ${response.status}: ${detail}`);
+      }
+      if (!response.body) {
+        throw new Error("OpenRouter returned an empty response stream");
+      }
+
+      let content = "";
+      let refusal: string | null = null;
+      let finishReason: string | null | undefined;
+      let promptTokens = 0;
+      let completionTokens = 0;
+      let costUsd = 0;
+      let model = this.requestedModel;
+      let provider: string | null = this.provider ?? null;
+      let streamError: Error | null = null;
+      let completedAt: number | null = null;
+      const parser = createParser({
+        maxBufferSize: MAX_STREAM_BUFFER_CHARS,
+        onError(error) {
+          streamError ??= error;
         },
-      }),
-    });
-    if (!response.ok) {
-      const detail = (await response.text()).slice(0, 500);
-      throw new Error(`OpenRouter ${response.status}: ${detail}`);
-    }
-    const parsed = ResponseSchema.parse(await response.json());
-    const choice = parsed.choices[0];
-    const content = choice.message.content;
-    let validated: ValidatedDecision;
-    if (choice.message.refusal) {
-      validated = {
-        decision: null,
-        failures: [
-          {
-            code: "refusal",
-            message: `OpenRouter refused the decision: ${choice.message.refusal.slice(0, 430)}`,
-            rejectedActionIds: [],
-          },
-        ],
+        onEvent(event) {
+          if (event.data === "[DONE]") {
+            completedAt ??= performance.now();
+            return;
+          }
+          try {
+            const chunk = StreamChunkSchema.parse(JSON.parse(event.data));
+            if (chunk.error) {
+              streamError ??= new Error(
+                `OpenRouter stream error: ${chunk.error.message}`,
+              );
+              return;
+            }
+            generationId ??= chunk.id ?? null;
+            model = chunk.model ?? model;
+            provider = chunk.provider ?? provider;
+            if (chunk.usage) {
+              promptTokens = chunk.usage.prompt_tokens ?? promptTokens;
+              completionTokens =
+                chunk.usage.completion_tokens ?? completionTokens;
+              attemptCompletionTokens = completionTokens;
+              costUsd = chunk.usage.cost ?? costUsd;
+            }
+            for (const choice of chunk.choices ?? []) {
+              const delta = choice.delta;
+              const tokenText =
+                delta?.content ?? delta?.reasoning ?? delta?.refusal;
+              if (tokenText && firstTokenAt === null) {
+                firstTokenAt = performance.now();
+              }
+              if (delta?.content) content += delta.content;
+              if (delta?.refusal) refusal = (refusal ?? "") + delta.refusal;
+              finishReason = choice.finish_reason ?? finishReason;
+            }
+          } catch (error) {
+            streamError ??=
+              error instanceof Error ? error : new Error(String(error));
+          }
+        },
+      });
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        parser.feed(decoder.decode(value, { stream: true }));
+        if (streamError) {
+          await reader.cancel();
+          throw streamError;
+        }
+      }
+      parser.feed(decoder.decode());
+      parser.reset({ consume: true });
+      if (streamError) throw streamError;
+      completedAt ??= performance.now();
+
+      let validated: ValidatedDecision;
+      const refusalText = refusal as string | null;
+      if (refusalText) {
+        validated = {
+          decision: null,
+          failures: [
+            {
+              code: "refusal",
+              message: `OpenRouter refused the decision: ${refusalText.slice(0, 430)}`,
+              rejectedActionIds: [],
+            },
+          ],
+        };
+      } else if (finishReason === "length") {
+        validated = {
+          decision: null,
+          failures: [
+            {
+              code: "truncated_response",
+              message: "OpenRouter truncated the decision at the token limit",
+              rejectedActionIds: [],
+            },
+          ],
+        };
+      } else {
+        validated = validateDecisionContent(content, candidates);
+      }
+      const error = validated.failures
+        .map((failure) => failure.message)
+        .join("; ");
+      return {
+        decision: validated.decision,
+        failures: validated.failures,
+        rejectedContent: validated.decision ? undefined : content || undefined,
+        promptTokens,
+        completionTokens,
+        costUsd,
+        model,
+        provider,
+        error: error || undefined,
+        attemptTiming: timing(completedAt, true),
       };
-    } else if (choice.finish_reason === "length") {
-      validated = {
-        decision: null,
-        failures: [
-          {
-            code: "truncated_response",
-            message: "OpenRouter truncated the decision at the token limit",
-            rejectedActionIds: [],
-          },
-        ],
-      };
-    } else {
-      validated = validateDecisionContent(content, candidates);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new TimedRequestError(message, timing(performance.now(), false));
     }
-    const error = validated.failures
-      .map((failure) => failure.message)
-      .join("; ");
-    return {
-      decision: validated.decision,
-      failures: validated.failures,
-      rejectedContent: validated.decision ? undefined : (content ?? undefined),
-      promptTokens: parsed.usage?.prompt_tokens ?? 0,
-      completionTokens: parsed.usage?.completion_tokens ?? 0,
-      costUsd: parsed.usage?.cost ?? 0,
-      model: parsed.model,
-      provider: parsed.provider ?? this.provider ?? null,
-      error: error || undefined,
-    };
   }
 }

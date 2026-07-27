@@ -249,6 +249,7 @@ export class HarnessRunner {
           ) as [string, string],
           attempts: agentResult.attempts,
           attemptFailures: agentResult.attemptFailures,
+          attemptTimings: agentResult.attemptTimings,
           fallback: completeFailure || resolved.fallback,
           latencyMs: agentResult.latencyMs,
           promptTokens: agentResult.promptTokens,

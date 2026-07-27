@@ -40,9 +40,30 @@ export function presentReplayAction(
   };
 }
 
-export function formatLatency(latencyMs: number): string {
+export function formatLatency(latencyMs: number | null | undefined): string {
+  if (latencyMs === null || latencyMs === undefined) return "—";
   if (latencyMs < 1_000) return `${Math.round(latencyMs)}ms`;
   return `${(latencyMs / 1_000).toFixed(1)}s`;
+}
+
+export type ReplayAttemptTiming = {
+  attempt: number;
+  totalMs: number;
+  timeToFirstTokenMs: number | null;
+  generationMs: number | null;
+  completionTokens: number;
+  timePerOutputTokenMs: number | null;
+  queueMs: number | null;
+};
+
+export function formatAttemptTiming(timing: ReplayAttemptTiming): string {
+  return [
+    `A${timing.attempt} ${formatLatency(timing.totalMs)}`,
+    `TTFT ${formatLatency(timing.timeToFirstTokenMs)}`,
+    `gen ${formatLatency(timing.generationMs)}`,
+    `TPOT ${formatLatency(timing.timePerOutputTokenMs)}`,
+    `queue ${formatLatency(timing.queueMs)}`,
+  ].join(" / ");
 }
 
 export function statDelta(

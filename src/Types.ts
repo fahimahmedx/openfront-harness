@@ -52,6 +52,18 @@ export const AgentAttemptFailureSchema = z.object({
 });
 export type AgentAttemptFailure = z.infer<typeof AgentAttemptFailureSchema>;
 
+export const AgentAttemptTimingSchema = z.object({
+  attempt: z.number().int().min(1).max(2),
+  totalMs: z.number().nonnegative(),
+  timeToFirstTokenMs: z.number().nonnegative().nullable(),
+  generationMs: z.number().nonnegative().nullable(),
+  completionTokens: z.number().int().nonnegative().default(0),
+  timePerOutputTokenMs: z.number().nonnegative().nullable().default(null),
+  queueMs: z.number().nonnegative().nullable(),
+  generationId: z.string().min(1).nullable(),
+});
+export type AgentAttemptTiming = z.infer<typeof AgentAttemptTimingSchema>;
+
 export const ObservationSchema = z.object({
   scenarioId: z.string(),
   decision: z.number().int().nonnegative(),
@@ -77,6 +89,7 @@ export const DecisionRecordSchema = z.object({
   outcomes: z.array(z.string()).length(2),
   attempts: z.number().int().min(1).max(2),
   attemptFailures: z.array(AgentAttemptFailureSchema).default([]),
+  attemptTimings: z.array(AgentAttemptTimingSchema).max(2).default([]),
   fallback: z.boolean(),
   latencyMs: z.number().nonnegative(),
   promptTokens: z.number().int().nonnegative(),
@@ -145,6 +158,7 @@ export interface AgentResult {
   decision: AgentDecision | null;
   attempts: number;
   attemptFailures: AgentAttemptFailure[];
+  attemptTimings: AgentAttemptTiming[];
   latencyMs: number;
   promptTokens: number;
   completionTokens: number;
