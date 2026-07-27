@@ -78,6 +78,7 @@ async function sendShell(
   fileName: "replay.html" | "harness.html",
 ) {
   try {
+    res.setHeader("Cache-Control", "no-store");
     res.type("html").send(await renderShell(fileName));
   } catch (error) {
     next(error);

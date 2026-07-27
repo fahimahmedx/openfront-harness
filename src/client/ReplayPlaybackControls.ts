@@ -3,7 +3,6 @@ import {
   GameSpeedDownIntentEvent,
   GameSpeedUpIntentEvent,
   ReplaySpeedChangeEvent,
-  TogglePauseIntentEvent,
 } from "../../OpenFrontIO/src/client/InputHandler";
 import { PauseGameIntentEvent } from "../../OpenFrontIO/src/client/Transport";
 import { ReplayPanel } from "../../OpenFrontIO/src/client/hud/layers/ReplayPanel";
@@ -355,7 +354,7 @@ class HarnessReplayPlayback extends HTMLElement {
     if (!this.eventBus || isReplayComplete(this.currentTick, this.totalTicks)) {
       return;
     }
-    this.eventBus.emit(new TogglePauseIntentEvent());
+    this.eventBus.emit(new PauseGameIntentEvent(!this.paused));
   };
 
   private changeSpeed = (event: Event) => {
