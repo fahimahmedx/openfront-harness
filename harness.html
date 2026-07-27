@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="An auditable AI strategy agent: replay every decision from a fixed OpenFront match and inspect what the model saw, chose, executed, and cost."
+      content="A portfolio case study about an auditable AI strategy agent built on the real OpenFront engine."
     />
     <meta name="theme-color" content="#f3f1ea" />
-    <title>OpenFront Harness · An auditable strategy agent</title>
+    <title>OpenFront Harness · Auditable AI strategy agent</title>
     <script type="module" src="/src/client/Dashboard.ts"></script>
   </head>
   <body>
@@ -17,12 +17,13 @@
     <header class="site-header">
       <nav class="shell" aria-label="Primary navigation">
         <a class="brand" href="/" aria-label="OpenFront Harness home">
-          <span class="brand-mark">OpenFront <span>Harness</span></span>
+          OpenFront <span>Harness</span>
         </a>
         <div class="nav-links">
-          <a href="#method">How it works</a>
-          <a href="#runs">Recorded runs</a>
-          <a href="/docs/writeup">Write-up</a>
+          <a href="#work">The work</a>
+          <a href="#evidence">Evidence</a>
+          <a href="/docs/writeup">Case study</a>
+          <a href="/lab">Live lab</a>
           <a id="source-link" class="hidden" href="#">Source</a>
         </div>
       </nav>
@@ -31,54 +32,52 @@
     <main id="main-content">
       <section class="hero shell" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow">OPENFRONT AGENT HARNESS</p>
-          <h1 id="hero-title">An AI strategy agent you can audit.</h1>
+          <h1 id="hero-title">I made GPT-5.6 win OpenFront.</h1>
           <p class="lede">
-            One model played a fixed match on Japan—and won. Replay every
-            decision: what it saw, what it chose, what the game executed, and
-            what inference cost.
+            I built an auditable harness with game actions, state observation,
+            and a complete decision trail.
           </p>
           <div class="hero-actions">
-            <a
-              id="sample-button"
-              class="button button-primary"
-              data-sample-link
-              href="#runs"
-              >Watch the verified run <span aria-hidden="true">↗</span></a
-            >
-            <a class="button button-secondary" href="/docs/writeup"
-              >Read the engineering story</a
-            >
+            <a class="button button-primary" data-sample-link href="#evidence">
+              Open the interactive replay <span aria-hidden="true">↗</span>
+            </a>
+            <a class="button button-secondary" href="/docs/writeup">
+              Read the case study
+            </a>
           </div>
           <p class="hero-note">
-            A real OpenFront simulation. No simplified clone, invented commands,
-            or edited golden path.
+            Designed and built end to end: agent contract, deterministic
+            harness, artifacts, replay verification, and trace UI.
           </p>
         </div>
 
         <a
-          class="replay-poster"
-          data-sample-link
-          href="#runs"
-          aria-label="Open the verified sample replay"
+          class="hero-demo"
+          href="/replay/9f73a404-ae98-430f-be5b-ea22fb1755a6"
+          aria-label="Open the recorded interactive replay"
         >
-          <img
-            src="/src/client/sample-replay-poster.webp"
-            alt="OpenFront match on Japan at decision 50, with the LLM controlling central Japan and its synchronized decision trace visible"
-            width="1280"
-            height="730"
-          />
-          <span class="poster-topline">
-            <span><i aria-hidden="true"></i> Recorded simulation</span>
-            <span id="poster-scenario">Japan v2</span>
+          <video
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            poster="/src/client/replay-demo-poster.jpg"
+            aria-hidden="true"
+          >
+            <source src="/src/client/replay-demo.webm" type="video/webm" />
+            <source src="/src/client/replay-demo.mp4" type="video/mp4" />
+          </video>
+          <span class="demo-topline">
+            <span><i aria-hidden="true"></i> Recorded run</span>
+            <span>Map + decision trace</span>
           </span>
-          <span class="poster-play" aria-hidden="true">
-            <b>▶</b>
-            <span>Open replay</span>
-          </span>
-          <span class="poster-caption">
-            <span>Sample result</span>
-            <strong id="poster-result">Verified LLM victory</strong>
+          <span class="demo-caption">
+            <span>
+              <small>RECORDED VICTORY</small>
+              <strong id="demo-result">LLM victory</strong>
+            </span>
+            <b>Open replay <span aria-hidden="true">↗</span></b>
           </span>
         </a>
       </section>
@@ -100,171 +99,157 @@
           <span>Inference</span>
           <strong id="proof-cost">$0.318</strong>
         </div>
-        <div>
-          <span>Replay verification</span>
-          <strong
-            ><i class="verified-dot" aria-hidden="true"></i> Hash
-            matched</strong
-          >
-        </div>
       </section>
 
-      <section id="method" class="method shell section-block">
-        <div class="section-intro">
+      <section id="work" class="work shell section-block">
+        <div class="section-heading compact-heading">
           <div>
-            <p class="eyebrow">THE ENGINEERING ARGUMENT</p>
-            <h2>The benchmark is the boundary.</h2>
+            <p class="eyebrow">THE WORK</p>
+            <h2>One agent. One real game. A complete audit trail.</h2>
           </div>
-          <div class="section-copy">
-            <p>
-              A model response is not evidence by itself. The harness makes the
-              environment fixed, the choices bounded, and the result replayable
-              through the real game engine.
-            </p>
-            <blockquote>
-              “The hard part was building a trustworthy boundary between a
-              probabilistic service and a deterministic game.”
-            </blockquote>
-          </div>
-        </div>
-
-        <div class="principles">
-          <article>
-            <span>01 / REAL SYSTEM</span>
-            <h3>The actual game runs.</h3>
-            <p>
-              OpenFront’s pinned deterministic core handles the map, nations,
-              combat, timing, victory logic, and state hashes.
-            </p>
-          </article>
-          <article>
-            <span>02 / CONTROLLED AGENCY</span>
-            <h3>The model cannot invent commands.</h3>
-            <p>
-              Every decision is limited to exactly two IDs from a menu of
-              currently legal, server-generated actions.
-            </p>
-          </article>
-          <article>
-            <span>03 / REPLAYABLE EVIDENCE</span>
-            <h3>The trace follows the simulation.</h3>
-            <p>
-              Observations, actions, latency, tokens, cost, hashes, and native
-              game intents remain synchronized during playback.
-            </p>
-          </article>
-        </div>
-
-        <div class="flow" aria-label="Harness data flow">
-          <div><strong>01</strong><span>Observe fixed core state</span></div>
-          <div><strong>02</strong><span>Enumerate legal actions</span></div>
-          <div><strong>03</strong><span>Select exactly two IDs</span></div>
-          <div><strong>04</strong><span>Execute native intents</span></div>
-          <div><strong>05</strong><span>Replay and verify</span></div>
-        </div>
-      </section>
-
-      <section class="protocol section-block">
-        <div class="shell protocol-layout">
-          <div class="protocol-heading">
-            <p class="eyebrow">FIXED PROTOCOL</p>
-            <h2>One setup, so runs mean the same thing.</h2>
-            <p>
-              Changing the map, seed, action contract, or engine creates a new
-              benchmark version instead of silently moving the goalposts.
-            </p>
-            <a class="inline-link" href="/docs/decisions"
-              >Inspect every design decision
-              <span aria-hidden="true">→</span></a
-            >
-          </div>
-          <div id="scenario-grid" class="metric-grid" aria-live="polite">
-            <div class="metric-loading">Loading the fixed scenario…</div>
-          </div>
-        </div>
-      </section>
-
-      <section id="runs" class="runs-section shell section-block">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">RECORDED EVIDENCE</p>
-            <h2>Every run keeps its receipts.</h2>
-            <p>
-              Watch the simulation or download the complete portable artifact.
-            </p>
-          </div>
-          <button id="refresh-button" class="text-button" type="button">
-            Refresh runs
-          </button>
-        </div>
-        <div id="runs-grid" class="runs-grid" aria-live="polite">
-          <div class="empty">Loading recorded runs…</div>
-        </div>
-      </section>
-
-      <section
-        id="lab"
-        class="lab shell section-block"
-        aria-labelledby="lab-title"
-      >
-        <div class="lab-copy">
-          <p class="eyebrow">LIVE LAB</p>
-          <h2 id="lab-title">Run another trial.</h2>
           <p>
-            Launch the same fixed Japan match with the configured model. A run
-            can take several minutes and is bounded by a $1 inference ceiling.
-          </p>
-          <div class="availability">
-            <i id="availability-dot" aria-hidden="true"></i>
-            <span id="generation-status"
-              >Checking generation availability…</span
-            >
-          </div>
-        </div>
-        <div class="lab-action">
-          <button id="run-button" type="button" disabled>
-            Run another trial
-          </button>
-          <p id="quota" class="quiet" aria-live="polite">
-            Loading public quota…
+            The model never controls the game directly. The harness observes the
+            deterministic core, offers a bounded menu of legal actions, and
+            records the result as replayable evidence.
           </p>
         </div>
-        <div id="progress" class="progress hidden" aria-live="polite"></div>
+
+        <ol class="process" aria-label="How the harness works">
+          <li>
+            <span>01</span><strong>Observe</strong>
+            <p>Read fixed core state.</p>
+          </li>
+          <li>
+            <span>02</span><strong>Choose</strong>
+            <p>Select exactly two legal IDs.</p>
+          </li>
+          <li>
+            <span>03</span><strong>Execute</strong>
+            <p>Apply native game intents.</p>
+          </li>
+          <li>
+            <span>04</span><strong>Audit</strong>
+            <p>Inspect what GPT-5.6 saw, chose, executed, and cost.</p>
+          </li>
+        </ol>
+
+        <div class="contributions">
+          <article>
+            <p class="eyebrow">AGENT CONTRACT</p>
+            <h3>Bounded agency</h3>
+            <p>
+              Server-generated action menus, strict structured output, shared
+              troop budgets, and deterministic fallbacks.
+            </p>
+          </article>
+          <article>
+            <p class="eyebrow">SIMULATION HARNESS</p>
+            <h3>Real engine, fixed protocol</h3>
+            <p>
+              OpenFront’s pinned core owns combat, timing, nations, victory
+              logic, and state hashes.
+            </p>
+          </article>
+          <article>
+            <p class="eyebrow">REPLAY INTERFACE</p>
+            <h3>Evidence synchronized</h3>
+            <p>
+              Observations, actions, latency, tokens, cost, and native game
+              intents stay aligned during playback.
+            </p>
+          </article>
+        </div>
+
+        <div id="project-meta" class="project-meta" aria-live="polite">
+          <span><b>Scenario</b> Japan v2</span>
+          <span><b>Engine</b> OpenFront v0.32.9</span>
+          <span><b>Mode</b> 1 LLM + 3 nations</span>
+          <span><b>Stack</b> TypeScript · Vite · OpenRouter</span>
+        </div>
       </section>
 
-      <section class="notes shell section-block">
-        <div>
-          <p class="eyebrow">ENGINEERING NOTES</p>
-          <h2>The system is the project.</h2>
+      <section id="evidence" class="evidence section-block">
+        <div class="shell">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">RECORDED EVIDENCE</p>
+              <h2>Inspect the result, not just the claim.</h2>
+            </div>
+            <button id="refresh-button" class="text-button" type="button">
+              Refresh runs
+            </button>
+          </div>
+
+          <div id="featured-run" class="featured-run" aria-live="polite">
+            <div class="loading">Loading the verified replay…</div>
+          </div>
+
+          <div class="recent-heading">
+            <h3>Recent trials</h3>
+            <span>Same fixed scenario</span>
+          </div>
+          <div id="recent-runs" class="run-list" aria-live="polite">
+            <div class="loading">Loading recorded runs…</div>
+          </div>
+
+          <details id="run-archive" class="run-archive">
+            <summary>View all recorded runs</summary>
+            <div id="archive-runs" class="run-list"></div>
+          </details>
         </div>
-        <div class="notes-links">
+      </section>
+
+      <section class="case-study shell section-block">
+        <div>
+          <p class="eyebrow">ENGINEERING CASE STUDY</p>
+          <h2>The system is the project.</h2>
+          <p>
+            The interesting work was building a trustworthy boundary between a
+            probabilistic service and a deterministic game.
+          </p>
+        </div>
+        <div class="case-links">
           <a href="/docs/writeup">
-            <span>Case study</span>
+            <span>01</span>
             <strong>What broke, what changed, and what the run proved</strong>
             <i aria-hidden="true">↗</i>
           </a>
           <a href="/docs/decisions">
-            <span>Decision log</span>
+            <span>02</span>
             <strong>The trade-offs behind the benchmark contract</strong>
             <i aria-hidden="true">↗</i>
           </a>
           <a href="/docs/readme">
-            <span>Technical reference</span>
+            <span>03</span>
             <strong>Architecture, API, artifacts, and local setup</strong>
             <i aria-hidden="true">↗</i>
           </a>
         </div>
       </section>
+
+      <section class="lab-teaser shell">
+        <div>
+          <p class="eyebrow">OPTIONAL LIVE DEMO</p>
+          <h2>Run the same fixed trial.</h2>
+          <p>
+            Live generation, quota, and progress controls are kept in a
+            dedicated lab so the portfolio story stays focused.
+          </p>
+        </div>
+        <a class="button button-primary" href="/lab">
+          Open the live lab <span aria-hidden="true">→</span>
+        </a>
+      </section>
     </main>
 
     <footer class="site-footer">
       <div class="shell footer-layout">
-        <a class="brand footer-brand" href="/"
-          >OpenFront <span>Harness</span></a
-        >
+        <a class="brand" href="/">OpenFront <span>Harness</span></a>
         <div>
           <span>Built on OpenFront v0.32.9</span>
-          <a href="https://github.com/openfrontio/OpenFrontIO">Upstream</a>
+          <a href="https://github.com/openfrontio/OpenFrontIO"
+            >Upstream project</a
+          >
         </div>
         <div>
           <span>Source: AGPL-3.0 · assets: CC BY-SA 4.0</span>

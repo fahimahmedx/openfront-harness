@@ -68,7 +68,9 @@ function replayWorkerAssetAdapter(): Plugin {
     name: "openfront-harness-replay-worker-asset-adapter",
     transform(code, id) {
       const normalized = id.replaceAll("\\", "/");
-      if (!normalized.endsWith("/OpenFrontIO/src/core/worker/WorkerClient.ts")) {
+      if (
+        !normalized.endsWith("/OpenFrontIO/src/core/worker/WorkerClient.ts")
+      ) {
         return null;
       }
       const needle = /cdnBase\s*:\s*getCdnBase\(\)(?!\s*\|\|)/;
@@ -160,6 +162,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         input: {
           dashboard: path.join(projectRoot, "harness.html"),
+          lab: path.join(projectRoot, "lab.html"),
           replay: path.join(projectRoot, "replay.html"),
         },
         output: {

@@ -5,7 +5,6 @@ type RunSummary = {
   scenarioId: string;
   status: string;
   startedAt: string;
-  completedAt?: string;
   model: string;
   provider?: string | null;
   winner: string;
@@ -17,53 +16,34 @@ type RunSummary = {
   replayUrl: string;
 };
 
-type RunProgressView = {
-  runId?: string;
-  status: string;
-  tick?: number;
-  decisionCount?: number;
-  maxDecisionCount?: number;
-  latestStrategy?: string;
-  costUsd?: number;
-  error?: string;
-  winner?: string;
-  replayUrl?: string;
-  outcome?: { winner?: string; llmWon?: boolean };
-};
-
-type QuotaView = {
-  remaining: number;
-  limit: number;
-};
-
-const runButton = document.querySelector<HTMLButtonElement>("#run-button")!;
 const sampleLinks = Array.from(
   document.querySelectorAll<HTMLAnchorElement>("[data-sample-link]"),
 );
-const quota = document.querySelector<HTMLElement>("#quota")!;
-const generationStatus =
-  document.querySelector<HTMLElement>("#generation-status")!;
-const availabilityDot =
-  document.querySelector<HTMLElement>("#availability-dot")!;
-const scenarioGrid = document.querySelector<HTMLElement>("#scenario-grid")!;
-const runsGrid = document.querySelector<HTMLElement>("#runs-grid")!;
-const progress = document.querySelector<HTMLElement>("#progress")!;
 const sourceLink = document.querySelector<HTMLAnchorElement>("#source-link")!;
 const refreshButton =
   document.querySelector<HTMLButtonElement>("#refresh-button")!;
-
+const featuredRun = document.querySelector<HTMLElement>("#featured-run")!;
+const recentRuns = document.querySelector<HTMLElement>("#recent-runs")!;
+const archiveRuns = document.querySelector<HTMLElement>("#archive-runs")!;
+const runArchive = document.querySelector<HTMLDetailsElement>("#run-archive")!;
+const projectMeta = document.querySelector<HTMLElement>("#project-meta")!;
 const proofOutcome = document.querySelector<HTMLElement>("#proof-outcome")!;
 const proofDecisions = document.querySelector<HTMLElement>("#proof-decisions")!;
 const proofTime = document.querySelector<HTMLElement>("#proof-time")!;
 const proofCost = document.querySelector<HTMLElement>("#proof-cost")!;
-const posterScenario = document.querySelector<HTMLElement>("#poster-scenario")!;
-const posterResult = document.querySelector<HTMLElement>("#poster-result")!;
+const demoResult = document.querySelector<HTMLElement>("#demo-result")!;
 
-let generationAvailable: boolean | null = null;
-let quotaState: QuotaView | null = null;
-let activeRunId: string | null = null;
-let pollingRunId: string | null = null;
-let launchPending = false;
+let currentScenarioId: string | null = null;
+let cachedRuns: RunSummary[] = [];
+
+const demoVideo = document.querySelector<HTMLVideoElement>(".hero-demo video");
+if (
+  demoVideo &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches
+) {
+  demoVideo.pause();
+  demoVideo.removeAttribute("autoplay");
+}
 
 function escapeHtml(value: unknown): string {
   return String(value)
@@ -91,34 +71,10 @@ function scenarioLabel(scenarioId: string): string {
     .join(" ");
 }
 
-function updateRunControls(): void {
-  const quotaExhausted = quotaState !== null && quotaState.remaining <= 0;
-  const busy = launchPending || activeRunId !== null;
-  runButton.disabled = busy || generationAvailable !== true || quotaExhausted;
-
-  if (launchPending) {
-    runButton.textContent = "Starting trial…";
-  } else if (activeRunId) {
-    runButton.textContent = "Trial in progress";
-  } else if (generationAvailable === false) {
-    runButton.textContent = "Generation unavailable";
-  } else if (quotaExhausted) {
-    runButton.textContent = "Daily quota exhausted";
-  } else {
-    runButton.textContent = "Run another trial";
-  }
-}
-
-function setQuotaText(message?: string): void {
-  if (message) {
-    quota.textContent = message;
-    return;
-  }
-  if (!quotaState) {
-    quota.textContent = "Public quota is unavailable.";
-    return;
-  }
-  quota.textContent = `${quotaState.remaining} of ${quotaState.limit} public runs remain today · one run per network`;
+function outcomeLabel(run: RunSummary): string {
+  return run.llmWon
+    ? "LLM victory"
+    : `${ordinal(run.finalPlacement)} place · ${run.winner} won`;
 }
 
 function updateSample(sample: RunSummary): void {
@@ -132,23 +88,94 @@ function updateSample(sample: RunSummary): void {
   proofDecisions.textContent = sample.decisionCount.toLocaleString();
   proofTime.textContent = `${(sample.ticks / 10 / 60).toFixed(1)} min`;
   proofCost.textContent = `$${sample.costUsd.toFixed(3)}`;
-  posterScenario.textContent = scenarioLabel(sample.scenarioId);
-  posterResult.textContent = sample.llmWon
-    ? "Verified LLM victory"
-    : `Verified ${ordinal(sample.finalPlacement)}-place finish`;
+  demoResult.textContent = outcome;
 }
 
-async function loadHealth(): Promise<void> {
-  const response = await fetch("/api/health");
-  if (!response.ok) throw new Error("Health check failed");
-  const data = (await response.json()) as { generationAvailable: boolean };
-  generationAvailable = data.generationAvailable;
-  availabilityDot.classList.toggle("available", generationAvailable);
-  availabilityDot.classList.toggle("unavailable", !generationAvailable);
-  generationStatus.textContent = generationAvailable
-    ? "Fresh generation is available"
-    : "Fresh generation is offline; the verified replay remains available";
-  updateRunControls();
+function featuredCard(run: RunSummary): string {
+  return `<article>
+    <div class="featured-copy">
+      <p class="eyebrow">VERIFIED SAMPLE · ${escapeHtml(scenarioLabel(run.scenarioId))}</p>
+      <h3>${escapeHtml(outcomeLabel(run))}</h3>
+      <p>
+        Replay all ${escapeHtml(run.decisionCount)} model decisions beside the
+        native simulation, then download the complete portable artifact.
+      </p>
+      <div class="featured-actions">
+        <a class="button button-primary" href="${escapeHtml(run.replayUrl)}">Open interactive replay <span aria-hidden="true">↗</span></a>
+        <a class="inline-link" href="/api/runs/${escapeHtml(run.runId)}/artifact">Download artifact</a>
+      </div>
+    </div>
+    <dl class="featured-stats">
+      <div><dt>Model</dt><dd>${escapeHtml(run.model)}</dd></div>
+      <div><dt>Decisions</dt><dd>${escapeHtml(run.decisionCount)}</dd></div>
+      <div><dt>Simulated time</dt><dd>${(run.ticks / 10 / 60).toFixed(1)} min</dd></div>
+      <div><dt>Inference</dt><dd>$${run.costUsd.toFixed(3)}</dd></div>
+    </dl>
+  </article>`;
+}
+
+function runRow(run: RunSummary): string {
+  const status =
+    run.status === "sample"
+      ? "Verified sample"
+      : run.status.charAt(0).toUpperCase() + run.status.slice(1);
+  return `<article class="run-row">
+    <div class="run-identity">
+      <span class="status ${escapeHtml(run.status)}">${escapeHtml(status)} · ${escapeHtml(scenarioLabel(run.scenarioId))}</span>
+      <h4>${escapeHtml(outcomeLabel(run))}</h4>
+      <p>${escapeHtml(run.model)}${run.provider ? ` via ${escapeHtml(run.provider)}` : ""}</p>
+    </div>
+    <div class="run-stats">
+      <span><b>${escapeHtml(run.decisionCount)}</b> decisions</span>
+      <span><b>${(run.ticks / 10 / 60).toFixed(1)}</b> sim min</span>
+      <span><b>$${run.costUsd.toFixed(3)}</b> inference</span>
+    </div>
+    <time datetime="${escapeHtml(run.startedAt)}">${new Date(run.startedAt).toLocaleDateString()}</time>
+    <div class="run-actions">
+      <a href="${escapeHtml(run.replayUrl)}">Watch replay <span aria-hidden="true">↗</span></a>
+      <a href="/api/runs/${escapeHtml(run.runId)}/artifact">Artifact</a>
+    </div>
+  </article>`;
+}
+
+function renderRuns(): void {
+  if (!cachedRuns.length) {
+    featuredRun.innerHTML =
+      '<div class="loading">No verified sample is available.</div>';
+    recentRuns.innerHTML =
+      '<div class="loading">No completed trials are available.</div>';
+    runArchive.hidden = true;
+    return;
+  }
+
+  const scenarioRuns = currentScenarioId
+    ? cachedRuns.filter((run) => run.scenarioId === currentScenarioId)
+    : cachedRuns;
+  const sample =
+    scenarioRuns.find((run) => run.status === "sample") ??
+    cachedRuns.find((run) => run.status === "sample");
+
+  if (sample) {
+    updateSample(sample);
+    featuredRun.innerHTML = featuredCard(sample);
+  } else {
+    featuredRun.innerHTML =
+      '<div class="loading">The verified sample is temporarily unavailable.</div>';
+  }
+
+  const recent = scenarioRuns
+    .filter((run) => run.runId !== sample?.runId)
+    .slice(0, 3);
+  recentRuns.innerHTML = recent.length
+    ? recent.map(runRow).join("")
+    : '<div class="loading">No additional trials yet.</div>';
+
+  const recentIds = new Set(recent.map((run) => run.runId));
+  const archived = cachedRuns.filter(
+    (run) => run.runId !== sample?.runId && !recentIds.has(run.runId),
+  );
+  archiveRuns.innerHTML = archived.map(runRow).join("");
+  runArchive.hidden = archived.length === 0;
 }
 
 async function loadScenario(): Promise<void> {
@@ -156,67 +183,19 @@ async function loadScenario(): Promise<void> {
   if (!response.ok) throw new Error("Scenario request failed");
   const data = await response.json();
   const scenario = data.scenario;
-  quotaState = data.quota as QuotaView;
+  currentScenarioId = String(scenario.id);
 
   if (data.sourceUrl) {
     sourceLink.href = data.sourceUrl;
     sourceLink.classList.remove("hidden");
   }
 
-  const metrics = [
-    ["Scenario", scenarioLabel(scenario.id)],
-    ["Map", `${scenario.map} / ${scenario.mapSize}`],
-    ["Match", "1 LLM + 3 nations"],
-    ["Decision cadence", `${scenario.decisionIntervalTicks} ticks`],
-    ["Action bandwidth", `${scenario.actionSlots} IDs / decision`],
-    [
-      "Limits",
-      `${scenario.maxDecisionCount} decisions / ${scenario.maxSimulatedMinutes} min`,
-    ],
-    ["Seed", scenario.seed],
-    ["Engine", scenario.openfront.version],
-  ];
-  scenarioGrid.innerHTML = metrics
-    .map(
-      ([label, value]) =>
-        `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`,
-    )
-    .join("");
-  setQuotaText();
-
-  if (data.activeRun?.runId) {
-    const runId = String(data.activeRun.runId);
-    activeRunId = runId;
-    showProgress(data.activeRun);
-    void pollRun(runId);
-  }
-  updateRunControls();
-}
-
-function runCard(run: RunSummary): string {
-  const outcome = run.llmWon
-    ? "LLM victory"
-    : `${ordinal(run.finalPlacement)} place · ${run.winner} won`;
-  const statusLabel = run.status === "sample" ? "Verified sample" : run.status;
-  return `<article class="run-card">
-    <div class="run-card-top">
-      <span class="status ${escapeHtml(run.status)}">${escapeHtml(statusLabel)} · ${escapeHtml(scenarioLabel(run.scenarioId))}</span>
-      <time datetime="${escapeHtml(run.startedAt)}">${new Date(run.startedAt).toLocaleDateString()}</time>
-    </div>
-    <div class="run-card-body">
-      <h3>${escapeHtml(outcome)}</h3>
-      <p>${escapeHtml(run.model)}${run.provider ? ` via ${escapeHtml(run.provider)}` : ""}</p>
-    </div>
-    <div class="run-stats">
-      <span><b>${run.decisionCount}</b> decisions</span>
-      <span><b>${(run.ticks / 10 / 60).toFixed(1)}</b> sim min</span>
-      <span><b>$${run.costUsd.toFixed(3)}</b> inference</span>
-    </div>
-    <div class="card-actions">
-      <a href="${escapeHtml(run.replayUrl)}">Watch replay <span aria-hidden="true">↗</span></a>
-      <a href="/api/runs/${escapeHtml(run.runId)}/artifact">Download artifact</a>
-    </div>
-  </article>`;
+  projectMeta.innerHTML = `
+    <span><b>Scenario</b> ${escapeHtml(scenarioLabel(scenario.id))}</span>
+    <span><b>Engine</b> OpenFront ${escapeHtml(scenario.openfront.version)}</span>
+    <span><b>Mode</b> 1 LLM + ${escapeHtml(scenario.nationCount)} nations</span>
+    <span><b>Stack</b> TypeScript · Vite · OpenRouter</span>`;
+  renderRuns();
 }
 
 async function loadRuns(): Promise<void> {
@@ -225,177 +204,30 @@ async function loadRuns(): Promise<void> {
     const response = await fetch("/api/runs");
     if (!response.ok) throw new Error("Runs request failed");
     const data = await response.json();
-    const runs = data.runs as RunSummary[];
-    runsGrid.innerHTML = runs.length
-      ? runs.map(runCard).join("")
-      : `<div class="empty">No completed runs yet. The first finished trial will appear here with its replay and artifact.</div>`;
-    const samples = runs
-      .filter((run) => run.status === "sample")
-      .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
-    if (samples[0]) updateSample(samples[0]);
+    cachedRuns = data.runs as RunSummary[];
+    renderRuns();
   } finally {
     refreshButton.disabled = false;
   }
 }
 
-function showProgress(run: RunProgressView): void {
-  const decisionCount = Number(run.decisionCount ?? 0);
-  const maxDecisionCount = Number(run.maxDecisionCount ?? 120);
-  const percent = Math.min(
-    100,
-    Math.max(0, (decisionCount / Math.max(1, maxDecisionCount)) * 100),
-  );
-  progress.className = "progress running";
-  progress.innerHTML = `<div class="progress-copy">
-    <p class="eyebrow">TRIAL IN PROGRESS</p>
-    <h3>Decision ${escapeHtml(decisionCount)} of ${escapeHtml(maxDecisionCount)}</h3>
-    <p>${escapeHtml(run.latestStrategy ?? "Initializing the Japan simulation…")}</p>
-    <div class="progress-track" aria-hidden="true"><span style="width:${percent.toFixed(1)}%"></span></div>
-  </div>
-  <div class="progress-metrics">
-    <span>Tick <b>${escapeHtml(run.tick ?? 0)}</b></span>
-    <span>Inference <b>$${Number(run.costUsd ?? 0).toFixed(3)}</b></span>
-  </div>`;
-}
-
-function showCompletedRun(run: RunProgressView, runId: string): void {
-  const winner = run.outcome?.winner ?? run.winner ?? "Match complete";
-  progress.className = "progress complete";
-  progress.innerHTML = `<div>
-    <p class="eyebrow">TRIAL COMPLETE</p>
-    <h3>${escapeHtml(winner)}</h3>
-    <p>The replay and complete decision artifact are ready.</p>
-  </div>
-  <a class="result-link" href="/replay/${escapeHtml(runId)}">Open replay <span aria-hidden="true">↗</span></a>`;
-}
-
-function showFailedRun(run: RunProgressView): void {
-  progress.className = "progress failed";
-  progress.innerHTML = `<div>
-    <p class="eyebrow">TRIAL ${escapeHtml(run.status.toUpperCase())}</p>
-    <h3>The match did not produce a benchmark result.</h3>
-    <p>${escapeHtml(run.error ?? "The run ended before a winner was declared.")}</p>
-  </div>`;
-}
-
-function showPollingError(): void {
-  progress.className = "progress failed";
-  progress.innerHTML = `<div>
-    <p class="eyebrow">STATUS CONNECTION LOST</p>
-    <h3>The trial may still be running.</h3>
-    <p>Trying the status endpoint again…</p>
-  </div>`;
-}
-
-async function pollRun(runId: string): Promise<void> {
-  if (pollingRunId === runId) return;
-  pollingRunId = runId;
-  let consecutiveErrors = 0;
-  try {
-    for (;;) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      try {
-        const response = await fetch(`/api/runs/${runId}`);
-        if (!response.ok) {
-          if (response.status === 404) {
-            showFailedRun({ status: "failed", error: "Run not found." });
-            break;
-          }
-          throw new Error("Status request failed");
-        }
-        const { run } = (await response.json()) as { run: RunProgressView };
-        consecutiveErrors = 0;
-        if (run.status === "running") {
-          showProgress(run);
-          continue;
-        }
-        if (run.status === "completed" || run.status === "sample") {
-          showCompletedRun(run, runId);
-        } else {
-          showFailedRun(run);
-        }
-        break;
-      } catch (error) {
-        console.error(error);
-        consecutiveErrors += 1;
-        showPollingError();
-        if (consecutiveErrors >= 5) break;
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      }
-    }
-  } finally {
-    pollingRunId = null;
-    activeRunId = null;
-    updateRunControls();
-    await Promise.allSettled([loadRuns(), loadScenario()]);
-  }
-}
-
-runButton.addEventListener("click", async () => {
-  if (runButton.disabled) return;
-  launchPending = true;
-  updateRunControls();
-  try {
-    const response = await fetch("/api/runs", { method: "POST" });
-    const data = await response.json();
-    if (data.quota) {
-      quotaState = data.quota as QuotaView;
-      setQuotaText();
-    }
-    if (!response.ok) {
-      setQuotaText(data.error ?? "Could not start the trial");
-      if (data.run?.runId) {
-        const runId = String(data.run.runId);
-        activeRunId = runId;
-        showProgress(data.run);
-        void pollRun(runId);
-      }
-      return;
-    }
-    activeRunId = data.runId;
-    showProgress({
-      runId: data.runId,
-      status: "running",
-      decisionCount: 0,
-      maxDecisionCount: 120,
-      latestStrategy: "Loading the Japan simulation…",
-      tick: 0,
-      costUsd: 0,
-    });
-    void pollRun(data.runId);
-  } catch (error) {
-    console.error(error);
-    setQuotaText("Could not reach the harness API.");
-  } finally {
-    launchPending = false;
-    updateRunControls();
-  }
-});
-
 refreshButton.addEventListener("click", () => {
   void loadRuns().catch((error) => {
     console.error(error);
-    runsGrid.innerHTML = `<div class="empty error">Recorded runs are temporarily unavailable. Try refreshing again.</div>`;
+    recentRuns.innerHTML =
+      '<div class="loading error">Recorded runs are temporarily unavailable.</div>';
   });
 });
 
 void loadScenario().catch((error) => {
   console.error(error);
-  scenarioGrid.innerHTML = `<div class="metric-loading error">The fixed scenario could not be loaded.</div>`;
-  quotaState = null;
-  setQuotaText("Scenario data is unavailable.");
-  updateRunControls();
+  projectMeta.classList.add("error");
 });
 
 void loadRuns().catch((error) => {
   console.error(error);
-  runsGrid.innerHTML = `<div class="empty error">Recorded runs are temporarily unavailable. The documentation remains accessible.</div>`;
-});
-
-void loadHealth().catch((error) => {
-  console.error(error);
-  generationAvailable = false;
-  availabilityDot.classList.add("unavailable");
-  generationStatus.textContent = "Live generation status is unavailable";
-  updateRunControls();
+  featuredRun.innerHTML =
+    '<div class="loading error">The verified replay is temporarily unavailable.</div>';
+  recentRuns.innerHTML =
+    '<div class="loading error">Recorded runs are temporarily unavailable.</div>';
 });
