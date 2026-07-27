@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { UnitType } from "../OpenFrontIO/src/core/game/Game";
 import { resolveDecisionActions } from "../src/ObservationActions";
 import { LegalAction } from "../src/Types";
 
@@ -16,6 +17,28 @@ const candidates: LegalAction[] = [
     category: "diplomacy",
     label: "Request alliance",
     intent: { type: "allianceRequest", recipient: "opponent" },
+  },
+  {
+    id: "build:City:123",
+    category: "build",
+    label: "Build City near (1, 2)",
+    intent: { type: "build_unit", unit: UnitType.City, tile: 123 },
+  },
+  {
+    id: "build:Defense Post:123",
+    category: "build",
+    label: "Build Defense Post near (1, 2)",
+    intent: {
+      type: "build_unit",
+      unit: UnitType.DefensePost,
+      tile: 123,
+    },
+  },
+  {
+    id: "build:Factory:456",
+    category: "build",
+    label: "Build Factory near (3, 4)",
+    intent: { type: "build_unit", unit: UnitType.Factory, tile: 456 },
   },
 ];
 
@@ -60,5 +83,31 @@ describe("fixed action slots", () => {
         (action) => action.id,
       ),
     ).toEqual(["hold:1", "hold:2"]);
+  });
+
+  test("replaces a second structure build at the same coordinate with a hold", () => {
+    const result = resolveDecisionActions(
+      ["build:City:123", "build:Defense Post:123"],
+      candidates,
+    );
+
+    expect(result.actions.map((action) => action.id)).toEqual([
+      "build:City:123",
+      "hold:2",
+    ]);
+    expect(result.fallback).toBe(true);
+  });
+
+  test("keeps structure builds at different coordinates", () => {
+    const result = resolveDecisionActions(
+      ["build:City:123", "build:Factory:456"],
+      candidates,
+    );
+
+    expect(result.actions.map((action) => action.id)).toEqual([
+      "build:City:123",
+      "build:Factory:456",
+    ]);
+    expect(result.fallback).toBe(false);
   });
 });

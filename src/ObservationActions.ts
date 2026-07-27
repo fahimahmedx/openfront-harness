@@ -633,6 +633,7 @@ export function resolveDecisionActions(
     candidates.map((candidate) => [candidate.id, candidate]),
   );
   const uses = new Map<string, number>();
+  const structureBuildTiles = new Set<number>();
   let fallback = false;
   const resolved = [0, 1].map((slot) => {
     const id = selectedIds[slot];
@@ -645,11 +646,22 @@ export function resolveDecisionActions(
     const repeatAllowed =
       candidate !== undefined &&
       (priorUses === 0 || isRepeatableLegalAction(candidate));
-    if (!allowedInSlot || !repeatAllowed) {
+    const structureBuildTile =
+      candidate?.intent?.type === "build_unit" &&
+      Structures.has(candidate.intent.unit)
+        ? candidate.intent.tile
+        : undefined;
+    const coordinateAvailable =
+      structureBuildTile === undefined ||
+      !structureBuildTiles.has(structureBuildTile);
+    if (!allowedInSlot || !repeatAllowed || !coordinateAvailable) {
       fallback = true;
       return byId.get(slotHoldId)!;
     }
     uses.set(id!, priorUses + 1);
+    if (structureBuildTile !== undefined) {
+      structureBuildTiles.add(structureBuildTile);
+    }
     return candidate;
   });
   return { actions: resolved, fallback };

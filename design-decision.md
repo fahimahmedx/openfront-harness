@@ -62,7 +62,7 @@ This document records every material decision made for the harness. A scenario-a
 
 ## 8. Exactly two action slots
 
-**Decision:** Require exactly two named action slots, `action1` and `action2`. Each slot has its own legal-ID enum and its own hold. Expansion, attack, and boat candidates may be selected in both slots because their troop amount is already bounded to one slot's half of the shared safe budget. Repeated build, upgrade, retreat, diplomacy, or hold actions are normalized deterministically to the appropriate slot hold.
+**Decision:** Require exactly two named action slots, `action1` and `action2`. Each slot has its own legal-ID enum and its own hold. Expansion, attack, and boat candidates may be selected in both slots because their troop amount is already bounded to one slot's half of the shared safe budget. Repeated build, upgrade, retreat, diplomacy, or hold actions are normalized deterministically to the appropriate slot hold. If two distinct structure builds target the same coordinate, the second is also normalized to its slot hold because the core can place only one structure there.
 
 **Pros:** Every model gets the same action bandwidth; choosing the strongest safe troop action in both slots is valid rather than a model error; slot-specific enums prevent the wrong hold ID; repeated non-repeatable side effects cannot reach the core; the trace clearly distinguishes an intentional hold from missing output.
 
