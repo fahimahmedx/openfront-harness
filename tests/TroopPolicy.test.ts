@@ -185,7 +185,9 @@ describe("troop policy", () => {
         name: expect.any(String),
         territoryPercent: expect.any(Number),
       },
-      territoryGapToLeader: expect.any(Number),
+      isTerritoryLeader: expect.any(Boolean),
+      territoryLeadPercent: expect.any(Number),
+      territoryDeficitPercent: expect.any(Number),
     });
     expect(finalObservation).not.toHaveProperty("winPercent");
     expect(finalObservation.self).toMatchObject({

@@ -120,8 +120,23 @@ function legacyObservationFields(value: unknown): unknown {
     1,
     standings.findIndex((candidate) => candidate.order === 0) + 1,
   );
+  const observedRank =
+    typeof observation.currentRank === "number"
+      ? observation.currentRank
+      : selfRank;
   const selfTerritory =
     typeof self.territoryPercent === "number" ? self.territoryPercent : 0;
+  const isTerritoryLeader =
+    typeof observation.isTerritoryLeader === "boolean"
+      ? observation.isTerritoryLeader
+      : observedRank === 1;
+  const runnerUp = standings.find((candidate) => candidate.order !== 0);
+  const derivedLeadPercent = isTerritoryLeader
+    ? Math.max(0, selfTerritory - (runnerUp?.territoryPercent ?? selfTerritory))
+    : 0;
+  const derivedDeficitPercent = isTerritoryLeader
+    ? 0
+    : Math.max(0, leader.territoryPercent - selfTerritory);
 
   return {
     ...observation,
@@ -129,37 +144,63 @@ function legacyObservationFields(value: unknown): unknown {
       observation.instantVictoryTerritoryPercent ??
       observation.winPercent ??
       80,
-    currentRank: observation.currentRank ?? selfRank,
+    currentRank: observedRank,
     territoryLeader: observation.territoryLeader ?? {
       id: leader.id,
       name: leader.name,
       territoryPercent: leader.territoryPercent,
     },
-    territoryGapToLeader:
+    isTerritoryLeader,
+    territoryLeadPercent:
+      observation.territoryLeadPercent ?? derivedLeadPercent,
+    territoryDeficitPercent:
+      observation.territoryDeficitPercent ??
       observation.territoryGapToLeader ??
-      Math.max(0, leader.territoryPercent - selfTerritory),
+      derivedDeficitPercent,
     timerVictoryRule: observation.timerVictoryRule ?? TIMER_VICTORY_RULE,
   };
 }
 
 export const ObservationSchema = z.preprocess(
   legacyObservationFields,
-  z.object({
-    scenarioId: z.string(),
-    decision: z.number().int().nonnegative(),
-    tick: z.number().int().nonnegative(),
-    elapsedSeconds: z.number().nonnegative(),
-    timeRemainingSeconds: z.number().nonnegative(),
-    instantVictoryTerritoryPercent: z.number(),
-    currentRank: z.number().int().positive(),
-    territoryLeader: TerritoryLeaderSchema,
-    territoryGapToLeader: z.number().nonnegative(),
-    timerVictoryRule: z.literal(TIMER_VICTORY_RULE),
-    landTiles: z.number().int().nonnegative(),
-    self: z.record(z.string(), z.unknown()),
-    opponents: z.array(z.record(z.string(), z.unknown())),
-    recentDecisions: z.array(z.record(z.string(), z.unknown())),
-  }),
+  z
+    .object({
+      scenarioId: z.string(),
+      decision: z.number().int().nonnegative(),
+      tick: z.number().int().nonnegative(),
+      elapsedSeconds: z.number().nonnegative(),
+      timeRemainingSeconds: z.number().nonnegative(),
+      instantVictoryTerritoryPercent: z.number(),
+      currentRank: z.number().int().positive(),
+      territoryLeader: TerritoryLeaderSchema,
+      isTerritoryLeader: z.boolean(),
+      territoryLeadPercent: z.number().nonnegative(),
+      territoryDeficitPercent: z.number().nonnegative(),
+      timerVictoryRule: z.literal(TIMER_VICTORY_RULE),
+      landTiles: z.number().int().nonnegative(),
+      self: z.record(z.string(), z.unknown()),
+      opponents: z.array(z.record(z.string(), z.unknown())),
+      recentDecisions: z.array(z.record(z.string(), z.unknown())),
+    })
+    .refine(
+      (observation) =>
+        observation.isTerritoryLeader === (observation.currentRank === 1),
+      {
+        message: "isTerritoryLeader must agree with currentRank",
+        path: ["isTerritoryLeader"],
+      },
+    )
+    .refine(
+      (observation) =>
+        observation.isTerritoryLeader
+          ? observation.territoryDeficitPercent === 0
+          : observation.territoryLeadPercent === 0,
+      {
+        message:
+          "territoryLeadPercent and territoryDeficitPercent must be mutually exclusive",
+        path: ["territoryLeadPercent"],
+      },
+    ),
 );
 export type Observation = z.infer<typeof ObservationSchema>;
 
@@ -262,6 +303,7 @@ export const RunArtifactSchema = z.object({
       "agent-v4",
       "agent-v5",
       "agent-v6",
+      "agent-v7",
     ]),
     seed: z.literal(3209),
     reasoningEffort: z

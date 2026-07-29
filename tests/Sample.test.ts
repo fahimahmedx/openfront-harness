@@ -25,6 +25,14 @@ describe("bundled sample", () => {
       80,
     );
     expect(sample.decisions[0].observation).not.toHaveProperty("winPercent");
+    expect(sample.decisions[0].observation).toMatchObject({
+      isTerritoryLeader: expect.any(Boolean),
+      territoryLeadPercent: expect.any(Number),
+      territoryDeficitPercent: expect.any(Number),
+    });
+    expect(sample.decisions[0].observation).not.toHaveProperty(
+      "territoryGapToLeader",
+    );
     expect(sample.decisions[0].actionOutcomes).toHaveLength(2);
     expect(sample.decisions[0].actionOutcomes[0].status).toMatch(
       /completed|unknown/,
@@ -40,9 +48,9 @@ describe("bundled sample", () => {
     const current = RunArtifactSchema.parse({
       ...sample,
       schemaVersion: 2,
-      model: { ...sample.model, promptVersion: "agent-v6" },
+      model: { ...sample.model, promptVersion: "agent-v7" },
     });
-    expect(current.model.promptVersion).toBe("agent-v6");
+    expect(current.model.promptVersion).toBe("agent-v7");
     expect(current.decisions[0].attemptFailures).toEqual([]);
     expect(current.decisions[0].attemptTimings).toEqual([]);
   });

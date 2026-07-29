@@ -5,7 +5,12 @@ import {
   promptFor,
   validateDecisionContent,
 } from "../src/OpenRouterAgent";
-import { LegalAction, Observation, TIMER_VICTORY_RULE } from "../src/Types";
+import {
+  LegalAction,
+  Observation,
+  ObservationSchema,
+  TIMER_VICTORY_RULE,
+} from "../src/Types";
 
 const candidates: LegalAction[] = [
   {
@@ -41,7 +46,9 @@ const observation: Observation = {
     name: "Territory Leader",
     territoryPercent: 35,
   },
-  territoryGapToLeader: 10,
+  isTerritoryLeader: false,
+  territoryLeadPercent: 0,
+  territoryDeficitPercent: 10,
   timerVictoryRule: TIMER_VICTORY_RULE,
   landTiles: 478894,
   self: {},
@@ -112,15 +119,17 @@ afterEach(() => {
 });
 
 describe("OpenRouter action output", () => {
-  it("versions the neutral troop-semantics contract as agent-v6", () => {
-    expect(OpenRouterAgent.promptVersion()).toBe("agent-v6");
+  it("versions the explicit standings contract as agent-v7", () => {
+    expect(OpenRouterAgent.promptVersion()).toBe("agent-v7");
     expect(OpenRouterAgent.reasoningEffort()).toBe("none");
   });
 
   it("explains troop saturation and neutral expansion without prescribing holds", () => {
     const prompt = promptFor(observation, candidates);
 
-    expect(prompt).toContain("troop growth approaches zero near 100% capacity");
+    expect(prompt).toContain(
+      "holding at maximum capacity cannot rebuild or increase reserves further",
+    );
     expect(prompt).toContain(
       "Neutral expansion captures unowned land and does not require a troop advantage",
     );
@@ -128,6 +137,55 @@ describe("OpenRouter action output", () => {
       "listed troop amounts do not violate the displayed reserve",
     );
     expect(prompt).not.toContain("Hold while rebuilding");
+  });
+
+  it("distinguishes a territory lead from a territory deficit", () => {
+    const prompt = promptFor(observation, candidates);
+
+    expect(prompt).toContain(
+      "isTerritoryLeader is true only while self is first",
+    );
+    expect(prompt).toContain(
+      "territoryDeficitPercent is positive only while behind",
+    );
+    expect(prompt).toContain("Never describe a deficit as a lead");
+    expect(prompt).not.toContain("territoryGapToLeader");
+  });
+
+  it("normalizes the legacy unsigned gap as a deficit when ranked second", () => {
+    const {
+      isTerritoryLeader: _isTerritoryLeader,
+      territoryLeadPercent: _territoryLeadPercent,
+      territoryDeficitPercent: _territoryDeficitPercent,
+      ...legacyObservation
+    } = observation;
+    const normalized = ObservationSchema.parse({
+      ...legacyObservation,
+      territoryGapToLeader: 0.942,
+    });
+
+    expect(normalized).toMatchObject({
+      currentRank: 2,
+      isTerritoryLeader: false,
+      territoryLeadPercent: 0,
+      territoryDeficitPercent: 0.942,
+    });
+    expect(normalized).not.toHaveProperty("territoryGapToLeader");
+  });
+
+  it("rejects contradictory standings fields", () => {
+    expect(() =>
+      ObservationSchema.parse({
+        ...observation,
+        isTerritoryLeader: true,
+      }),
+    ).toThrow(/isTerritoryLeader must agree with currentRank/);
+    expect(() =>
+      ObservationSchema.parse({
+        ...observation,
+        territoryLeadPercent: 1,
+      }),
+    ).toThrow(/must be mutually exclusive/);
   });
 
   it("constrains each named slot to its legal action IDs", () => {

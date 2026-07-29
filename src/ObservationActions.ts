@@ -131,6 +131,17 @@ export function createObservation(
       : Number(
           ((player.numTilesOwned() / game.numLandTiles()) * 100).toFixed(3),
         );
+  const isTerritoryLeader = standings[0]?.candidate === player;
+  const runnerUp = standings.find(({ candidate }) => candidate !== player);
+  const runnerUpTerritoryPercent =
+    runnerUp === undefined || game.numLandTiles() === 0
+      ? selfTerritoryPercent
+      : Number(
+          (
+            (runnerUp.candidate.numTilesOwned() / game.numLandTiles()) *
+            100
+          ).toFixed(3),
+        );
   const opponents = game
     .players()
     .filter((candidate) => candidate !== player)
@@ -162,8 +173,18 @@ export function createObservation(
       name: territoryLeader.name(),
       territoryPercent: leaderTerritoryPercent,
     },
-    territoryGapToLeader: Number(
-      Math.max(0, leaderTerritoryPercent - selfTerritoryPercent).toFixed(3),
+    isTerritoryLeader,
+    territoryLeadPercent: Number(
+      (isTerritoryLeader
+        ? Math.max(0, selfTerritoryPercent - runnerUpTerritoryPercent)
+        : 0
+      ).toFixed(3),
+    ),
+    territoryDeficitPercent: Number(
+      (isTerritoryLeader
+        ? 0
+        : Math.max(0, leaderTerritoryPercent - selfTerritoryPercent)
+      ).toFixed(3),
     ),
     timerVictoryRule: TIMER_VICTORY_RULE,
     landTiles: game.numLandTiles(),
