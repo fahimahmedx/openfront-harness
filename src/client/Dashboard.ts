@@ -26,7 +26,6 @@ const featuredRun = document.querySelector<HTMLElement>("#featured-run")!;
 const recentRuns = document.querySelector<HTMLElement>("#recent-runs")!;
 const archiveRuns = document.querySelector<HTMLElement>("#archive-runs")!;
 const runArchive = document.querySelector<HTMLDetailsElement>("#run-archive")!;
-const projectMeta = document.querySelector<HTMLElement>("#project-meta")!;
 const proofOutcome = document.querySelector<HTMLElement>("#proof-outcome")!;
 const proofDecisions = document.querySelector<HTMLElement>("#proof-decisions")!;
 const proofTime = document.querySelector<HTMLElement>("#proof-time")!;
@@ -200,11 +199,6 @@ async function loadScenario(): Promise<void> {
     sourceLink.classList.remove("hidden");
   }
 
-  projectMeta.innerHTML = `
-    <span><b>Scenario</b> ${escapeHtml(scenarioLabel(scenario.id))}</span>
-    <span><b>Engine</b> OpenFront ${escapeHtml(scenario.openfront.version)}</span>
-    <span><b>Mode</b> 1 LLM + ${escapeHtml(scenario.nationCount)} nations</span>
-    <span><b>Stack</b> TypeScript · Vite · OpenRouter</span>`;
   renderRuns();
 }
 
@@ -231,7 +225,6 @@ refreshButton.addEventListener("click", () => {
 
 void loadScenario().catch((error) => {
   console.error(error);
-  projectMeta.classList.add("error");
 });
 
 void loadRuns().catch((error) => {

@@ -173,55 +173,22 @@
         <ol class="process" aria-label="How the harness works">
           <li>
             <span>01</span><strong>Observe</strong>
-            <p>Read fixed core state.</p>
+            <p>Agent reads game state.</p>
           </li>
           <li>
             <span>02</span><strong>Choose</strong>
-            <p>Select exactly two legal IDs.</p>
+            <p>Agent selects two legal actions.</p>
           </li>
           <li>
             <span>03</span><strong>Execute</strong>
-            <p>Apply native game intents.</p>
+            <p>Agent reacts to result of actions.</p>
           </li>
           <li>
             <span>04</span><strong>Audit</strong>
-            <p>Inspect what GPT-5.6 saw, chose, executed, and cost.</p>
+            <p>Inspect what the agent saw, chose, executed, and why.</p>
           </li>
         </ol>
 
-        <div class="contributions">
-          <article>
-            <p class="eyebrow">AGENT CONTRACT</p>
-            <h3>Bounded agency</h3>
-            <p>
-              Server-generated action menus, strict structured output, shared
-              troop budgets, and deterministic fallbacks.
-            </p>
-          </article>
-          <article>
-            <p class="eyebrow">SIMULATION HARNESS</p>
-            <h3>Real engine, fixed protocol</h3>
-            <p>
-              OpenFront’s pinned core owns combat, timing, nations, victory
-              logic, and state hashes.
-            </p>
-          </article>
-          <article>
-            <p class="eyebrow">REPLAY INTERFACE</p>
-            <h3>Evidence synchronized</h3>
-            <p>
-              Observations, actions, latency, tokens, cost, and native game
-              intents stay aligned during playback.
-            </p>
-          </article>
-        </div>
-
-        <div id="project-meta" class="project-meta" aria-live="polite">
-          <span><b>Scenario</b> Japan v2</span>
-          <span><b>Engine</b> OpenFront v0.32.9</span>
-          <span><b>Mode</b> 1 LLM + 3 nations</span>
-          <span><b>Stack</b> TypeScript · Vite · OpenRouter</span>
-        </div>
       </section>
 
       <section id="evidence" class="evidence section-block">
