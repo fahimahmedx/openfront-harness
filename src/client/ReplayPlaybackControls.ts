@@ -25,7 +25,6 @@ class HarnessReplayPlayback extends HTMLElement {
   private speed = defaultReplaySpeedMultiplier;
   private eventBus: EventBus | null = null;
   private paintFrame: number | null = null;
-  private toggleButton: HTMLButtonElement;
   private status: HTMLElement;
   private time: HTMLOutputElement;
   private progress: HTMLElement;
@@ -89,31 +88,6 @@ class HarnessReplayPlayback extends HTMLElement {
         padding: 8px 10px;
       }
 
-      .toggle {
-        width: 36px;
-        height: 36px;
-        flex: none;
-        display: grid;
-        place-items: center;
-        border: 1px solid rgba(30, 122, 90, .5);
-        border-radius: 50%;
-        background: rgba(30, 122, 90, .08);
-        color: var(--signal);
-        cursor: pointer;
-      }
-
-      .toggle:hover:not(:disabled) {
-        border-color: var(--signal);
-        background: rgba(30, 122, 90, .14);
-      }
-
-      .toggle svg {
-        width: 15px;
-        height: 15px;
-        fill: currentColor;
-      }
-
-      .toggle:disabled,
       .rate:disabled {
         cursor: not-allowed;
         opacity: .42;
@@ -169,26 +143,11 @@ class HarnessReplayPlayback extends HTMLElement {
         color: var(--signal);
       }
 
-      .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        clip-path: inset(50%);
-      }
-
       @media (max-width: 480px) {
         .controls {
           min-height: 52px;
           gap: 7px;
           padding: 7px 8px;
-        }
-
-        .toggle {
-          width: 34px;
-          height: 34px;
         }
 
         .readout { min-width: 78px; }
@@ -230,9 +189,6 @@ class HarnessReplayPlayback extends HTMLElement {
         <div class="progress-fill"></div>
       </div>
       <div class="controls">
-        <button class="toggle" type="button" disabled>
-          <span class="sr-only">Pause replay</span>
-        </button>
         <div class="readout">
           <span class="status" aria-live="polite">Loading replay</span>
           <output>00:00 / ${formatReplayTime(this.totalTicks)}</output>
@@ -254,7 +210,6 @@ class HarnessReplayPlayback extends HTMLElement {
       </div>
     </section>`;
 
-    this.toggleButton = root.querySelector(".toggle")!;
     this.status = root.querySelector(".status")!;
     this.time = root.querySelector("output")!;
     this.progress = root.querySelector(".progress")!;
@@ -266,7 +221,6 @@ class HarnessReplayPlayback extends HTMLElement {
       .addEventListener("contextmenu", (event) => {
         event.preventDefault();
       });
-    this.toggleButton.addEventListener("click", this.togglePlayback);
     this.rateButtons.forEach((button) => {
       button.addEventListener("click", this.changeSpeed);
     });
@@ -282,7 +236,6 @@ class HarnessReplayPlayback extends HTMLElement {
       "harness-replay-tick",
       this.onTick as EventListener,
     );
-    this.toggleButton?.removeEventListener("click", this.togglePlayback);
     this.rateButtons?.forEach((button) => {
       button.removeEventListener("click", this.changeSpeed);
     });
@@ -350,13 +303,6 @@ class HarnessReplayPlayback extends HTMLElement {
     this.setSpeed(replayRates[Math.max(current - 1, 0)]);
   };
 
-  private togglePlayback = () => {
-    if (!this.eventBus || isReplayComplete(this.currentTick, this.totalTicks)) {
-      return;
-    }
-    this.eventBus.emit(new PauseGameIntentEvent(!this.paused));
-  };
-
   private changeSpeed = (event: Event) => {
     const button = event.currentTarget as HTMLButtonElement;
     const multiplier = Number(button.dataset.speed) as ReplaySpeedMultiplier;
@@ -384,7 +330,7 @@ class HarnessReplayPlayback extends HTMLElement {
   }
 
   private paint() {
-    if (!this.toggleButton) return;
+    if (!this.status) return;
     const complete = isReplayComplete(this.currentTick, this.totalTicks);
     const ready = this.eventBus !== null;
     const disabled = !ready || complete;
@@ -408,19 +354,6 @@ class HarnessReplayPlayback extends HTMLElement {
       `${formatReplayTime(this.currentTick)} of ${formatReplayTime(this.totalTicks)}`,
     );
     this.progressFill.style.width = `${progress}%`;
-
-    this.toggleButton.disabled = disabled;
-    this.toggleButton.setAttribute(
-      "aria-label",
-      complete
-        ? "Replay complete"
-        : this.paused
-          ? "Resume replay"
-          : "Pause replay",
-    );
-    this.toggleButton.innerHTML = this.paused
-      ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span class="sr-only">Resume replay</span>`
-      : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg><span class="sr-only">${complete ? "Replay complete" : "Pause replay"}</span>`;
 
     this.rateButtons.forEach((button) => {
       button.disabled = disabled;
