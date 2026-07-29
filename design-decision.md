@@ -1,6 +1,6 @@
 # OpenFront LLM Harness — Design Decisions
 
-Status: implemented for benchmark scenario `japan-v2`; the slot-based `agent-v4` output contract was added on 2026-07-26. Existing `japan-v1` and `agent-v1` through `agent-v3` artifacts remain replay-compatible.
+Status: implemented for benchmark scenario `japan-v2`; the timer-aware `agent-v5` observation and output contract was added on 2026-07-27. Existing schema-v1, `japan-v1`, and `agent-v1` through `agent-v4` artifacts remain replay-compatible.
 
 This document records every material decision made for the harness. A scenario-affecting change must create a new scenario ID instead of silently changing an existing benchmark, because future leaderboard results need to remain comparable.
 
@@ -80,11 +80,13 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 ## 10. Normalized observations, not hidden core objects
 
-**Decision:** Send a compact JSON observation containing public self/opponent state, attacks, relations, units, time, map totals, and the last three decisions. Version 2 explicitly includes troop-capacity percentage, absolute troop growth per second, total incoming and outgoing troops, the active policy mode, reserve floor and percentage, spendable troops, per-action budget, and each opponent's troops relative to the LLM.
+**Decision:** Send a compact JSON observation containing public self/opponent state, attacks, relations, units, time, map totals, and the last three decisions. Version 2 explicitly includes troop-capacity percentage, absolute troop growth per second, total incoming and outgoing troops, the active policy mode, reserve floor and percentage, spendable troops, per-action budget, and each opponent's troops relative to the LLM. Agent v5 renames the ambiguous `winPercent` field to `instantVictoryTerritoryPercent`, adds the LLM's current territory rank, the territory leader, the percentage-point gap to that leader, and the explicit rule that the living player with the most land tiles wins when the timer expires. Recent decisions include structured action lifecycle outcomes rather than implying that submission equals execution.
+
+**Why the rename:** `winPercent` sounded like a prediction of the player's chance of winning, but its value was actually the fixed territory threshold for an immediate victory. That ambiguity caused a real policy error: in the GLM evaluation, the model repeatedly interpreted `winPercent: 80` as an 80% win probability and used it to justify holding, even though it controlled far less than 80% of the map and was behind on territory. `instantVictoryTerritoryPercent` names both what is measured and when the rule applies. It also distinguishes the threshold-based instant-victory condition from the separate timer-victory rule, where the surviving territory leader wins without reaching that threshold. Because this is a semantic clarification to the model-facing contract, it is versioned as `agent-v5`; schema-v1 artifacts are normalized to the new name only for replay compatibility.
 
 **Pros:** The model sees structured, stable data; prompts stay inspectable; engine implementation details and cyclic objects do not leak; artifacts can be analyzed without running the game.
 
-**Cons:** Information omitted by normalization is unavailable to the policy; large-scale spatial geometry is summarized rather than rendered; changing observation fields changes the benchmark.
+**Cons:** Information omitted by normalization is unavailable to the policy; large-scale spatial geometry is summarized rather than rendered; rank and leader fields duplicate values a sufficiently careful model could calculate; changing observation fields changes the prompt contract and requires a new version.
 
 ## 11. Public strategy note instead of chain of thought
 
@@ -96,11 +98,11 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 ## 12. Structured output plus local validation
 
-**Decision:** Use OpenRouter JSON Schema output in strict mode. Build separate `action1` and `action2` enum properties from the current candidate menu, excluding the other slot's hold from each property. Parse independently with Zod and verify membership for each slot locally. Include `maxUses` in the candidate view so repeatable troop actions are explicit. This slot-based request contract is prompt version `agent-v4`; it replaces v3's array-level distinctness rule, which conflicted with the two-slot troop budget and could not be expressed with the pinned provider's strict-schema subset.
+**Decision:** Use OpenRouter JSON Schema output in strict mode. Build separate `action1` and `action2` enum properties from the current candidate menu, excluding the other slot's hold from each property. Parse independently with Zod and verify membership for each slot locally. Include `maxUses` in the candidate view so repeatable troop actions are explicit. Agent v4 introduced the slot-based request shape, replacing v3's array-level distinctness rule. Agent v5 retains that shape and adds explicit timer-victory guidance plus the renamed observation fields and post-execution feedback.
 
 **Pros:** The provider prevents invented and wrong-slot IDs during generation; property names encode slot identity without unsupported JSON Schema keywords; local validation remains defense in depth; application types and API schema agree; failure behavior is measurable.
 
-**Cons:** Strict structured output and dynamic enums narrow compatible endpoints; schema requests add tokens and provider coupling; repeatability remains a harness-owned semantic rule; local validation and retry logic remain necessary because the provider boundary is untrusted.
+**Cons:** Strict structured output and dynamic enums narrow compatible endpoints; schema requests add tokens and provider coupling; repeatability remains a harness-owned semantic rule; local validation and retry logic remain necessary because the provider boundary is untrusted; v4 and v5 results must not be treated as the same prompt division.
 
 ## 13. Default model and pinned provider route
 
@@ -158,13 +160,21 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 **Cons:** Useful partial trajectories are excluded from leaderboard-style results; some long strategic games may fail at the cap.
 
-## 19. Placement from elimination order
+## 19. Placement from territory and elimination order
 
-**Decision:** Track the first tick at which each player becomes non-alive and calculate placement by counting players eliminated later, with the winner first.
+**Decision:** Track the first tick at which each player becomes non-alive. Rank every player still alive at termination by final land tiles, using deterministic player order for exact ties; rank eliminated players after all survivors by elimination order.
 
-**Pros:** Works even though OpenFront's `players()` method returns only living players; avoids ranking all eliminated zero-tile players incorrectly; produces a useful four-player metric.
+**Pros:** Works even though OpenFront's `players()` method returns only living players; avoids ranking all eliminated zero-tile players incorrectly; no longer labels every surviving non-winner as second place; matches the timer's territory-based winner rule.
 
-**Cons:** Simultaneous elimination requires a tie convention; placement is harness-derived rather than a native OpenFront field.
+**Cons:** Simultaneous elimination and exact territory ties require deterministic conventions; placement is harness-derived rather than a native OpenFront field.
+
+### 19a. Post-execution action lifecycle outcomes
+
+**Decision:** For every applied action, track core state and game updates from submission onward and record a structured status: `started`, `failed`, `completed`, or `destroyed`. Include the actual start tick, resolution tick, associated attack/unit ID when available, and a human-readable detail. Holds complete immediately; rejected actions fail when no observable core start or state change occurs; construction and retreats remain started while active; completed or destroyed entities update their original decision record on later ticks. Feed the latest structured outcomes back in `recentDecisions`. Schema-v1 artifacts remain readable and receive `unknown` only where their old string annotation cannot establish an execution result.
+
+**Pros:** Submission is no longer misrepresented as success; models can react to failed construction or still-active actions; the replay panel exposes the same lifecycle evidence as the artifact; long-lived effects remain connected to the decision that created them.
+
+**Cons:** OpenFront does not expose one uniform execution receipt for every intent, so lifecycle classification combines update events with observable state transitions; repeated troop actions can legitimately point to the same merged attack; an action still active when the match ends remains `started`.
 
 ## 20. Native intent replay with sparse turn storage
 
@@ -192,7 +202,7 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 ## 23. Bundle a real-model v2 sample
 
-**Decision:** Ship one gzipped `japan-v2` sample generated by the default live model. Provide a no-network verifier that replays its recorded actions and requires winner, terminal tick, and final hash to match. Continue accepting legacy `japan-v1`/`agent-v1` artifacts for replay. Keep the immutable bundled winning sample identified as `agent-v2`; new live runs use `agent-v4`, and replacing the sample requires a new real model run rather than rewriting its recorded decisions.
+**Decision:** Ship one gzipped `japan-v2` sample generated by the default live model. Provide a no-network verifier that replays its recorded actions and requires winner, terminal tick, and final hash to match. Continue accepting legacy schema-v1 and `japan-v1`/`agent-v1` artifacts for replay. Keep the immutable bundled winning sample identified as `agent-v2`; new live runs use `agent-v5`, and replacing the sample requires a new real model run rather than rewriting its recorded decisions.
 
 **Pros:** Recruiters can inspect the result without a key or waiting; deployment remains useful when generation is disabled; the verifier turns the sample into a reproducibility fixture.
 
@@ -200,9 +210,9 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 ## 24. Versioned, transparent artifacts
 
-**Decision:** Store schema-versioned JSON containing full normalized observations, candidate menus, decisions, per-attempt validation diagnostics, metrics, outcome, and replay, compressed with gzip. Diagnostic entries contain stable codes and rejected action IDs but not raw model responses. Default missing diagnostic arrays to empty when parsing older artifacts.
+**Decision:** Store schema-versioned JSON containing full normalized observations, candidate menus, decisions, per-attempt validation diagnostics, post-execution action lifecycles, metrics, outcome, and replay, compressed with gzip. Schema 2 introduces the renamed timer-aware observation and structured action outcomes. Diagnostic entries contain stable codes and rejected action IDs but not raw model responses. Normalize schema-v1 observations and missing diagnostic/lifecycle fields when parsing older artifacts.
 
-**Pros:** Data is portable, auditable, and easy to analyze; replay and agent trace cannot become detached; failures can be classified without retaining unnecessary raw output; old artifacts remain viewable; gzip reduces the bundled sample substantially.
+**Pros:** Data is portable, auditable, and easy to analyze; replay and agent trace cannot become detached; request failures and core execution outcomes are distinct; old artifacts remain viewable; gzip reduces the bundled sample substantially.
 
 **Cons:** Full observations duplicate state and can grow; rejected IDs expose a small part of invalid output; JSON is less query-efficient than a database; schema evolution needs explicit migrations.
 
@@ -262,7 +272,11 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 **Cons:** There is no automated browser screenshot test; live OpenRouter behavior is not in CI; the full upstream suite is broader and slower than the harness-focused gate.
 
-**Current acceptance evidence:** The live v2 sample (`fadf8cc4-40e0-4c81-91d3-6da5b507c636`) won in first place after 106 model decisions at tick 10,561. It used 180,599 prompt tokens and 20,095 completion tokens, cost $0.31777925, retried 15 decisions, and fell back to two holds eight times. An artifact audit found no decision where combined troop commitments exceeded `spendableTroops`, no ordinary land attack below the readiness/troop-advantage gates, and no counterattack total above the recorded incoming force. The no-network verifier reproduced winner, placement, terminal tick, and final hash `4090602815772241`; all 10 focused tests, TypeScript checking, and the production build passed. This validates the implemented boundary and this recorded trajectory, not general strategic competence from one run.
+**Current acceptance evidence:** The live v2 sample (`fadf8cc4-40e0-4c81-91d3-6da5b507c636`) won in first place after 106 model decisions at tick 10,561. It used 180,599 prompt tokens and 20,095 completion tokens, cost $0.31777925, retried 15 decisions, and fell back to two holds eight times. An artifact audit found no decision where combined troop commitments exceeded `spendableTroops`, no ordinary land attack below the readiness/troop-advantage gates, and no counterattack total above the recorded incoming force. The no-network verifier reproduced winner, placement, terminal tick, and final hash `4090602815772241`; all 36 focused tests, TypeScript checking, and the production build passed. A second no-network replay of a timer-ended trace corrected the surviving LLM from the old hard-coded second place to third and classified all nine Defense Post attempts as one completed, five destroyed, and three failed. This validates the implemented boundary and these recorded trajectories, not general strategic competence from individual runs.
+
+**Agent-v5 GLM comparison:** A fresh `z-ai/glm-5.2` run through the same pinned CoreWeave route (`d64701f9-0804-4ac9-af30-29c21c8d5d48`) won first place on the timer with 59.827% territory at its final observation. The earlier agent-v4 run (`fa907146-94dc-426b-b49b-a8ea6c641f19`) finished with 18.486% territory and was third under the corrected placement rule, although its schema-v1 artifact had incorrectly reported second. The new run was ranked first for 109 of 120 decisions, versus 78 previously. Its public strategy used rank explicitly in 116 decisions, referred correctly to timer victory in 42, and never repeated the earlier ambiguous “80% win” phrasing, which appeared in 45 agent-v4 decisions; it instead described 80% as the instant-victory threshold. At the final decision, agent v4 held while ranked third because it incorrectly expected the clock to secure victory, whereas agent v5 held while ranked first with a 26-percentage-point lead because the explicit timer rule correctly favored it. The improvement appeared before the holding endgame: at decision 80, agent v5 led with 51.0% territory while agent v4 was second with 33.8%.
+
+The new lifecycle trace recorded 232 completed and eight destroyed action slots, with no failed or unresolved actions. All four Defense Posts completed, compared with one completion, five destructions, and three failures across the earlier run's nine attempts. Richer observations increased prompt usage from 190,700 to 258,774 tokens and cost from $0.15623482 to $0.20269708; neither run used a fallback, although the new run retried one timed-out request successfully. This paired result is direct evidence that the renamed threshold and explicit rank/timer fields corrected the observed semantic error, but one stochastic model run cannot isolate every field's causal effect or establish a statistically reliable win-rate improvement. Lifecycle feedback improved the evidence available to the policy and artifact, but the new strategy notes did not explicitly cite lifecycle statuses, so this run alone does not prove that feedback caused the win.
 
 ## 32. Preserve attribution and publish the harness
 

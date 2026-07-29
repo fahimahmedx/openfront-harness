@@ -4,7 +4,7 @@ import {
   OpenRouterAgent,
   validateDecisionContent,
 } from "../src/OpenRouterAgent";
-import { LegalAction, Observation } from "../src/Types";
+import { LegalAction, Observation, TIMER_VICTORY_RULE } from "../src/Types";
 
 const candidates: LegalAction[] = [
   {
@@ -33,7 +33,15 @@ const observation: Observation = {
   tick: 103,
   elapsedSeconds: 10.2,
   timeRemainingSeconds: 1189.8,
-  winPercent: 80,
+  instantVictoryTerritoryPercent: 80,
+  currentRank: 2,
+  territoryLeader: {
+    id: "leader",
+    name: "Territory Leader",
+    territoryPercent: 35,
+  },
+  territoryGapToLeader: 10,
+  timerVictoryRule: TIMER_VICTORY_RULE,
   landTiles: 478894,
   self: {},
   opponents: [],
@@ -103,8 +111,8 @@ afterEach(() => {
 });
 
 describe("OpenRouter action output", () => {
-  it("versions the slot-based request contract as agent-v4", () => {
-    expect(OpenRouterAgent.promptVersion()).toBe("agent-v4");
+  it("versions the timer-aware request contract as agent-v5", () => {
+    expect(OpenRouterAgent.promptVersion()).toBe("agent-v5");
     expect(OpenRouterAgent.reasoningEffort()).toBe("none");
   });
 

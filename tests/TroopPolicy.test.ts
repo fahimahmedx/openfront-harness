@@ -172,6 +172,22 @@ describe("troop policy", () => {
     const prompt = promptFor(finalObservation, finalCandidates);
     expect(prompt).toContain("absolute troop growth becomes slow");
     expect(prompt).toContain("troopCapacityPercent");
+    expect(prompt).toContain(
+      "instantVictoryTerritoryPercent is the territory threshold",
+    );
+    expect(prompt).toContain("the living player with the most land tiles wins");
+    expect(prompt).not.toContain('"winPercent"');
+    expect(finalObservation).toMatchObject({
+      instantVictoryTerritoryPercent: 80,
+      currentRank: expect.any(Number),
+      territoryLeader: {
+        id: expect.any(String),
+        name: expect.any(String),
+        territoryPercent: expect.any(Number),
+      },
+      territoryGapToLeader: expect.any(Number),
+    });
+    expect(finalObservation).not.toHaveProperty("winPercent");
     expect(finalObservation.self).toMatchObject({
       troopPolicyMode: expect.stringMatching(/expansion|combat|emergency/),
       reserveFloorPercent: expect.any(Number),

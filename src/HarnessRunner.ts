@@ -16,6 +16,14 @@ import {
   Winner,
 } from "../OpenFrontIO/src/core/Schemas";
 import { replacer } from "../OpenFrontIO/src/core/Util";
+import {
+  actionOutcomes,
+  beginActionTracking,
+  hasUnresolvedActions,
+  observeActionUpdates,
+  TrackedAction,
+  updateActionTracking,
+} from "./ActionLifecycle";
 import { NodeGameMapLoader } from "./NodeGameMapLoader";
 import {
   createLegalActions,
@@ -66,6 +74,39 @@ function winnerLabel(winner: Player | Team | null): string {
   return typeof winner === "string" ? winner : winner.name();
 }
 
+export type PlacementEntry = {
+  id: string;
+  alive: boolean;
+  tiles: number;
+  eliminatedAt?: number;
+};
+
+export function calculateFinalPlacement(
+  entries: PlacementEntry[],
+  playerId: string,
+): number {
+  const player = entries.find((entry) => entry.id === playerId);
+  if (!player) return entries.length;
+  if (player.alive) {
+    return (
+      [...entries]
+        .map((entry, order) => ({ entry, order }))
+        .filter(({ entry }) => entry.alive)
+        .sort((a, b) => b.entry.tiles - a.entry.tiles || a.order - b.order)
+        .findIndex(({ entry }) => entry.id === playerId) + 1
+    );
+  }
+  return (
+    1 +
+    entries.filter(
+      (entry) =>
+        entry.id !== playerId &&
+        (entry.alive ||
+          (entry.eliminatedAt ?? -1) > (player.eliminatedAt ?? -1)),
+    ).length
+  );
+}
+
 export class HarnessRunner {
   constructor(
     private readonly store: RunStore,
@@ -107,6 +148,11 @@ export class HarnessRunner {
     let currentTurn: Turn | undefined;
     let trackEliminations = false;
     const eliminatedAt = new Map<string, number>();
+    const openActionLifecycles: Array<{
+      trackers: TrackedAction[];
+      record: DecisionRecord;
+    }> = [];
+    const lifecycleGroups = new Set<TrackedAction[]>();
     const runner = await createGameRunner(
       gameStart,
       SCENARIO.clientID,
@@ -116,6 +162,9 @@ export class HarnessRunner {
           fatalError = update.errMsg;
           if (update.stack) console.error(update.stack);
           return;
+        }
+        for (const trackers of lifecycleGroups) {
+          observeActionUpdates(trackers, update);
         }
         const hashes = update.updates[GameUpdateType.Hash] as HashUpdate[];
         if (hashes.length > 0) {
@@ -231,10 +280,42 @@ export class HarnessRunner {
         const appliedIntents = resolved.actions
           .map((candidate) => candidate.intent)
           .filter((intent): intent is Intent => intent !== null);
+        const lifecycle = beginActionTracking(game, player, resolved.actions);
+        lifecycleGroups.add(lifecycle);
+        executeTurn(appliedIntents);
+        updateActionTracking(lifecycle, game, game.ticks());
+        for (const tracked of openActionLifecycles) {
+          updateActionTracking(tracked.trackers, game, game.ticks());
+        }
+        for (
+          let tick = 1;
+          tick < SCENARIO.decisionIntervalTicks && game.getWinner() === null;
+          tick++
+        ) {
+          executeTurn();
+          updateActionTracking(lifecycle, game, game.ticks());
+          for (const tracked of openActionLifecycles) {
+            updateActionTracking(tracked.trackers, game, game.ticks());
+          }
+        }
 
+        for (let index = openActionLifecycles.length - 1; index >= 0; index--) {
+          const tracked = openActionLifecycles[index];
+          const updated = actionOutcomes(tracked.trackers, game, game.ticks());
+          tracked.record.actionOutcomes = updated;
+          tracked.record.outcomes = updated.map(
+            (item) => `${item.status}: ${item.detail}`,
+          ) as [string, string];
+          if (!hasUnresolvedActions(tracked.trackers)) {
+            lifecycleGroups.delete(tracked.trackers);
+            openActionLifecycles.splice(index, 1);
+          }
+        }
+
+        const trackedOutcomes = actionOutcomes(lifecycle, game, game.ticks());
         const record: DecisionRecord = {
           index: decisionIndex,
-          tick: game.ticks(),
+          tick: observation.tick,
           observation,
           candidates,
           strategy,
@@ -242,11 +323,13 @@ export class HarnessRunner {
           appliedActionIds: resolved.actions.map(
             (candidate) => candidate.id,
           ) as [string, string],
-          outcomes: resolved.actions.map((candidate) =>
-            candidate.intent === null
-              ? "held"
-              : "queued as a legal core intent",
+          outcomes: trackedOutcomes.map(
+            (item) => `${item.status}: ${item.detail}`,
           ) as [string, string],
+          actionOutcomes: trackedOutcomes as [
+            (typeof trackedOutcomes)[number],
+            (typeof trackedOutcomes)[number],
+          ],
           attempts: agentResult.attempts,
           attemptFailures: agentResult.attemptFailures,
           attemptTimings: agentResult.attemptTimings,
@@ -259,15 +342,11 @@ export class HarnessRunner {
           provider: agentResult.provider,
         };
         decisions.push(record);
-        executeTurn(appliedIntents);
-        for (
-          let tick = 1;
-          tick < SCENARIO.decisionIntervalTicks && game.getWinner() === null;
-          tick++
-        ) {
-          executeTurn();
+        if (hasUnresolvedActions(lifecycle)) {
+          openActionLifecycles.push({ trackers: lifecycle, record });
+        } else {
+          lifecycleGroups.delete(lifecycle);
         }
-
         progress = {
           ...progress,
           tick: game.ticks(),
@@ -293,6 +372,9 @@ export class HarnessRunner {
           game.getWinner() === null
         ) {
           executeTurn();
+          for (const tracked of openActionLifecycles) {
+            updateActionTracking(tracked.trackers, game, game.ticks());
+          }
         }
       }
       // The OpenFront winner check runs every ten ticks. If the final fixed
@@ -305,6 +387,9 @@ export class HarnessRunner {
       ) {
         for (let tick = 0; tick < 20 && game.getWinner() === null; tick++) {
           executeTurn();
+          for (const tracked of openActionLifecycles) {
+            updateActionTracking(tracked.trackers, game, game.ticks());
+          }
         }
       }
       if (game.getWinner() !== null)
@@ -315,27 +400,29 @@ export class HarnessRunner {
       fatalError = terminationReason;
     }
 
+    for (const tracked of openActionLifecycles) {
+      const updated = actionOutcomes(tracked.trackers, game, game.ticks());
+      tracked.record.actionOutcomes = updated;
+      tracked.record.outcomes = updated.map(
+        (item) => `${item.status}: ${item.detail}`,
+      ) as [string, string];
+    }
+
     const completedAt = new Date();
     const winner = game.getWinner();
     const human = game.playerByClientID(SCENARIO.clientID);
-    const humanEliminatedAt = human ? eliminatedAt.get(human.id()) : undefined;
     const finalPlacement =
       human === null
-        ? 4
-        : winner === human
-          ? 1
-          : humanEliminatedAt === undefined
-            ? 2
-            : 1 +
-              game
-                .allPlayers()
-                .filter(
-                  (candidate) =>
-                    candidate !== human &&
-                    (candidate.isAlive() ||
-                      (eliminatedAt.get(candidate.id()) ?? -1) >
-                        humanEliminatedAt),
-                ).length;
+        ? game.allPlayers().length
+        : calculateFinalPlacement(
+            game.allPlayers().map((candidate) => ({
+              id: candidate.id(),
+              alive: candidate.isAlive(),
+              tiles: candidate.numTilesOwned(),
+              eliminatedAt: eliminatedAt.get(candidate.id()),
+            })),
+            human.id(),
+          );
     const status = winner !== null && !fatalError ? "completed" : "failed";
     const usage = decisions.reduce(
       (total, record) => ({
@@ -374,7 +461,7 @@ export class HarnessRunner {
       JSON.parse(
         JSON.stringify(
           {
-            schemaVersion: 1,
+            schemaVersion: 2,
             runId,
             status,
             scenario: publicScenario(),

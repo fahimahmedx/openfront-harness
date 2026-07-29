@@ -14,6 +14,7 @@ import {
   LegalAction,
   Observation,
   ObservationSchema,
+  TIMER_VICTORY_RULE,
 } from "./Types";
 
 const TROOP_BUDGET_FRACTIONS = [25, 50, 75, 100] as const;
@@ -105,6 +106,31 @@ export function createObservation(
 ): Observation {
   const elapsedSeconds = game.elapsedGameSeconds();
   const policy = troopPolicyState(game, player);
+  const standings = [...game.players()]
+    .map((candidate, order) => ({ candidate, order }))
+    .sort(
+      (a, b) =>
+        b.candidate.numTilesOwned() - a.candidate.numTilesOwned() ||
+        a.order - b.order,
+    );
+  const currentRank =
+    standings.findIndex(({ candidate }) => candidate === player) + 1;
+  const territoryLeader = standings[0]?.candidate ?? player;
+  const leaderTerritoryPercent =
+    game.numLandTiles() === 0
+      ? 0
+      : Number(
+          (
+            (territoryLeader.numTilesOwned() / game.numLandTiles()) *
+            100
+          ).toFixed(3),
+        );
+  const selfTerritoryPercent =
+    game.numLandTiles() === 0
+      ? 0
+      : Number(
+          ((player.numTilesOwned() / game.numLandTiles()) * 100).toFixed(3),
+        );
   const opponents = game
     .players()
     .filter((candidate) => candidate !== player)
@@ -129,7 +155,17 @@ export function createObservation(
       0,
       SCENARIO.maxSimulatedMinutes * 60 - elapsedSeconds,
     ),
-    winPercent: game.config().percentageTilesOwnedToWin(),
+    instantVictoryTerritoryPercent: game.config().percentageTilesOwnedToWin(),
+    currentRank: Math.max(1, currentRank),
+    territoryLeader: {
+      id: territoryLeader.id(),
+      name: territoryLeader.name(),
+      territoryPercent: leaderTerritoryPercent,
+    },
+    territoryGapToLeader: Number(
+      Math.max(0, leaderTerritoryPercent - selfTerritoryPercent).toFixed(3),
+    ),
+    timerVictoryRule: TIMER_VICTORY_RULE,
     landTiles: game.numLandTiles(),
     self: {
       ...playerSummary(game, player),
@@ -157,6 +193,7 @@ export function createObservation(
       strategy: record.strategy,
       actions: record.appliedActionIds,
       outcomes: record.outcomes,
+      actionOutcomes: record.actionOutcomes,
     })),
   });
 }

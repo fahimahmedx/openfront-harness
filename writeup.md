@@ -52,7 +52,9 @@ The model sees a normalized observation plus that menu and must fill two named s
 }
 ```
 
-OpenRouter enforces a strict JSON Schema. In the current `agent-v4` contract, that schema is generated from the current menu, with separate legal-ID enums for `action1` and `action2`. Troop candidates advertise `maxUses: 2` and may fill both slots because each exact commitment was calculated from one half of the shared safe budget. Other actions have `maxUses: 1`; repeating one deterministically turns the second use into a hold.
+OpenRouter enforces a strict JSON Schema. Agent v4 introduced the current slot shape: the schema is generated from the current menu, with separate legal-ID enums for `action1` and `action2`. Troop candidates advertise `maxUses: 2` and may fill both slots because each exact commitment was calculated from one half of the shared safe budget. Other actions have `maxUses: 1`; repeating one deterministically turns the second use into a hold.
+
+The current `agent-v5` contract also makes the end condition explicit. The old `winPercent` name was dangerously easy to read as a probability; it was actually the territory threshold for immediate victory. The observation now calls it `instantVictoryTerritoryPercent`, reports current rank, the territory leader, and the percentage-point gap to that leader, and states that the living player with the most land wins when the timer expires.
 
 A malformed or invented action is retried once. The retry includes the rejected JSON and a specific validation error, instead of blindly sending the same request again. If it also fails, both slots become holds. Every failed attempt is recorded with a stable error code and any rejected IDs, while the raw rejected response is not persisted. Provider refusals and token-limit truncation have distinct diagnostics. Five consecutive complete failures stop the run.
 
@@ -80,12 +82,13 @@ Each artifact contains:
 - the exact scenario, source commit, model, provider, prompt version, and seeds;
 - every normalized observation and legal candidate menu;
 - selected and applied action IDs;
+- structured post-execution status for both actions—started, failed, completed, or destroyed—with lifecycle ticks and an entity ID when available;
 - for `agent-v3` and newer runs, per-attempt validation codes and rejected IDs; older artifacts default this list to empty;
 - fallback status, total latency, per-attempt client-observed TTFT, generation time, time per output token (TPOT), token usage, and reported cost;
 - winner, placement, terminal tick, simulated time, and final state hash;
 - a native OpenFront replay record.
 
-During playback, a trace panel follows the replay tick. It shows the latest public strategy note, both actions, state summary, latency, tokens, and cost next to the real renderer.
+During playback, a trace panel follows the replay tick. It shows the latest public strategy note, both actions and their actual lifecycle status, state summary, latency, tokens, and cost next to the real renderer.
 
 Fresh runs stream structured model output to measure each attempt from the harness. The artifact records total attempt time, time to first received token, time from that token to stream completion, and TPOT as generation time divided by one fewer than the reported completion-token count. Provider queue time remains null because OpenRouter does not expose it separately; TTFT necessarily includes network transit, routing, queueing, and prompt processing. Legacy artifacts default the attempt-timing list to empty.
 
@@ -120,7 +123,7 @@ The run was not cosmetically cleaned up. Fifteen decisions needed the allowed re
 
 I validated v4 with a fresh live run rather than relying only on unit tests. The model reused a troop action in 75 of 84 decisions—18 expansions, 55 land attacks or counters, and two boats. All 75 stayed within the shared spendable budget, none caused a duplicate validation failure or action fallback, and the LLM won at tick 8,321. One provider request timed out and succeeded on retry; that remained a genuine transport failure rather than an action-contract failure.
 
-I then replayed the artifact without network access. The engine reproduced the LLM victory at tick 10,561 with final state hash `4090602815772241`. The suite passed all 25 tests, TypeScript checking passed, and the production client built successfully. Those checks establish that the v2 trajectory remains reproducible and the v4 output boundary is enforced; they do not turn one victory into a broad benchmark claim.
+I then replayed the artifact without network access. The engine reproduced the LLM victory at tick 10,561 with final state hash `4090602815772241`. The suite passed all 36 tests, TypeScript checking passed, and the production client built successfully. A second offline replay of a timer-ended trace corrected the surviving LLM from the old hard-coded second place to third; its nine Defense Post attempts resolved as one completed, five destroyed, and three failed. Those checks establish that the v2 trajectories remain reproducible and the v5 observation, placement, and lifecycle boundary is enforced; they do not turn individual runs into a broad benchmark claim.
 
 ## Bugs that only appeared at the boundaries
 
@@ -138,7 +141,9 @@ Strictness created an early failure instead of silently dropping a parameter or 
 
 The first completed artifact said the eliminated LLM finished first. The reason was subtle: OpenFront's `players()` method returns living players only. Sorting that list and looking for the dead human produced index `-1`, which my defensive `Math.max` turned into first place.
 
-The fix was to record each player's elimination tick from `allPlayers()` and derive placement from elimination order. The corrected v1 artifact reported the eliminated LLM in fourth place; the replacement v2 sample reports first because the core actually declared the LLM the winner.
+The first fix was to record each player's elimination tick from `allPlayers()` and derive eliminated placements from elimination order. The corrected v1 artifact reported the eliminated LLM in fourth place; the replacement v2 sample reports first because the core actually declared the LLM the winner.
+
+A later timer-ended run exposed the other half of the bug: every living non-winner was hard-coded to second place, even when two surviving players owned more territory. Terminal placement now ranks all survivors by final land tiles before applying elimination order to dead players.
 
 ### Two legal actions could spend the same troops twice
 
@@ -150,7 +155,7 @@ This was an interface defect, not just weak play. In v2, exact troop amounts com
 
 The action menu is derived from one state snapshot, but OpenFront applies intents inside a changing simulation. During verification, a Defense Post and a Factory intent were legal candidates when proposed and were later rejected by the core as state changed.
 
-The harness keeps the attempted native intents in the artifact and lets the game remain authoritative. A future artifact schema should capture explicit post-execution outcomes instead of today's more limited “queued as a legal core intent” annotation.
+Schema 2 now follows each applied action after submission. It records whether the core actually started it, rejected it, completed it, or destroyed the entity before completion, along with start/resolution ticks and an attack or unit ID where one exists. Long-running attacks and construction update the original decision record on later ticks, and the next observations include those results. Legacy schema-v1 artifacts remain readable but use `unknown` where their old “queued as a legal core intent” string cannot prove execution.
 
 ### Production HTML was not actually static
 
@@ -177,9 +182,8 @@ The harness is ready to demonstrate an inspectable agent run, but a credible lea
 3. Accept signed action traces and replay every submission server-side.
 4. Pin a content-addressed engine/container for each season.
 5. Split model/provider configurations into explicit divisions.
-6. Record post-execution action results, not only accepted queue intents.
-7. Add browser-level replay screenshots and visual regression tests.
-8. Move jobs and artifacts to shared infrastructure before horizontal scaling.
+6. Add browser-level replay screenshots and visual regression tests.
+7. Move jobs and artifacts to shared infrastructure before horizontal scaling.
 
 I would not start by adding more models. The hard part is making one result interpretable and reproducible. Once that contract is solid, adding competitors is easy.
 

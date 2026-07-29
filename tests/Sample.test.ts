@@ -9,7 +9,8 @@ describe("bundled sample", () => {
     const body = gunzipSync(
       readFileSync(path.resolve("resources/harness/sample-run.json.gz")),
     ).toString();
-    const sample = RunArtifactSchema.parse(JSON.parse(body));
+    const rawSample = JSON.parse(body);
+    const sample = RunArtifactSchema.parse(rawSample);
 
     expect(sample.status).toBe("sample");
     expect(sample.scenario.id).toBe("japan-v2");
@@ -19,6 +20,15 @@ describe("bundled sample", () => {
     expect(sample.outcome.finalPlacement).toBeGreaterThanOrEqual(1);
     expect(sample.outcome.finalPlacement).toBeLessThanOrEqual(4);
     expect(sample.usage.costUsd).toBeLessThanOrEqual(1);
+    expect(sample.decisions[0].observation).toHaveProperty(
+      "instantVictoryTerritoryPercent",
+      80,
+    );
+    expect(sample.decisions[0].observation).not.toHaveProperty("winPercent");
+    expect(sample.decisions[0].actionOutcomes).toHaveLength(2);
+    expect(sample.decisions[0].actionOutcomes[0].status).toMatch(
+      /completed|unknown/,
+    );
 
     const legacy = RunArtifactSchema.parse({
       ...sample,
@@ -29,9 +39,10 @@ describe("bundled sample", () => {
 
     const current = RunArtifactSchema.parse({
       ...sample,
-      model: { ...sample.model, promptVersion: "agent-v4" },
+      schemaVersion: 2,
+      model: { ...sample.model, promptVersion: "agent-v5" },
     });
-    expect(current.model.promptVersion).toBe("agent-v4");
+    expect(current.model.promptVersion).toBe("agent-v5");
     expect(current.decisions[0].attemptFailures).toEqual([]);
     expect(current.decisions[0].attemptTimings).toEqual([]);
   });

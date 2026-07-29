@@ -10,11 +10,12 @@ import {
   isRepeatableLegalAction,
   LegalAction,
   Observation,
+  TIMER_VICTORY_RULE,
 } from "./Types";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
-const PROMPT_VERSION = "agent-v4" as const;
+const PROMPT_VERSION = "agent-v5" as const;
 const MODEL_SEED = 3209 as const;
 const REASONING_EFFORT = "none" as const;
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -230,6 +231,8 @@ export function promptFor(observation: Observation, candidates: LegalAction[]) {
     "Troop discipline is essential: absolute troop growth becomes slow at low troop counts, weak reserves invite defeat, and undersized attacks fail.",
     "Read self.troopCapacityPercent, troopGrowthPerSecond, troopPolicyMode, reserveFloorTroops, and opponent troopsRelativeToSelf before spending troops.",
     "Troop actions use a shared two-slot safe budget and already preserve the displayed reserve floor. Hold while rebuilding; attack players only with a real troop advantage.",
+    `${TIMER_VICTORY_RULE} instantVictoryTerritoryPercent is the territory threshold for an immediate victory, not a probability. Use currentRank, territoryLeader, and territoryGapToLeader to judge the timer outcome.`,
+    "Recent actionOutcomes report whether submitted actions started, failed, completed, or were destroyed. Do not assume a submitted action took effect.",
     "strategy is a public, concise tactical note (160 characters maximum), not private reasoning.",
     JSON.stringify({ observation, legal_actions: candidateView }),
   ].join("\n");

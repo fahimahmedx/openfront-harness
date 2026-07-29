@@ -13,6 +13,14 @@ type PublicDecision = {
   strategy: string;
   appliedActionIds: string[];
   outcomes: string[];
+  actionOutcomes?: Array<{
+    actionId: string;
+    status: "started" | "failed" | "completed" | "destroyed" | "unknown";
+    startedAtTick: number | null;
+    resolvedAtTick: number | null;
+    entityId: string | number | null;
+    detail: string;
+  }>;
   candidates: ReplayActionCandidate[];
   latencyMs: number;
   promptTokens: number;
@@ -686,13 +694,14 @@ class HarnessReplayPanel extends HTMLElement {
     actions.className = "actions";
     const actionsLabel = document.createElement("span");
     actionsLabel.className = "section-label";
-    actionsLabel.textContent = "Executed actions";
+    actionsLabel.textContent = "Action results";
     actions.append(actionsLabel);
     decision.appliedActionIds.forEach((id, index) => {
+      const lifecycle = decision.actionOutcomes?.[index];
       const presentation = presentReplayAction(
         id,
         decision.candidates ?? [],
-        decision.outcomes[index],
+        lifecycle?.detail ?? decision.outcomes[index],
       );
       const row = document.createElement("div");
       row.className = "action";
@@ -714,7 +723,9 @@ class HarnessReplayPanel extends HTMLElement {
       }
       const outcome = document.createElement("small");
       outcome.className = "action-outcome";
-      outcome.textContent = presentation.outcome;
+      outcome.textContent = lifecycle
+        ? `${lifecycle.status}: ${presentation.outcome}`
+        : presentation.outcome;
       actionCopy.append(outcome);
       row.append(actionIndex, actionCopy);
       actions.append(row);

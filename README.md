@@ -75,13 +75,13 @@ Troop-spending actions share one two-slot budget instead of independently spendi
 
 ## Artifact shape
 
-Each `.json.gz` artifact has schema version 1 and contains:
+New `.json.gz` artifacts use schema version 2; schema-version-1 artifacts remain readable. Each artifact contains:
 
 - scenario, source commit, model, provider, prompt version, and model seed;
 - start/end timestamps and exact token/cost usage;
 - winner, placement, terminal tick, simulated time, and final hash;
 - every normalized observation and legal candidate menu;
-- selected and applied action IDs, fallback state, and request metrics;
+- selected and applied action IDs, post-execution lifecycle results, fallback state, and request metrics;
 - an OpenFront `GameRecord` containing the initial configuration and sparse turns.
 
 Run files are written atomically. A small pending JSON checkpoint is updated after each decision so interrupted work is visible rather than silently disappearing.

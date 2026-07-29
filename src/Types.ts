@@ -64,40 +64,177 @@ export const AgentAttemptTimingSchema = z.object({
 });
 export type AgentAttemptTiming = z.infer<typeof AgentAttemptTimingSchema>;
 
-export const ObservationSchema = z.object({
-  scenarioId: z.string(),
-  decision: z.number().int().nonnegative(),
-  tick: z.number().int().nonnegative(),
-  elapsedSeconds: z.number().nonnegative(),
-  timeRemainingSeconds: z.number().nonnegative(),
-  winPercent: z.number(),
-  landTiles: z.number().int().nonnegative(),
-  self: z.record(z.string(), z.unknown()),
-  opponents: z.array(z.record(z.string(), z.unknown())),
-  recentDecisions: z.array(z.record(z.string(), z.unknown())),
+export const TIMER_VICTORY_RULE =
+  "When the timer expires, the living player with the most land tiles wins.";
+
+const TerritoryLeaderSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  territoryPercent: z.number().nonnegative(),
 });
+
+function legacyObservationFields(value: unknown): unknown {
+  if (typeof value !== "object" || value === null) return value;
+  const observation = value as Record<string, unknown>;
+  const self =
+    typeof observation.self === "object" && observation.self !== null
+      ? (observation.self as Record<string, unknown>)
+      : {};
+  const opponents = Array.isArray(observation.opponents)
+    ? observation.opponents.filter(
+        (candidate): candidate is Record<string, unknown> =>
+          typeof candidate === "object" && candidate !== null,
+      )
+    : [];
+  const standings = [self, ...opponents]
+    .map((candidate, order) => ({
+      id:
+        typeof candidate.id === "string"
+          ? candidate.id
+          : order === 0
+            ? "self"
+            : `opponent-${order}`,
+      name:
+        typeof candidate.name === "string"
+          ? candidate.name
+          : order === 0
+            ? "Self"
+            : `Opponent ${order}`,
+      territoryPercent:
+        typeof candidate.territoryPercent === "number"
+          ? candidate.territoryPercent
+          : 0,
+      alive: candidate.alive !== false,
+      order,
+    }))
+    .filter((candidate) => candidate.alive)
+    .sort(
+      (a, b) => b.territoryPercent - a.territoryPercent || a.order - b.order,
+    );
+  const leader = standings[0] ?? {
+    id: "self",
+    name: "Self",
+    territoryPercent: 0,
+  };
+  const selfRank = Math.max(
+    1,
+    standings.findIndex((candidate) => candidate.order === 0) + 1,
+  );
+  const selfTerritory =
+    typeof self.territoryPercent === "number" ? self.territoryPercent : 0;
+
+  return {
+    ...observation,
+    instantVictoryTerritoryPercent:
+      observation.instantVictoryTerritoryPercent ??
+      observation.winPercent ??
+      80,
+    currentRank: observation.currentRank ?? selfRank,
+    territoryLeader: observation.territoryLeader ?? {
+      id: leader.id,
+      name: leader.name,
+      territoryPercent: leader.territoryPercent,
+    },
+    territoryGapToLeader:
+      observation.territoryGapToLeader ??
+      Math.max(0, leader.territoryPercent - selfTerritory),
+    timerVictoryRule: observation.timerVictoryRule ?? TIMER_VICTORY_RULE,
+  };
+}
+
+export const ObservationSchema = z.preprocess(
+  legacyObservationFields,
+  z.object({
+    scenarioId: z.string(),
+    decision: z.number().int().nonnegative(),
+    tick: z.number().int().nonnegative(),
+    elapsedSeconds: z.number().nonnegative(),
+    timeRemainingSeconds: z.number().nonnegative(),
+    instantVictoryTerritoryPercent: z.number(),
+    currentRank: z.number().int().positive(),
+    territoryLeader: TerritoryLeaderSchema,
+    territoryGapToLeader: z.number().nonnegative(),
+    timerVictoryRule: z.literal(TIMER_VICTORY_RULE),
+    landTiles: z.number().int().nonnegative(),
+    self: z.record(z.string(), z.unknown()),
+    opponents: z.array(z.record(z.string(), z.unknown())),
+    recentDecisions: z.array(z.record(z.string(), z.unknown())),
+  }),
+);
 export type Observation = z.infer<typeof ObservationSchema>;
 
-export const DecisionRecordSchema = z.object({
-  index: z.number().int().nonnegative(),
-  tick: z.number().int().nonnegative(),
-  observation: ObservationSchema,
-  candidates: z.array(LegalActionSchema),
-  strategy: z.string().max(160),
-  selectedActionIds: z.array(z.string()).length(2),
-  appliedActionIds: z.array(z.string()).length(2),
-  outcomes: z.array(z.string()).length(2),
-  attempts: z.number().int().min(1).max(2),
-  attemptFailures: z.array(AgentAttemptFailureSchema).default([]),
-  attemptTimings: z.array(AgentAttemptTimingSchema).max(2).default([]),
-  fallback: z.boolean(),
-  latencyMs: z.number().nonnegative(),
-  promptTokens: z.number().int().nonnegative(),
-  completionTokens: z.number().int().nonnegative(),
-  costUsd: z.number().nonnegative(),
-  model: z.string(),
-  provider: z.string().nullable(),
+export const ActionOutcomeStatusSchema = z.enum([
+  "started",
+  "failed",
+  "completed",
+  "destroyed",
+  "unknown",
+]);
+export type ActionOutcomeStatus = z.infer<typeof ActionOutcomeStatusSchema>;
+
+export const ActionOutcomeSchema = z.object({
+  actionId: z.string().min(1).max(160),
+  status: ActionOutcomeStatusSchema,
+  startedAtTick: z.number().int().nonnegative().nullable(),
+  resolvedAtTick: z.number().int().nonnegative().nullable(),
+  entityId: z.union([z.string(), z.number().int()]).nullable(),
+  detail: z.string().min(1).max(500),
 });
+export type ActionOutcome = z.infer<typeof ActionOutcomeSchema>;
+
+function legacyActionOutcomes(value: unknown): unknown {
+  if (typeof value !== "object" || value === null) return value;
+  const decision = value as Record<string, unknown>;
+  if (Array.isArray(decision.actionOutcomes)) return value;
+  const actionIds = Array.isArray(decision.appliedActionIds)
+    ? decision.appliedActionIds
+    : [];
+  const outcomes = Array.isArray(decision.outcomes) ? decision.outcomes : [];
+  const tick = typeof decision.tick === "number" ? decision.tick : 0;
+  return {
+    ...decision,
+    actionOutcomes: actionIds.map((actionId, index) => {
+      const detail =
+        typeof outcomes[index] === "string"
+          ? outcomes[index]
+          : "Legacy artifact did not record an execution result";
+      const held = detail === "held" || String(actionId).startsWith("hold:");
+      return {
+        actionId: String(actionId),
+        status: held ? "completed" : "unknown",
+        startedAtTick: held ? tick : null,
+        resolvedAtTick: held ? tick : null,
+        entityId: null,
+        detail,
+      };
+    }),
+  };
+}
+
+export const DecisionRecordSchema = z.preprocess(
+  legacyActionOutcomes,
+  z.object({
+    index: z.number().int().nonnegative(),
+    tick: z.number().int().nonnegative(),
+    observation: ObservationSchema,
+    candidates: z.array(LegalActionSchema),
+    strategy: z.string().max(160),
+    selectedActionIds: z.array(z.string()).length(2),
+    appliedActionIds: z.array(z.string()).length(2),
+    outcomes: z.array(z.string()).length(2),
+    actionOutcomes: z.array(ActionOutcomeSchema).length(2),
+    attempts: z.number().int().min(1).max(2),
+    attemptFailures: z.array(AgentAttemptFailureSchema).default([]),
+    attemptTimings: z.array(AgentAttemptTimingSchema).max(2).default([]),
+    fallback: z.boolean(),
+    latencyMs: z.number().nonnegative(),
+    promptTokens: z.number().int().nonnegative(),
+    completionTokens: z.number().int().nonnegative(),
+    costUsd: z.number().nonnegative(),
+    model: z.string(),
+    provider: z.string().nullable(),
+  }),
+);
 export type DecisionRecord = z.infer<typeof DecisionRecordSchema>;
 
 export const RunStatusSchema = z.enum([
@@ -110,7 +247,7 @@ export const RunStatusSchema = z.enum([
 export type RunStatus = z.infer<typeof RunStatusSchema>;
 
 export const RunArtifactSchema = z.object({
-  schemaVersion: z.literal(1),
+  schemaVersion: z.union([z.literal(1), z.literal(2)]),
   runId: z.uuid(),
   status: RunStatusSchema,
   scenario: z.record(z.string(), z.unknown()),
@@ -118,7 +255,13 @@ export const RunArtifactSchema = z.object({
     requested: z.string(),
     resolved: z.string(),
     provider: z.string().nullable(),
-    promptVersion: z.enum(["agent-v1", "agent-v2", "agent-v3", "agent-v4"]),
+    promptVersion: z.enum([
+      "agent-v1",
+      "agent-v2",
+      "agent-v3",
+      "agent-v4",
+      "agent-v5",
+    ]),
     seed: z.literal(3209),
     reasoningEffort: z
       .enum(["none", "minimal", "low", "medium", "high", "xhigh", "max"])
