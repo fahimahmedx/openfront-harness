@@ -16,13 +16,11 @@ type RunSummary = {
   replayUrl: string;
 };
 
-const sampleLinks = Array.from(
-  document.querySelectorAll<HTMLAnchorElement>("[data-sample-link]"),
-);
+const featuredReplayUrl =
+  "/replay/9f73a404-ae98-430f-be5b-ea22fb1755a6";
 const sourceLink = document.querySelector<HTMLAnchorElement>("#source-link")!;
 const refreshButton =
   document.querySelector<HTMLButtonElement>("#refresh-button")!;
-const featuredRun = document.querySelector<HTMLElement>("#featured-run")!;
 const recentRuns = document.querySelector<HTMLElement>("#recent-runs")!;
 const archiveRuns = document.querySelector<HTMLElement>("#archive-runs")!;
 const runArchive = document.querySelector<HTMLDetailsElement>("#run-archive")!;
@@ -82,12 +80,6 @@ function outcomeLabel(run: RunSummary): string {
     : `${ordinal(run.finalPlacement)} place · ${run.winner} won`;
 }
 
-function updateSample(sample: RunSummary): void {
-  sampleLinks.forEach((link) => {
-    link.href = sample.replayUrl;
-  });
-}
-
 function updateHeroRun(run: RunSummary): void {
   const outcome = run.llmWon
     ? "LLM victory"
@@ -99,35 +91,13 @@ function updateHeroRun(run: RunSummary): void {
   demoResult.textContent = outcome;
 }
 
-function featuredCard(run: RunSummary): string {
-  return `<article>
-    <div class="featured-copy">
-      <p class="eyebrow">VERIFIED SAMPLE · ${escapeHtml(scenarioLabel(run.scenarioId))}</p>
-      <h3>${escapeHtml(outcomeLabel(run))}</h3>
-      <p>
-        Replay all ${escapeHtml(run.decisionCount)} model decisions beside the
-        native simulation, then download the complete portable artifact.
-      </p>
-      <div class="featured-actions">
-        <a class="button button-primary" href="${escapeHtml(run.replayUrl)}">Open interactive replay <span aria-hidden="true">↗</span></a>
-        <a class="inline-link" href="/api/runs/${escapeHtml(run.runId)}/artifact">Download artifact</a>
-      </div>
-    </div>
-    <dl class="featured-stats">
-      <div><dt>Model</dt><dd>${escapeHtml(run.model)}</dd></div>
-      <div><dt>Decisions</dt><dd>${escapeHtml(run.decisionCount)}</dd></div>
-      <div><dt>Simulated time</dt><dd>${(run.ticks / 10 / 60).toFixed(1)} min</dd></div>
-      <div><dt>Inference</dt><dd>$${run.costUsd.toFixed(3)}</dd></div>
-    </dl>
-  </article>`;
-}
-
-function runRow(run: RunSummary): string {
+function runRow(run: RunSummary, featured = false): string {
   const status =
     run.status === "sample"
       ? "Verified sample"
       : run.status.charAt(0).toUpperCase() + run.status.slice(1);
-  return `<article class="run-row">
+  const replayUrl = featured ? featuredReplayUrl : run.replayUrl;
+  return `<article class="run-row${featured ? " run-row-featured" : ""}">
     <div class="run-identity">
       <span class="status ${escapeHtml(run.status)}">${escapeHtml(status)} · ${escapeHtml(scenarioLabel(run.scenarioId))}</span>
       <h4>${escapeHtml(outcomeLabel(run))}</h4>
@@ -140,16 +110,14 @@ function runRow(run: RunSummary): string {
     </div>
     <time datetime="${escapeHtml(run.startedAt)}">${new Date(run.startedAt).toLocaleDateString()}</time>
     <div class="run-actions">
-      <a href="${escapeHtml(run.replayUrl)}">Watch replay <span aria-hidden="true">↗</span></a>
-      <a href="/api/runs/${escapeHtml(run.runId)}/artifact">Artifact</a>
+      <a${featured ? ' class="run-primary-action"' : ""} href="${escapeHtml(replayUrl)}">${featured ? "Open replay" : "Watch replay"} <span aria-hidden="true">↗</span></a>
+      <a href="/api/runs/${escapeHtml(run.runId)}/artifact">${featured ? "Download artifact" : "Artifact"}</a>
     </div>
   </article>`;
 }
 
 function renderRuns(): void {
   if (!cachedRuns.length) {
-    featuredRun.innerHTML =
-      '<div class="loading">No verified sample is available.</div>';
     recentRuns.innerHTML =
       '<div class="loading">No completed trials are available.</div>';
     runArchive.hidden = true;
@@ -159,33 +127,22 @@ function renderRuns(): void {
   const scenarioRuns = currentScenarioId
     ? cachedRuns.filter((run) => run.scenarioId === currentScenarioId)
     : cachedRuns;
-  const sample =
-    scenarioRuns.find((run) => run.status === "sample") ??
-    cachedRuns.find((run) => run.status === "sample");
+  const sample = scenarioRuns.find((run) => run.status === "sample");
   const heroRun = cachedRuns.find((run) => run.runId === heroRunId);
 
   if (heroRun) updateHeroRun(heroRun);
 
-  if (sample) {
-    updateSample(sample);
-    featuredRun.innerHTML = featuredCard(sample);
-  } else {
-    featuredRun.innerHTML =
-      '<div class="loading">The verified sample is temporarily unavailable.</div>';
-  }
-
-  const recent = scenarioRuns
-    .filter((run) => run.runId !== sample?.runId)
-    .slice(0, 3);
+  const recent = [
+    ...(sample ? [sample] : []),
+    ...scenarioRuns.filter((run) => run.runId !== sample?.runId),
+  ].slice(0, 4);
   recentRuns.innerHTML = recent.length
-    ? recent.map(runRow).join("")
-    : '<div class="loading">No additional trials yet.</div>';
+    ? recent.map((run) => runRow(run, run.runId === sample?.runId)).join("")
+    : '<div class="loading">No completed trials yet.</div>';
 
   const recentIds = new Set(recent.map((run) => run.runId));
-  const archived = cachedRuns.filter(
-    (run) => run.runId !== sample?.runId && !recentIds.has(run.runId),
-  );
-  archiveRuns.innerHTML = archived.map(runRow).join("");
+  const archived = cachedRuns.filter((run) => !recentIds.has(run.runId));
+  archiveRuns.innerHTML = archived.map((run) => runRow(run)).join("");
   runArchive.hidden = archived.length === 0;
 }
 
@@ -231,8 +188,6 @@ void loadScenario().catch((error) => {
 
 void loadRuns().catch((error) => {
   console.error(error);
-  featuredRun.innerHTML =
-    '<div class="loading error">The verified replay is temporarily unavailable.</div>';
   recentRuns.innerHTML =
     '<div class="loading error">Recorded runs are temporarily unavailable.</div>';
 });

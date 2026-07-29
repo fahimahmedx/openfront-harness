@@ -184,8 +184,7 @@ h1 {
   line-height: 1.55;
 }
 
-.hero-actions,
-.featured-actions {
+.hero-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -372,8 +371,7 @@ h1 {
 .proof span,
 .run-stats,
 .status,
-.run-row time,
-.featured-stats dt {
+.run-row time {
   color: var(--faint);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 8px;
@@ -576,100 +574,11 @@ h1 {
   opacity: 0.45;
 }
 
-.featured-run {
-  border: 1px solid #3a5147;
-  background: var(--panel-raised);
-}
-
-.featured-run > article {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
-}
-
-.featured-copy {
-  padding: clamp(28px, 4vw, 48px);
-}
-
-.featured-copy h3 {
-  margin: 0;
-  font-size: clamp(32px, 4vw, 48px);
-  letter-spacing: -0.055em;
-}
-
-.featured-copy > p:not(.eyebrow) {
-  max-width: 600px;
-  margin: 18px 0 0;
-  color: var(--panel-muted);
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-.featured-actions .button-primary {
-  border-color: var(--signal-bright);
-  background: var(--signal-bright);
-  color: var(--panel);
-}
-
-.featured-actions .button-primary:hover {
-  border-color: #fff;
-  background: #fff;
-}
-
-.inline-link {
-  margin-left: 6px;
-  border-bottom: 1px solid #567068;
-  padding: 8px 0 4px;
-  color: var(--panel-muted);
-  font-size: 11px;
-  font-weight: 720;
-}
-
-.inline-link:hover {
-  border-color: #fff;
-  color: #fff;
-}
-
-.featured-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  margin: 0;
-  border-left: 1px solid #3a5147;
-}
-
-.featured-stats > div {
-  min-height: 120px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 20px;
-  border-right: 1px solid #3a5147;
-  border-bottom: 1px solid #3a5147;
-}
-
-.featured-stats > div:nth-child(even) {
-  border-right: 0;
-}
-
-.featured-stats > div:nth-child(n + 3) {
-  border-bottom: 0;
-}
-
-.featured-stats dt {
-  color: #779087;
-}
-
-.featured-stats dd {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 720;
-}
-
 .recent-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-top: 62px;
   border-bottom: 1px solid #3a5147;
   padding-bottom: 13px;
 }
@@ -695,6 +604,13 @@ h1 {
   min-height: 118px;
   border-bottom: 1px solid #30473d;
   padding: 20px 0;
+}
+
+.run-row-featured {
+  border-color: #486057;
+  background: #12231b;
+  box-shadow: inset 3px 0 0 var(--signal-bright);
+  padding-inline: 20px;
 }
 
 .run-identity h4 {
@@ -758,6 +674,24 @@ h1 {
 .run-actions a:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
+}
+
+.run-actions .run-primary-action {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--signal-bright);
+  border-radius: 3px;
+  background: var(--signal-bright);
+  padding: 9px 13px;
+  color: var(--panel) !important;
+}
+
+.run-actions .run-primary-action:hover {
+  border-color: #fff;
+  background: #fff;
+  text-decoration: none;
 }
 
 .run-archive {
@@ -913,15 +847,6 @@ h1 {
     max-width: 740px;
   }
 
-  .featured-run > article {
-    grid-template-columns: 1fr;
-  }
-
-  .featured-stats {
-    border-top: 1px solid #3a5147;
-    border-left: 0;
-  }
-
   .run-row {
     grid-template-columns: minmax(240px, 1fr) minmax(260px, 1fr) auto;
   }
@@ -1059,33 +984,6 @@ h1 {
     border-bottom: 0;
   }
 
-  .featured-copy {
-    padding: 27px 22px;
-  }
-
-  .featured-copy h3 {
-    font-size: 34px;
-  }
-
-  .featured-actions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .inline-link {
-    width: max-content;
-    margin-left: 0;
-  }
-
-  .featured-stats > div {
-    min-height: 100px;
-    padding: 16px;
-  }
-
-  .recent-heading {
-    margin-top: 48px;
-  }
-
   .run-row {
     grid-template-columns: 1fr auto;
     gap: 16px;
@@ -1138,21 +1036,6 @@ h1 {
 
   .demo-caption strong {
     font-size: 12px;
-  }
-
-  .featured-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .featured-stats > div,
-  .featured-stats > div:nth-child(n + 3) {
-    min-height: 82px;
-    border-right: 0;
-    border-bottom: 1px solid #3a5147;
-  }
-
-  .featured-stats > div:last-child {
-    border-bottom: 0;
   }
 
 }
