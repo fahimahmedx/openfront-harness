@@ -68,6 +68,8 @@ function ordinal(value: number): string {
 }
 
 function scenarioLabel(scenarioId: string): string {
+  if (scenarioId === "japan-v2") return "Japan";
+
   return scenarioId
     .split("-")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
