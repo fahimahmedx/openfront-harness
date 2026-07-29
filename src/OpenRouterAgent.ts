@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createParser } from "eventsource-parser";
-import { SCENARIO } from "./Scenario";
+import { DEFAULT_OPENROUTER_MODEL, SCENARIO } from "./Scenario";
 import {
   AgentAttemptFailure,
   AgentAttemptTiming,
@@ -15,7 +15,7 @@ import {
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
-const PROMPT_VERSION = "agent-v5" as const;
+const PROMPT_VERSION = "agent-v6" as const;
 const MODEL_SEED = 3209 as const;
 const REASONING_EFFORT = "none" as const;
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -228,9 +228,9 @@ export function promptFor(observation: Observation, candidates: LegalAction[]) {
     "Your goal is to win. Choose one legal ID for action1 and one legal ID for action2.",
     "Troop actions with maxUses 2 may be selected in both slots. Do not repeat actions with maxUses 1.",
     "Use hold:1 only for action1 or hold:2 only for action2 when that slot should do nothing. Never invent an ID.",
-    "Troop discipline is essential: absolute troop growth becomes slow at low troop counts, weak reserves invite defeat, and undersized attacks fail.",
-    "Read self.troopCapacityPercent, troopGrowthPerSecond, troopPolicyMode, reserveFloorTroops, and opponent troopsRelativeToSelf before spending troops.",
-    "Troop actions use a shared two-slot safe budget and already preserve the displayed reserve floor. Hold while rebuilding; attack players only with a real troop advantage.",
+    "self.troopCapacityPercent is current troops divided by self.maxTroops; troop growth approaches zero near 100% capacity.",
+    "Every listed troop action already preserves self.reserveFloorTroops. self.spendableTroops is safe surplus divided across the two slots, so listed troop amounts do not violate the displayed reserve.",
+    "Neutral expansion captures unowned land and does not require a troop advantage over opponents. Judge attacks on opponents separately using troopsRelativeToSelf.",
     `${TIMER_VICTORY_RULE} instantVictoryTerritoryPercent is the territory threshold for an immediate victory, not a probability. Use currentRank, territoryLeader, and territoryGapToLeader to judge the timer outcome.`,
     "Recent actionOutcomes report whether submitted actions started, failed, completed, or were destroyed. Do not assume a submitted action took effect.",
     "strategy is a public, concise tactical note (160 characters maximum), not private reasoning.",
@@ -249,7 +249,7 @@ export class OpenRouterAgent {
     options: { model?: string; provider?: string } = {},
   ) {
     this.requestedModel =
-      options.model ?? process.env.OPENROUTER_MODEL ?? "openai/gpt-5.6-luna";
+      options.model ?? process.env.OPENROUTER_MODEL ?? DEFAULT_OPENROUTER_MODEL;
     this.provider =
       options.provider ?? process.env.OPENROUTER_PROVIDER ?? "openai";
   }

@@ -6,6 +6,7 @@ import { Intent, Turn } from "../OpenFrontIO/src/core/Schemas";
 import { NodeGameMapLoader } from "../src/NodeGameMapLoader";
 import {
   createScenarioStartInfo,
+  modelPlayerName,
   SCENARIO,
   SCENARIO_GAME_CONFIG,
 } from "../src/Scenario";
@@ -26,6 +27,14 @@ describe("japan-v2 scenario", () => {
       minimumAttackToDefenderRatio: 0.2,
       emergencyReserveRatio: 0.15,
     });
+  });
+
+  test("uses a schema-safe model name for the player", () => {
+    expect(modelPlayerName("z-ai/glm-5.2")).toBe("GLM 5.2");
+    expect(modelPlayerName("openai/gpt-5.6-luna")).toBe("GPT 5.6");
+    expect(createScenarioStartInfo("z-ai/glm-5.2").players[0].username).toBe(
+      "GLM 5.2",
+    );
   });
 
   test("loads the real map and deterministically spawns the intended players", async () => {

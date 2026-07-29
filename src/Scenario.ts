@@ -13,12 +13,35 @@ import {
 
 export const OPENFRONT_VERSION = "v0.32.9";
 export const OPENFRONT_COMMIT = "dcc18d5231af6253b0e991bf04a4c764982fe262";
+export const DEFAULT_OPENROUTER_MODEL = "openai/gpt-5.6-luna";
+
+export function modelPlayerName(model: string): string {
+  const modelParts = model.split("/");
+  const slug = modelParts[modelParts.length - 1] || model;
+  const knownModel = /^(gpt|glm)-(\d+(?:\.\d+)?)/i.exec(slug);
+  if (knownModel) {
+    // OpenFront usernames do not allow hyphens.
+    return `${knownModel[1].toUpperCase()} ${knownModel[2]}`;
+  }
+
+  const safeName = slug
+    .replace(/[-_]+/g, " ")
+    .replace(/[^a-zA-Z0-9 .üÜ]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 27);
+  return safeName.length >= 3 ? safeName : "LLM";
+}
+
+function configuredModel(): string {
+  return process.env.OPENROUTER_MODEL ?? DEFAULT_OPENROUTER_MODEL;
+}
 
 export const SCENARIO = {
   id: "japan-v2",
   seed: "JAPAN01A",
   clientID: "LLMAGENT",
-  playerName: "LLM Agent",
+  playerName: modelPlayerName(configuredModel()),
   spawn: { x: 1613, y: 1133, label: "Kanto" },
   expectedNations: ["Hokkaido", "Shikoku", "Kansai"],
   decisionIntervalTicks: 100,
@@ -55,7 +78,9 @@ export const SCENARIO_GAME_CONFIG: GameConfig = GameConfigSchema.parse({
   maxTimerValue: SCENARIO.maxSimulatedMinutes,
 });
 
-export function createScenarioStartInfo(): GameStartInfo {
+export function createScenarioStartInfo(
+  model: string = configuredModel(),
+): GameStartInfo {
   return {
     gameID: SCENARIO.seed,
     lobbyCreatedAt: 0,
@@ -63,7 +88,7 @@ export function createScenarioStartInfo(): GameStartInfo {
     players: [
       {
         clientID: SCENARIO.clientID,
-        username: SCENARIO.playerName,
+        username: modelPlayerName(model),
         clanTag: null,
         isLobbyCreator: true,
       },
@@ -71,9 +96,10 @@ export function createScenarioStartInfo(): GameStartInfo {
   };
 }
 
-export function publicScenario() {
+export function publicScenario(model: string = configuredModel()) {
   return {
     ...SCENARIO,
+    playerName: modelPlayerName(model),
     map: GameMapType.Japan,
     mapSize: GameMapSize.Normal,
     mode: GameMode.FFA,

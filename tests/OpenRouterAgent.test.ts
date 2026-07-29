@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   actionResponseJsonSchema,
   OpenRouterAgent,
+  promptFor,
   validateDecisionContent,
 } from "../src/OpenRouterAgent";
 import { LegalAction, Observation, TIMER_VICTORY_RULE } from "../src/Types";
@@ -111,9 +112,22 @@ afterEach(() => {
 });
 
 describe("OpenRouter action output", () => {
-  it("versions the timer-aware request contract as agent-v5", () => {
-    expect(OpenRouterAgent.promptVersion()).toBe("agent-v5");
+  it("versions the neutral troop-semantics contract as agent-v6", () => {
+    expect(OpenRouterAgent.promptVersion()).toBe("agent-v6");
     expect(OpenRouterAgent.reasoningEffort()).toBe("none");
+  });
+
+  it("explains troop saturation and neutral expansion without prescribing holds", () => {
+    const prompt = promptFor(observation, candidates);
+
+    expect(prompt).toContain("troop growth approaches zero near 100% capacity");
+    expect(prompt).toContain(
+      "Neutral expansion captures unowned land and does not require a troop advantage",
+    );
+    expect(prompt).toContain(
+      "listed troop amounts do not violate the displayed reserve",
+    );
+    expect(prompt).not.toContain("Hold while rebuilding");
   });
 
   it("constrains each named slot to its legal action IDs", () => {

@@ -170,7 +170,7 @@ describe("troop policy", () => {
     const finalObservation = createObservation(runner.game, player, 20, []);
     const finalCandidates = createLegalActions(runner.game, player);
     const prompt = promptFor(finalObservation, finalCandidates);
-    expect(prompt).toContain("absolute troop growth becomes slow");
+    expect(prompt).toContain("troop growth approaches zero near 100% capacity");
     expect(prompt).toContain("troopCapacityPercent");
     expect(prompt).toContain(
       "instantVictoryTerritoryPercent is the territory threshold",

@@ -261,6 +261,7 @@ export const RunArtifactSchema = z.object({
       "agent-v3",
       "agent-v4",
       "agent-v5",
+      "agent-v6",
     ]),
     seed: z.literal(3209),
     reasoningEffort: z

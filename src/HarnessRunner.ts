@@ -139,7 +139,7 @@ export class HarnessRunner {
     this.store.setProgress(progress);
     await this.store.savePending(progress);
 
-    const gameStart = createScenarioStartInfo();
+    const gameStart = createScenarioStartInfo(this.agent.requestedModel);
     const turns: Turn[] = [];
     const decisions: DecisionRecord[] = [];
     let lastHash: number | null = null;
@@ -464,7 +464,7 @@ export class HarnessRunner {
             schemaVersion: 2,
             runId,
             status,
-            scenario: publicScenario(),
+            scenario: publicScenario(this.agent.requestedModel),
             model: {
               requested: this.agent.requestedModel,
               resolved:
