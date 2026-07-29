@@ -390,6 +390,85 @@ h1 {
   letter-spacing: -0.02em;
 }
 
+.action-reel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2.4vw, 30px);
+  padding-top: clamp(54px, 6.5vw, 78px);
+}
+
+.action-reel figure {
+  min-width: 0;
+  margin: 0;
+}
+
+.action-reel-video {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: #dfe3dc;
+}
+
+.action-reel-video::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+}
+
+.action-reel video {
+  width: 100%;
+  aspect-ratio: 8 / 5;
+  object-fit: cover;
+  transition: transform 300ms ease;
+}
+
+.action-reel figure:hover video {
+  transform: scale(1.012);
+}
+
+.action-reel figure:nth-child(2) video {
+  transform: scale(1.2);
+  transform-origin: left top;
+}
+
+.action-reel figure:nth-child(2):hover video {
+  transform: scale(1.212);
+}
+
+.action-reel figcaption {
+  border-top: 1px solid var(--line-strong);
+  margin-top: 17px;
+  padding-top: 15px;
+}
+
+.action-reel figcaption span {
+  display: block;
+  color: var(--signal);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.action-reel figcaption strong {
+  display: block;
+  margin-top: 16px;
+  font-size: 18px;
+  letter-spacing: -0.035em;
+}
+
+.action-reel figcaption p {
+  max-width: 340px;
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .section-block {
   padding-block: clamp(84px, 10vw, 124px);
 }
@@ -1219,6 +1298,20 @@ h1 {
 
   .proof > div:last-child {
     border-right: 0;
+  }
+
+  .action-reel {
+    grid-template-columns: 1fr;
+    gap: 42px;
+    padding-top: 48px;
+  }
+
+  .action-reel figure {
+    max-width: 620px;
+  }
+
+  .action-reel figcaption strong {
+    margin-top: 12px;
   }
 
   .section-block {

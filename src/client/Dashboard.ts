@@ -39,13 +39,14 @@ const heroRunId =
 let currentScenarioId: string | null = null;
 let cachedRuns: RunSummary[] = [];
 
-const demoVideo = document.querySelector<HTMLVideoElement>(".hero-demo video");
-if (
-  demoVideo &&
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches
-) {
-  demoVideo.pause();
-  demoVideo.removeAttribute("autoplay");
+const autoplayVideos = document.querySelectorAll<HTMLVideoElement>(
+  ".hero-demo video, .action-reel video",
+);
+if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  autoplayVideos.forEach((video) => {
+    video.pause();
+    video.removeAttribute("autoplay");
+  });
 }
 
 function escapeHtml(value: unknown): string {
