@@ -31,7 +31,7 @@ const sampleFile = path.join(
 );
 
 const htmlCache = new Map<string, Promise<string>>();
-function renderShell(fileName: "replay.html" | "harness.html" | "lab.html") {
+function renderShell(fileName: "replay.html" | "harness.html") {
   let rendered = htmlCache.get(fileName);
   if (rendered) return rendered;
   rendered = (async () => {
@@ -75,7 +75,7 @@ function renderShell(fileName: "replay.html" | "harness.html" | "lab.html") {
 async function sendShell(
   res: express.Response,
   next: express.NextFunction,
-  fileName: "replay.html" | "harness.html" | "lab.html",
+  fileName: "replay.html" | "harness.html",
 ) {
   try {
     res.setHeader("Cache-Control", "no-store");
@@ -289,8 +289,8 @@ app.get("/docs/:document", async (req, res) => {
 app.get(["/replay.html", "/replay/:runId"], (_req, res, next) => {
   void sendShell(res, next, "replay.html");
 });
-app.get(["/lab", "/lab.html"], (_req, res, next) => {
-  void sendShell(res, next, "lab.html");
+app.get(["/lab", "/lab.html"], (_req, res) => {
+  res.redirect(302, "/");
 });
 app.get(["/", "/harness.html"], (_req, res, next) => {
   void sendShell(res, next, "harness.html");

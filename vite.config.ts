@@ -162,7 +162,6 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         input: {
           dashboard: path.join(projectRoot, "harness.html"),
-          lab: path.join(projectRoot, "lab.html"),
           replay: path.join(projectRoot, "replay.html"),
         },
         output: {

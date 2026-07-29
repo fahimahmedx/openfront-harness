@@ -193,8 +193,7 @@ h1 {
   margin-top: 30px;
 }
 
-.button,
-#run-button {
+.button {
   min-height: 48px;
   display: inline-flex;
   align-items: center;
@@ -213,14 +212,12 @@ h1 {
     transform 150ms ease;
 }
 
-.button-primary,
-#run-button {
+.button-primary {
   background: var(--ink);
   color: #fff;
 }
 
-.button-primary:hover,
-#run-button:hover:not(:disabled) {
+.button-primary:hover {
   border-color: var(--signal);
   background: var(--signal);
   transform: translateY(-1px);
@@ -481,9 +478,7 @@ h1 {
 }
 
 .section-heading h2,
-.case-study h2,
-.lab-teaser h2,
-.lab-page h1 {
+.case-study h2 {
   max-width: 760px;
   margin: 0;
   font-size: clamp(38px, 4.5vw, 58px);
@@ -840,33 +835,6 @@ h1 {
   font-style: normal;
 }
 
-.lab-teaser {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 60px;
-  margin-bottom: clamp(84px, 10vw, 124px);
-  border: 1px solid var(--line-strong);
-  background: var(--paper-raised);
-  padding: clamp(30px, 5vw, 54px);
-}
-
-.lab-teaser h2 {
-  font-size: clamp(32px, 4vw, 46px);
-}
-
-.lab-teaser p:last-child {
-  max-width: 650px;
-  margin: 18px 0 0;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.lab-teaser > .button {
-  flex: none;
-}
-
 .site-footer {
   border-top: 1px solid var(--line-strong);
   padding-block: 36px 46px;
@@ -894,219 +862,6 @@ h1 {
 
 .footer-layout a:not(.brand) {
   color: var(--signal);
-}
-
-/* Dedicated live lab */
-.lab-page {
-  min-height: calc(100vh - 160px);
-  padding-block: clamp(64px, 9vw, 110px);
-}
-
-.lab-page-header {
-  display: grid;
-  grid-template-columns: 1fr 0.8fr;
-  gap: 70px;
-  align-items: end;
-}
-
-.lab-page-header > div > p:last-child {
-  max-width: 590px;
-  margin: 24px 0 0;
-  color: var(--muted);
-  font-size: 17px;
-  line-height: 1.65;
-}
-
-.lab-scenario {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border-top: 1px solid var(--line-strong);
-  border-left: 1px solid var(--line-strong);
-}
-
-.lab-scenario span {
-  min-height: 88px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 15px;
-  border-right: 1px solid var(--line-strong);
-  border-bottom: 1px solid var(--line-strong);
-  font-size: 12px;
-  font-weight: 720;
-}
-
-.lab-scenario b {
-  color: var(--faint);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 8px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.lab-panel {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 54px;
-  align-items: center;
-  margin-top: 64px;
-  border: 1px solid var(--line-strong);
-  background: var(--paper-raised);
-  padding: clamp(28px, 5vw, 52px);
-}
-
-.availability {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: var(--muted);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 9px;
-  text-transform: uppercase;
-}
-
-.availability i {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--line-strong);
-}
-
-.availability i.available {
-  background: var(--signal);
-}
-
-.availability i.unavailable {
-  background: var(--warning);
-}
-
-.lab-panel-copy h2 {
-  margin: 18px 0 12px;
-  font-size: clamp(30px, 4vw, 46px);
-  letter-spacing: -0.05em;
-}
-
-.lab-panel-copy > p {
-  max-width: 600px;
-  margin: 0;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.lab-action {
-  min-width: 250px;
-  text-align: right;
-}
-
-#run-button {
-  width: 100%;
-}
-
-#run-button:disabled {
-  border-color: var(--line-strong);
-  background: #dfe1db;
-  color: #737c77;
-  cursor: not-allowed;
-}
-
-.quiet {
-  max-width: 280px;
-  margin: 12px 0 0;
-  color: var(--faint);
-  font-size: 10px;
-  line-height: 1.5;
-}
-
-.progress {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 36px;
-  border-top: 1px solid var(--line);
-  padding-top: 30px;
-}
-
-.progress h3 {
-  margin: 0 0 8px;
-  font-size: 24px;
-  letter-spacing: -0.035em;
-}
-
-.progress-copy {
-  flex: 1;
-}
-
-.progress-copy > p:not(.eyebrow),
-.progress > div > p:not(.eyebrow) {
-  max-width: 700px;
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.55;
-}
-
-.progress-track {
-  height: 3px;
-  margin-top: 20px;
-  overflow: hidden;
-  background: var(--line);
-}
-
-.progress-track span {
-  display: block;
-  height: 100%;
-  background: var(--signal);
-}
-
-.progress-metrics {
-  display: flex;
-  gap: 24px;
-  color: var(--faint);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 9px;
-  text-transform: uppercase;
-}
-
-.progress-metrics b {
-  color: var(--ink);
-}
-
-.progress.failed .eyebrow {
-  color: var(--warning);
-}
-
-.result-link {
-  flex: none;
-  color: var(--signal);
-  font-size: 13px;
-  font-weight: 780;
-}
-
-.lab-notes {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
-  margin-top: 36px;
-}
-
-.lab-notes div {
-  border-top: 1px solid var(--line-strong);
-  padding-top: 15px;
-}
-
-.lab-notes strong {
-  display: block;
-  margin-bottom: 7px;
-  font-size: 12px;
-}
-
-.lab-notes p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.55;
 }
 
 .error {
@@ -1150,8 +905,7 @@ h1 {
   }
 
   .compact-heading,
-  .case-study,
-  .lab-page-header {
+  .case-study {
     grid-template-columns: 1fr;
   }
 
@@ -1272,8 +1026,7 @@ h1 {
   }
 
   .section-heading h2,
-  .case-study h2,
-  .lab-page h1 {
+  .case-study h2 {
     font-size: clamp(36px, 11vw, 50px);
   }
 
@@ -1362,14 +1115,6 @@ h1 {
     gap: 13px;
   }
 
-  .lab-teaser {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 30px;
-    margin-bottom: 76px;
-    padding: 28px 22px;
-  }
-
   .footer-layout {
     grid-template-columns: 1fr;
     gap: 24px;
@@ -1379,44 +1124,6 @@ h1 {
     text-align: left;
   }
 
-  .lab-page {
-    padding-block: 54px 76px;
-  }
-
-  .lab-page-header {
-    gap: 42px;
-  }
-
-  .lab-page-header > div > p:last-child {
-    font-size: 15px;
-  }
-
-  .lab-panel {
-    grid-template-columns: 1fr;
-    gap: 30px;
-    margin-top: 46px;
-    padding: 26px 21px;
-  }
-
-  .lab-action {
-    min-width: 0;
-    text-align: left;
-  }
-
-  .progress {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 22px;
-  }
-
-  .progress-metrics {
-    flex-wrap: wrap;
-  }
-
-  .lab-notes {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
 }
 
 @media (max-width: 420px) {
@@ -1448,9 +1155,6 @@ h1 {
     border-bottom: 0;
   }
 
-  .lab-scenario {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
