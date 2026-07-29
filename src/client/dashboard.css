@@ -144,6 +144,57 @@ nav.shell {
   color: var(--ink);
 }
 
+.nav-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--line);
+}
+
+.maker-credit {
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+.maker-credit strong {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.social-links {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.social-links a {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.social-links a:hover {
+  transform: translateY(-1px);
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.social-links svg {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(360px, 0.88fr) minmax(520px, 1.12fr);
@@ -875,8 +926,10 @@ h1 {
     gap: 16px;
   }
 
-  .nav-links a[href="#work"],
-  .nav-links a[href="#evidence"],
+  .nav-divider {
+    display: none;
+  }
+
   .nav-links a#source-link {
     display: none;
   }
@@ -1021,13 +1074,23 @@ h1 {
   .footer-layout > div:last-child {
     text-align: left;
   }
-
 }
 
 @media (max-width: 420px) {
-  .nav-links a[href="/docs/writeup"],
-  .nav-links a[href="/docs/readme"] {
-    display: none;
+  nav.shell {
+    gap: 14px;
+  }
+
+  .nav-links {
+    gap: 9px;
+  }
+
+  .maker-credit {
+    font-size: 0;
+  }
+
+  .maker-credit strong {
+    font-size: 11px;
   }
 
   .demo-caption {
@@ -1037,7 +1100,12 @@ h1 {
   .demo-caption strong {
     font-size: 12px;
   }
+}
 
+@media (max-width: 350px) {
+  .brand span {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
