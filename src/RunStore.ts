@@ -35,7 +35,7 @@ export class RunStore {
 
   constructor(
     readonly dataDir: string,
-    private readonly sampleFile?: string,
+    private readonly bundledFiles: string[] = [],
   ) {}
 
   async init(): Promise<void> {
@@ -92,9 +92,9 @@ export class RunStore {
     const activeFile = path.join(this.dataDir, `${runId}.json.gz`);
     const local = await this.readArtifact(activeFile);
     if (local) return local;
-    if (this.sampleFile) {
-      const sample = await this.readArtifact(this.sampleFile);
-      if (sample?.runId === runId) return sample;
+    for (const file of this.bundledFiles) {
+      const bundled = await this.readArtifact(file);
+      if (bundled?.runId === runId) return bundled;
     }
     return null;
   }
@@ -111,13 +111,13 @@ export class RunStore {
           .map((file) => this.readArtifact(path.join(this.dataDir, file))),
       )
     ).filter((artifact): artifact is RunArtifact => artifact !== null);
-    if (this.sampleFile) {
-      const sample = await this.readArtifact(this.sampleFile);
+    for (const file of this.bundledFiles) {
+      const bundled = await this.readArtifact(file);
       if (
-        sample &&
-        !artifacts.some((artifact) => artifact.runId === sample.runId)
+        bundled &&
+        !artifacts.some((artifact) => artifact.runId === bundled.runId)
       ) {
-        artifacts.push(sample);
+        artifacts.push(bundled);
       }
     }
     return artifacts.sort((a, b) => b.startedAt.localeCompare(a.startedAt));

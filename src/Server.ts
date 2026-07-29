@@ -29,6 +29,10 @@ const sampleFile = path.join(
   projectRoot,
   "resources/harness/sample-run.json.gz",
 );
+const featuredRunFile = path.join(
+  projectRoot,
+  "resources/harness/9f73a404-ae98-430f-be5b-ea22fb1755a6.json.gz",
+);
 
 const htmlCache = new Map<string, Promise<string>>();
 function renderShell(fileName: "replay.html" | "harness.html") {
@@ -93,7 +97,7 @@ if (!process.env.RATE_LIMIT_SALT) {
   console.warn("RATE_LIMIT_SALT is not set; using a development-only value");
 }
 
-const store = new RunStore(dataDir, sampleFile);
+const store = new RunStore(dataDir, [sampleFile, featuredRunFile]);
 const limiter = new DailyRateLimiter(
   path.join(dataDir, "rate-limits.json"),
   rateSalt,
