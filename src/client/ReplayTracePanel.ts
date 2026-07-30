@@ -345,14 +345,6 @@ class HarnessReplayPanel extends HTMLElement {
         letter-spacing: .02em;
       }
 
-      .action-outcome {
-        display: block;
-        margin-top: 3px;
-        color: var(--muted);
-        font-size: 9px;
-        line-height: 1.4;
-      }
-
       .stats {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -721,12 +713,6 @@ class HarnessReplayPanel extends HTMLElement {
         detail.textContent = presentation.detail;
         actionCopy.append(detail);
       }
-      const outcome = document.createElement("small");
-      outcome.className = "action-outcome";
-      outcome.textContent = lifecycle
-        ? `${lifecycle.status}: ${presentation.outcome}`
-        : presentation.outcome;
-      actionCopy.append(outcome);
       row.append(actionIndex, actionCopy);
       actions.append(row);
     });
