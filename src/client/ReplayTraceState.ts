@@ -1,6 +1,12 @@
+import { renderTroops } from "../../OpenFrontIO/src/client/Utils";
+
 export type ReplayActionCandidate = {
   id: string;
   label: string;
+  intent?: {
+    type: string;
+    troops?: number;
+  } | null;
 };
 
 export type ActionPresentation = {
@@ -21,7 +27,15 @@ export function presentReplayAction(
   outcome: string | undefined,
 ): ActionPresentation {
   const candidate = candidates.find((entry) => entry.id === id);
-  const humanLabel = candidate?.label ?? id;
+  const recordedLabel = candidate?.label ?? id;
+  const rawTroops = candidate?.intent?.troops;
+  const humanLabel =
+    typeof rawTroops === "number" && Number.isFinite(rawTroops)
+      ? recordedLabel.replace(
+          `${Math.floor(rawTroops).toLocaleString("en-US")} troops`,
+          `${renderTroops(rawTroops)} troops`,
+        )
+      : recordedLabel;
   const trailingDetail = humanLabel.match(/^(.*?)\s+\(([^()]*)\)$/);
   const detailMatch =
     trailingDetail && /safe budget|capacity reserve/i.test(trailingDetail[2])
@@ -38,6 +52,10 @@ export function presentReplayAction(
           ? "Queued successfully"
           : (outcome ?? "Outcome unavailable"),
   };
+}
+
+export function formatExactTroops(troops: number): string {
+  return Math.floor(Math.max(0, troops) / 10).toLocaleString("en-US");
 }
 
 export function formatLatency(latencyMs: number | null | undefined): string {

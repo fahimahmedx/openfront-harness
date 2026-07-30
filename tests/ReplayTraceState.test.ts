@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatExactTroops,
   formatAttemptTiming,
   formatLatency,
   presentReplayAction,
@@ -16,15 +17,40 @@ describe("replay trace presentation", () => {
             id: "attack:player:100",
             label:
               "Attack Hokkaido by land with 12,000 troops (100% of this slot's safe budget; 35% capacity reserve)",
+            intent: {
+              type: "attack",
+              troops: 12_000,
+            },
           },
         ],
         "queued as a legal core intent",
       ),
     ).toEqual({
-      label: "Attack Hokkaido by land with 12,000 troops",
+      label: "Attack Hokkaido by land with 1.20K troops",
       detail: "100% of this slot's safe budget · 35% capacity reserve",
       outcome: "Queued successfully",
     });
+  });
+
+  it("renders recorded raw troop units on the same scale as the game HUD", () => {
+    expect(
+      presentReplayAction(
+        "expand:neutral:100",
+        [
+          {
+            id: "expand:neutral:100",
+            label:
+              "Expand into neutral land with 67,809 troops (100% of this slot's safe budget; 15% capacity reserve)",
+            intent: {
+              type: "attack",
+              troops: 67_809,
+            },
+          },
+        ],
+        "queued as a legal core intent",
+      ).label,
+    ).toBe("Expand into neutral land with 6.78K troops");
+    expect(formatExactTroops(299_679)).toBe("29,967");
   });
 
   it("humanizes holds and falls back to an unmatched raw action ID", () => {

@@ -1,5 +1,6 @@
 import { renderTroops } from "../../OpenFrontIO/src/client/Utils";
 import {
+  formatExactTroops,
   formatAttemptTiming,
   formatLatency,
   presentReplayAction,
@@ -764,7 +765,7 @@ class HarnessReplayPanel extends HTMLElement {
       {
         label: "Troops",
         value: renderTroops(Number(decision.observation.self.troops)),
-        exactValue: `${Number(decision.observation.self.troops).toLocaleString()} available garrison troops`,
+        exactValue: `${formatExactTroops(Number(decision.observation.self.troops))} available garrison troops`,
         delta: statDelta(
           Number(decision.observation.self.troops),
           previousSelf ? Number(previousSelf.troops) : undefined,
