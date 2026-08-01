@@ -152,9 +152,17 @@ afterEach(() => {
 });
 
 describe("OpenRouter action output", () => {
-  it("versions stale-build handling as agent-v10", () => {
-    expect(OpenRouterAgent.promptVersion()).toBe("agent-v10");
+  it("versions semantic diplomacy guidance as agent-v11", () => {
+    expect(OpenRouterAgent.promptVersion()).toBe("agent-v11");
     expect(OpenRouterAgent.reasoningEffort()).toBe("none");
+  });
+
+  it("explains early alliances and pairing diplomacy with a build", () => {
+    const prompt = promptFor(observation, diplomacyCandidates);
+
+    expect(prompt).toContain("avoid opening proactive wars");
+    expect(prompt).toContain("more likely to accept early requests");
+    expect(prompt).toContain("paired with a diplomacy action in action2");
   });
 
   it("explains troop saturation and neutral expansion without prescribing holds", () => {

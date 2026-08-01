@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { UnitType } from "../OpenFrontIO/src/core/game/Game";
+import { Relation, UnitType } from "../OpenFrontIO/src/core/game/Game";
 import {
+  allianceRequestHistory,
+  relationStatus,
   resolveDecisionActions,
   selectSafestBuildAnchor,
 } from "../src/ObservationActions";
@@ -88,6 +90,43 @@ const candidates: LegalAction[] = [
 ];
 
 describe("fixed action slots", () => {
+  test("exposes semantic relations and persistent alliance request history", () => {
+    expect([
+      relationStatus(Relation.Hostile),
+      relationStatus(Relation.Distrustful),
+      relationStatus(Relation.Neutral),
+      relationStatus(Relation.Friendly),
+    ]).toEqual(["hostile", "distrustful", "neutral", "friendly"]);
+
+    expect(
+      allianceRequestHistory(
+        [
+          {
+            actionOutcomes: [
+              {
+                actionId: "alliance:request:opponent",
+                status: "completed",
+                startedAtTick: 100,
+                resolvedAtTick: 110,
+                entityId: null,
+                detail: "Alliance request to Opponent was rejected",
+              },
+              {
+                actionId: "hold:2",
+                status: "completed",
+                startedAtTick: 100,
+                resolvedAtTick: 100,
+                entityId: null,
+                detail: "Held intentionally",
+              },
+            ],
+          },
+        ],
+        "opponent",
+      ),
+    ).toEqual({ sentCount: 1, lastResult: "rejected" });
+  });
+
   test("selects the legal build anchor farthest from a hostile front", () => {
     const spawnByAnchor = new Map<number, number | false>([
       [10, 11],

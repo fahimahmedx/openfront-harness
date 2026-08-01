@@ -194,7 +194,25 @@ describe("troop policy", () => {
       troopPolicyMode: expect.stringMatching(/expansion|combat|emergency/),
       reserveFloorPercent: expect.any(Number),
       troopGrowthPerSecond: expect.any(Number),
+      diplomacy: {
+        earlyAllianceWindowOpen: expect.any(Boolean),
+        hostileOpponentCount: expect.any(Number),
+        hostileSharedBorderCount: expect.any(Number),
+      },
     });
+    for (const opponent of finalObservation.opponents) {
+      expect(opponent).toMatchObject({
+        relation: expect.stringMatching(
+          /^(hostile|distrustful|neutral|friendly)$/,
+        ),
+        allianceRequest: {
+          available: expect.any(Boolean),
+          history: {
+            sentCount: expect.any(Number),
+          },
+        },
+      });
+    }
     expect(TROOP_POLICY.combatTriggerRatio).toBe(0.55);
   }, 30_000);
 });

@@ -51,6 +51,12 @@ describe("bundled sample", () => {
       model: { ...sample.model, promptVersion: "agent-v10" },
     });
     expect(current.model.promptVersion).toBe("agent-v10");
+    expect(
+      RunArtifactSchema.parse({
+        ...sample,
+        model: { ...sample.model, promptVersion: "agent-v11" },
+      }).model.promptVersion,
+    ).toBe("agent-v11");
     expect(current.decisions[0].attemptFailures).toEqual([]);
     expect(current.decisions[0].attemptTimings).toEqual([]);
   });

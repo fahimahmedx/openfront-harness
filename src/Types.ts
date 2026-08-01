@@ -373,6 +373,7 @@ export const RunArtifactSchema = z.object({
       "agent-v8",
       "agent-v9",
       "agent-v10",
+      "agent-v11",
     ]),
     // Retained only for parsing artifacts created before model seeding was
     // removed. New runs omit this field.

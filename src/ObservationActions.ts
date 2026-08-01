@@ -2,6 +2,7 @@ import { closestTwoTiles } from "../OpenFrontIO/src/core/execution/Util";
 import {
   Game,
   Player,
+  Relation,
   Structures,
   UnitType,
 } from "../OpenFrontIO/src/core/game/Game";
@@ -31,6 +32,43 @@ export type TroopBudget = {
   spendableTroops: number;
   perActionTroopBudget: number;
 };
+
+export function relationStatus(
+  relation: Relation,
+): "hostile" | "distrustful" | "neutral" | "friendly" {
+  switch (relation) {
+    case Relation.Hostile:
+      return "hostile";
+    case Relation.Distrustful:
+      return "distrustful";
+    case Relation.Neutral:
+      return "neutral";
+    case Relation.Friendly:
+      return "friendly";
+  }
+}
+
+export function allianceRequestHistory(
+  decisions: Pick<DecisionRecord, "actionOutcomes">[],
+  opponentID: string,
+): { sentCount: number; lastResult: "accepted" | "rejected" | "other" | null } {
+  const actionID = `alliance:request:${opponentID}`;
+  const outcomes = decisions.flatMap((decision) =>
+    decision.actionOutcomes.filter((outcome) => outcome.actionId === actionID),
+  );
+  const last = outcomes[outcomes.length - 1];
+  return {
+    sentCount: outcomes.length,
+    lastResult:
+      last === undefined
+        ? null
+        : last.detail.includes("was accepted")
+          ? "accepted"
+          : last.detail.includes("was rejected")
+            ? "rejected"
+            : "other",
+  };
+}
 
 const STRUCTURE_TYPES = [
   UnitType.City,
@@ -149,16 +187,28 @@ export function createObservation(
     .players()
     .filter((candidate) => candidate !== player)
     .sort((a, b) => a.id().localeCompare(b.id()))
-    .map((candidate) => ({
-      ...playerSummary(game, candidate),
-      sharedBorder: player.sharesBorderWith(candidate),
-      allied: player.isAlliedWith(candidate),
-      relation: player.relation(candidate),
-      canAttack: player.canAttackPlayer(candidate),
-      troopsRelativeToSelf: Number(
-        (candidate.troops() / Math.max(1, player.troops())).toFixed(3),
-      ),
-    }));
+    .map((candidate) => {
+      const relation = relationStatus(player.relation(candidate));
+      return {
+        ...playerSummary(game, candidate),
+        sharedBorder: player.sharesBorderWith(candidate),
+        allied: player.isAlliedWith(candidate),
+        relation,
+        allianceRequest: {
+          available: player.canSendAllianceRequest(candidate),
+          history: allianceRequestHistory(recent, candidate.id()),
+        },
+        canAttack: player.canAttackPlayer(candidate),
+        troopsRelativeToSelf: Number(
+          (candidate.troops() / Math.max(1, player.troops())).toFixed(3),
+        ),
+      };
+    });
+  const earlyAllianceWindowOpen =
+    game.ticks() < game.config().numSpawnPhaseTurns() + 1800;
+  const hostileOpponents = opponents.filter(
+    (opponent) => opponent.relation === "hostile",
+  );
 
   return ObservationSchema.parse({
     scenarioId: SCENARIO.id,
@@ -203,6 +253,13 @@ export function createObservation(
         .allies()
         .map((ally) => ally.id())
         .sort(),
+      diplomacy: {
+        earlyAllianceWindowOpen,
+        hostileOpponentCount: hostileOpponents.length,
+        hostileSharedBorderCount: hostileOpponents.filter(
+          (opponent) => opponent.sharedBorder,
+        ).length,
+      },
       traitor: player.isTraitor(),
       immune: player.isImmune(),
       troopPolicyMode: policy.mode,

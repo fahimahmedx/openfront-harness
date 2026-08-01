@@ -17,7 +17,7 @@ import {
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
-const PROMPT_VERSION = "agent-v10" as const;
+const PROMPT_VERSION = "agent-v11" as const;
 const REASONING_EFFORT = "none" as const;
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_COMPLETION_TOKENS = 512;
@@ -251,6 +251,8 @@ export function promptFor(observation: Observation, candidates: LegalAction[]) {
     "Do not combine cooperative and hostile actions toward the same opponent in one decision (for example, alliance plus attack, embargo, or alliance break).",
     "Troop actions with maxUses 2 may be selected in both slots. Do not repeat actions with maxUses 1.",
     "Build and upgrade actions are legal only in action1, so choose at most one gold-spending action per decision. Follow each action's allowedSlots.",
+    "In free-for-all play, avoid opening proactive wars against multiple comparable opponents. An alliance can keep one front peaceful; neutral nations are more likely to accept early requests before hostilities.",
+    "Diplomacy does not spend troops or gold. A build or upgrade in action1 can be paired with a diplomacy action in action2. Use relation names and allianceRequest history instead of guessing from numeric codes.",
     "Use hold:1 only for action1 or hold:2 only for action2 when that slot should do nothing. Never invent an ID.",
     "self.troopCapacityPercent is current troops divided by self.maxTroops; troop growth approaches zero near 100% capacity, so holding at maximum capacity cannot rebuild or increase reserves further.",
     "Every listed troop action already preserves self.reserveFloorTroops. self.spendableTroops is safe surplus divided across the two slots, so listed troop amounts do not violate the displayed reserve.",
