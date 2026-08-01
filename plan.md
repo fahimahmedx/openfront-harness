@@ -54,7 +54,7 @@ Fixed scenario japan-v1:
 - Request strict JSON with a short strategy note and exactly two candidate IDs. Use dedicated hold:1 and hold:2
   IDs when the model wants fewer actions.
 
-- Call OpenRouter Chat Completions statelessly with prompt version agent-v1, structured output, seed 3209, low
+- Call OpenRouter Chat Completions statelessly with prompt version agent-v1, structured output, unseeded sampling, low
   reasoning effort, and a 256-token completion cap. Require parameter support and pin the configured provider for
   benchmark consistency. OpenRouter documents both strict structured outputs
   (https://openrouter.ai/docs/guides/features/structured-outputs) and usage/cost accounting

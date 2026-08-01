@@ -16,7 +16,6 @@ import {
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
 const PROMPT_VERSION = "agent-v7" as const;
-const MODEL_SEED = 3209 as const;
 const REASONING_EFFORT = "none" as const;
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_COMPLETION_TOKENS = 512;
@@ -259,10 +258,6 @@ export class OpenRouterAgent {
     return PROMPT_VERSION;
   }
 
-  static modelSeed() {
-    return MODEL_SEED;
-  }
-
   static reasoningEffort() {
     return REASONING_EFFORT;
   }
@@ -478,7 +473,6 @@ export class OpenRouterAgent {
         body: JSON.stringify({
           model: this.requestedModel,
           messages,
-          seed: MODEL_SEED,
           // The pinned OpenAI endpoint advertises `max_tokens`; Azure advertises
           // `max_completion_tokens`. `require_parameters` makes this distinction
           // significant, so use the parameter supported by the pinned endpoint.

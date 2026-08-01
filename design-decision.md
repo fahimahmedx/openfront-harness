@@ -116,13 +116,13 @@ Incoming hostile troops take precedence and switch the policy to emergency mode.
 
 **Cons:** Availability is lower than multi-provider routing; a provider parameter change can stop all runs; model behavior may still change behind a stable slug; alternative model results are not leaderboard-comparable without a new benchmark division.
 
-## 14. Separate game seed and model seed
+## 14. Fixed game seed and unseeded model generation
 
-**Decision:** Use game seed `JAPAN01A` and model seed `3209`, recording both.
+**Decision:** Keep game seed `JAPAN01A`, but do not send a model seed. Historical artifacts may retain their recorded model seed for compatibility; new artifacts omit it.
 
-**Pros:** Makes the two sources of stochasticity explicit; providers that honor seed can reduce response variance; artifacts are easier to reproduce.
+**Pros:** Measures the model/provider's natural sampling behavior; supports endpoints that do not implement model seeds; avoids presenting a best-effort hosted parameter as a reproducibility guarantee. Exact replay remains deterministic from the recorded action trace.
 
-**Cons:** Hosted-model seeds are best-effort rather than a cryptographic reproducibility guarantee; backend model revisions can change output; exact leaderboard reproducibility ultimately requires model snapshots or submitted action traces.
+**Cons:** Repeated generations can produce different decisions and outcomes; controlled prompt comparisons have more sampling variance; meaningful model comparisons require multiple runs and distributional reporting.
 
 ## 15. Retry once, then hold
 
@@ -292,7 +292,7 @@ The new lifecycle trace recorded 232 completed and eight destroyed action slots,
 
 ## Known benchmark limitations
 
-- A fixed engine seed does not make a hosted model perfectly deterministic. Provider seeds are best effort, and model weights/routing can change.
+- A fixed engine seed does not make a hosted model deterministic. Sampling, model weights, and provider routing can change generated decisions.
 - The current score surface is outcome, placement, survival, ticks, usage, and trace—not yet a single leaderboard formula.
 - The candidate generator is part of the environment. Improving it can improve every model and therefore requires a scenario version bump.
 - One map, seed, spawn, model run, and opponent set cannot establish general strategy competence.

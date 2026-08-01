@@ -309,6 +309,7 @@ describe("OpenRouter action output", () => {
     const secondRequest = JSON.parse(
       String((fetchMock.mock.calls[1][1] as RequestInit).body),
     ) as {
+      seed?: number;
       reasoning: { effort: string };
       messages: Array<{ role: string; content: string }>;
       response_format: {
@@ -324,6 +325,7 @@ describe("OpenRouter action output", () => {
       stream: boolean;
       stream_options: { include_usage: boolean };
     };
+    expect(secondRequest).not.toHaveProperty("seed");
     expect(secondRequest.reasoning).toEqual({ effort: "none" });
     expect(secondRequest.stream).toBe(true);
     expect(secondRequest.stream_options).toEqual({ include_usage: true });

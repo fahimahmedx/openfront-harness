@@ -77,7 +77,7 @@ Troop-spending actions share one two-slot budget instead of independently spendi
 
 New `.json.gz` artifacts use schema version 2; schema-version-1 artifacts remain readable. Each artifact contains:
 
-- scenario, source commit, model, provider, prompt version, and model seed;
+- scenario, source commit, model, provider, prompt version, and reasoning configuration;
 - start/end timestamps and exact token/cost usage;
 - winner, placement, terminal tick, simulated time, and final hash;
 - every normalized observation and legal candidate menu;
@@ -119,7 +119,7 @@ Public generation is intentionally conservative: one active run globally, one la
 src/                          scenario, runner, agent, storage, API
 src/client/                   dashboard, replay bootstrap, trace panel
 tests/                        focused deterministic tests
-data/                         local run artifacts grouped by run folder (git-ignored)
+data/                         local run artifacts grouped by run folder
 resources/harness/            bundled real-model replay artifacts
 OpenFrontIO/                   untouched v0.32.9 source dependency
 vite.config.ts                external build and in-memory replay adapter

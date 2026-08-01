@@ -305,7 +305,9 @@ export const RunArtifactSchema = z.object({
       "agent-v6",
       "agent-v7",
     ]),
-    seed: z.literal(3209),
+    // Retained only for parsing artifacts created before model seeding was
+    // removed. New runs omit this field.
+    seed: z.literal(3209).optional(),
     reasoningEffort: z
       .enum(["none", "minimal", "low", "medium", "high", "xhigh", "max"])
       .optional(),

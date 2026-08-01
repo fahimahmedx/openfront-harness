@@ -64,14 +64,9 @@ This changed how I think about agents: the most important prompt is often the AP
 
 ## Determinism has layers
 
-The game is deterministic for a given start configuration and intent sequence. The hosted model is not deterministic in the same strong sense.
+The game is deterministic for a given start configuration and intent sequence. The hosted model is not deterministic in the same strong sense. The game seed fixes the environment, while model generation is intentionally unseeded so the benchmark measures the provider's natural sampling behavior and remains compatible with providers that do not implement seeds.
 
-I record two different seeds because they solve different problems:
-
-- the game seed controls the environment;
-- the model seed asks the provider for more repeatable sampling.
-
-The model route is also pinned to one provider with fallbacks disabled. That reduces hidden variance, but it does not freeze a hosted model's weights or infrastructure. A future benchmark cannot claim bit-for-bit model reproducibility from a seed alone. It needs to treat the submitted action trace as the reproducible object and replay that trace server-side against a content-addressed game build.
+The model route is pinned to one provider with fallbacks disabled. That reduces hidden variance, but it does not freeze a hosted model's weights or infrastructure. A future benchmark cannot claim bit-for-bit model reproducibility from hosted generation. It needs to treat the submitted action trace as the reproducible object and replay that trace server-side against a content-addressed game build.
 
 That distinction—deterministic environment versus deterministic policy—is probably the most important thing I learned.
 
@@ -81,7 +76,7 @@ A normal agent log tells me what a model requested. A game replay tells me what 
 
 Each artifact contains:
 
-- the exact scenario, source commit, model, provider, prompt version, and seeds;
+- the exact scenario, source commit, model, provider, prompt version, reasoning configuration, and game seed;
 - every normalized observation and legal candidate menu;
 - selected and applied action IDs;
 - structured post-execution status for both actions—started, failed, completed, or destroyed—with lifecycle ticks and an entity ID when available;
