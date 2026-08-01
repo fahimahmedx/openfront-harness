@@ -4,7 +4,13 @@ OpenFrontIO/static
 OpenFrontIO/.git
 .git
 .env*
-data
+data/*
+!data/deepseek-v4-flash/
+!data/deepseek-v4-flash/**
+!data/glm-5.2/
+!data/glm-5.2/**
+!data/gpt-5.6-luna/
+!data/gpt-5.6-luna/**
 static
 tests
 OpenFrontIO/tests

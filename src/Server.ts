@@ -30,14 +30,13 @@ const artifactRoot =
   dataDir === localDataRoot || dataDir.startsWith(`${localDataRoot}${path.sep}`)
     ? localDataRoot
     : dataDir;
-const sampleFile = path.join(
-  projectRoot,
-  "resources/harness/sample-run.json.gz",
-);
-const featuredRunFile = path.join(
-  projectRoot,
-  "resources/harness/9f73a404-ae98-430f-be5b-ea22fb1755a6.json.gz",
-);
+const bundledRunRoot = path.join(projectRoot, "resources/harness");
+const bundledRunFiles = (
+  await fs.readdir(bundledRunRoot, { recursive: true })
+)
+  .filter((file) => file.endsWith(".json.gz"))
+  .sort()
+  .map((file) => path.join(bundledRunRoot, file));
 
 const htmlCache = new Map<string, Promise<string>>();
 function renderShell(fileName: "replay.html" | "harness.html") {
@@ -104,7 +103,7 @@ if (!process.env.RATE_LIMIT_SALT) {
 
 const store = new RunStore(
   dataDir,
-  [sampleFile, featuredRunFile],
+  bundledRunFiles,
   artifactRoot,
 );
 const limiter = new DailyRateLimiter(
