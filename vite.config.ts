@@ -11,6 +11,11 @@ import {
   createHashedPublicAssetFiles,
   writePublicAssetManifest,
 } from "./OpenFrontIO/src/server/PublicAssetManifest";
+import {
+  adaptLeaderboardCurrentTroops,
+  adaptReplaySeekInputHandler,
+  adaptReplaySeekLocalServer,
+} from "./src/OpenFrontAdapters";
 
 const projectRoot = import.meta.dirname;
 const openFrontRoot = path.join(projectRoot, "OpenFrontIO");
@@ -18,6 +23,28 @@ const resourcesDir = path.join(openFrontRoot, "resources");
 const proprietaryDir = path.join(openFrontRoot, "proprietary");
 const sourceDirs = [resourcesDir, proprietaryDir];
 const outDir = path.join(projectRoot, "static");
+
+function openFrontHarnessAdapter(): Plugin {
+  return {
+    name: "openfront-harness-source-adapters",
+    enforce: "pre",
+    transform(code, id) {
+      const normalized = id.replaceAll("\\", "/").split("?")[0];
+      if (normalized.endsWith("/OpenFrontIO/src/client/InputHandler.ts")) {
+        return adaptReplaySeekInputHandler(code);
+      }
+      if (normalized.endsWith("/OpenFrontIO/src/client/LocalServer.ts")) {
+        return adaptReplaySeekLocalServer(code);
+      }
+      if (
+        normalized.endsWith("/OpenFrontIO/src/client/hud/layers/Leaderboard.ts")
+      ) {
+        return adaptLeaderboardCurrentTroops(code);
+      }
+      return null;
+    },
+  };
+}
 
 function replayTickAdapter(): Plugin {
   return {
@@ -132,6 +159,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      openFrontHarnessAdapter(),
       replayTickAdapter(),
       replayTurnstileAdapter(),
       replayWorkerAssetAdapter(),
