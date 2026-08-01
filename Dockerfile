@@ -1,11 +1,30 @@
+FROM node:24-slim AS openfront-source
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates git \
+  && rm -rf /var/lib/apt/lists/*
+RUN git clone --depth 1 --branch v0.32.9 --filter=blob:none --sparse \
+    https://github.com/openfrontio/OpenFrontIO.git /OpenFrontIO \
+  && cd /OpenFrontIO \
+  && git sparse-checkout set --no-cone \
+    '/package.json' \
+    '/package-lock.json' \
+    '/tsconfig.json' \
+    '/src/' \
+    '/proprietary/' \
+    '/resources/*' \
+    '!/resources/maps/*/' \
+    '/resources/maps/japan/' \
+  && test "$(git rev-parse HEAD)" = "dcc18d5231af6253b0e991bf04a4c764982fe262" \
+  && rm -rf .git
+
 FROM node:24-slim AS build
 WORKDIR /app
 ENV HUSKY=0
 COPY package*.json ./
 RUN npm ci --ignore-scripts
-COPY OpenFrontIO/package*.json ./OpenFrontIO/
+COPY --from=openfront-source /OpenFrontIO/package*.json ./OpenFrontIO/
 RUN npm --prefix OpenFrontIO ci --ignore-scripts
-COPY OpenFrontIO ./OpenFrontIO
+COPY --from=openfront-source /OpenFrontIO ./OpenFrontIO
 COPY tsconfig.json vite.config.ts vitest.config.ts harness.html replay.html ./
 COPY src ./src
 COPY resources ./resources
@@ -16,7 +35,7 @@ WORKDIR /app
 ENV HUSKY=0 NPM_CONFIG_IGNORE_SCRIPTS=1
 COPY package*.json ./
 RUN npm ci --omit=dev --ignore-scripts
-COPY OpenFrontIO/package*.json ./OpenFrontIO/
+COPY --from=openfront-source /OpenFrontIO/package*.json ./OpenFrontIO/
 RUN npm --prefix OpenFrontIO ci --omit=dev --ignore-scripts
 
 FROM node:24-slim
@@ -25,9 +44,10 @@ ENV NODE_ENV=production PORT=3000 RUN_DATA_DIR=/data
 COPY --from=production-dependencies /app/node_modules ./node_modules
 COPY --from=production-dependencies /app/OpenFrontIO/node_modules ./OpenFrontIO/node_modules
 COPY package*.json tsconfig.json ./
-COPY OpenFrontIO/src ./OpenFrontIO/src
-COPY OpenFrontIO/resources ./OpenFrontIO/resources
-COPY OpenFrontIO/proprietary ./OpenFrontIO/proprietary
+COPY --from=openfront-source /OpenFrontIO/tsconfig.json ./OpenFrontIO/tsconfig.json
+COPY --from=openfront-source /OpenFrontIO/src ./OpenFrontIO/src
+COPY --from=openfront-source /OpenFrontIO/resources ./OpenFrontIO/resources
+COPY --from=openfront-source /OpenFrontIO/proprietary ./OpenFrontIO/proprietary
 COPY src ./src
 COPY resources ./resources
 COPY README.md design-decision.md writeup.md ./
