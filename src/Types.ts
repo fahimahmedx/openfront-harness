@@ -267,6 +267,17 @@ export const ActionOutcomeStatusSchema = z.enum([
 ]);
 export type ActionOutcomeStatus = z.infer<typeof ActionOutcomeStatusSchema>;
 
+export const ActionOutcomeFailureCodeSchema = z.enum([
+  "anchor_lost",
+  "insufficient_gold",
+  "placement_blocked",
+  "player_eliminated",
+  "runtime_rejected",
+]);
+export type ActionOutcomeFailureCode = z.infer<
+  typeof ActionOutcomeFailureCodeSchema
+>;
+
 export const ActionOutcomeSchema = z.object({
   actionId: z.string().min(1).max(160),
   status: ActionOutcomeStatusSchema,
@@ -274,6 +285,7 @@ export const ActionOutcomeSchema = z.object({
   resolvedAtTick: z.number().int().nonnegative().nullable(),
   entityId: z.union([z.string(), z.number().int()]).nullable(),
   detail: z.string().min(1).max(500),
+  failureCode: ActionOutcomeFailureCodeSchema.optional(),
 });
 export type ActionOutcome = z.infer<typeof ActionOutcomeSchema>;
 
@@ -360,6 +372,7 @@ export const RunArtifactSchema = z.object({
       "agent-v7",
       "agent-v8",
       "agent-v9",
+      "agent-v10",
     ]),
     // Retained only for parsing artifacts created before model seeding was
     // removed. New runs omit this field.

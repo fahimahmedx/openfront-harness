@@ -24,6 +24,8 @@ let decisionIndex = 0;
 const recordedPolicy: AgentPolicy = {
   requestedModel: source.model.requested,
   provider: source.model.provider ?? undefined,
+  promptVersion: source.model.promptVersion,
+  recordedDecisions: source.decisions,
   async estimateNextCost() {
     return 0;
   },

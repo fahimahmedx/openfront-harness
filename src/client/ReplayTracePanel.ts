@@ -21,6 +21,7 @@ type PublicDecision = {
     resolvedAtTick: number | null;
     entityId: string | number | null;
     detail: string;
+    failureCode?: string;
   }>;
   candidates: ReplayActionCandidate[];
   latencyMs: number;
@@ -711,7 +712,9 @@ class HarnessReplayPanel extends HTMLElement {
       if (presentation.detail) {
         const detail = document.createElement("span");
         detail.className = "action-detail";
-        detail.textContent = presentation.detail;
+        detail.textContent = lifecycle?.failureCode
+          ? `${lifecycle.failureCode}: ${presentation.detail}`
+          : presentation.detail;
         actionCopy.append(detail);
       }
       row.append(actionIndex, actionCopy);

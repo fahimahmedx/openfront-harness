@@ -52,6 +52,8 @@ const PROJECT_ROOT = path.resolve(__dirname, "..");
 export interface AgentPolicy {
   requestedModel: string;
   provider?: string;
+  promptVersion?: string;
+  recordedDecisions?: readonly DecisionRecord[];
   estimateNextCost(
     observation: ReturnType<typeof createObservation>,
     candidates: ReturnType<typeof createLegalActions>,
@@ -250,7 +252,14 @@ export class HarnessRunner {
           decisionIndex,
           decisions,
         );
-        const candidates = createLegalActions(game, player);
+        const promptVersion =
+          this.agent.promptVersion ?? OpenRouterAgent.promptVersion();
+        const recordedDecision = this.agent.recordedDecisions?.[decisionIndex];
+        const candidates =
+          recordedDecision?.candidates ??
+          createLegalActions(game, player, {
+            safeBuildAnchors: promptVersion === "agent-v10",
+          });
         const estimate = await this.agent.estimateNextCost(
           observation,
           candidates,
@@ -269,7 +278,22 @@ export class HarnessRunner {
           "hold:1",
           "hold:2",
         ];
-        const resolved = resolveDecisionActions(selectedIds, candidates);
+        const resolved = recordedDecision
+          ? {
+              actions: recordedDecision.appliedActionIds.map((id) => {
+                const candidate = recordedDecision.candidates.find(
+                  (item) => item.id === id,
+                );
+                if (!candidate) {
+                  throw new Error(
+                    `Recorded decision ${decisionIndex} is missing applied action ${id}`,
+                  );
+                }
+                return candidate;
+              }),
+              fallback: recordedDecision.fallback,
+            }
+          : resolveDecisionActions(selectedIds, candidates);
         const completeFailure = agentResult.decision === null;
         consecutiveFailures = completeFailure ? consecutiveFailures + 1 : 0;
         const strategy = completeFailure
@@ -474,7 +498,8 @@ export class HarnessRunner {
                 decisions[decisions.length - 1]?.provider ??
                 this.agent.provider ??
                 null,
-              promptVersion: OpenRouterAgent.promptVersion(),
+              promptVersion:
+                this.agent.promptVersion ?? OpenRouterAgent.promptVersion(),
               reasoningEffort: OpenRouterAgent.reasoningEffort(),
             },
             startedAt: startedAt.toISOString(),

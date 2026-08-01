@@ -84,13 +84,52 @@ describe("action lifecycle tracking", () => {
       .mockImplementation(() => undefined);
     execute([invalidBuild.intent!]);
     updateActionTracking(failedTracking, runner.game, runner.game.ticks());
+    execute();
+    updateActionTracking(failedTracking, runner.game, runner.game.ticks());
     expect(
       actionOutcomes(failedTracking, runner.game, runner.game.ticks())[0],
     ).toMatchObject({
       status: "failed",
       startedAtTick: null,
+      failureCode: "placement_blocked",
+      detail: expect.stringContaining("target tile -1 is invalid"),
     });
     warning.mockRestore();
+
+    player.addGold(1_000_000n);
+    const legalBuild = createLegalActions(runner.game, player).find(
+      (candidate) =>
+        candidate.intent?.type === "build_unit" &&
+        candidate.intent.unit === UnitType.City,
+    );
+    expect(legalBuild).toBeDefined();
+    const staleBuildTracking = beginActionTracking(runner.game, player, [
+      legalBuild!,
+    ]);
+    const staleIntent = legalBuild!.intent as Extract<
+      Intent,
+      { type: "build_unit" }
+    >;
+    const opponent = runner.game
+      .players()
+      .find((candidate) => candidate !== player)!;
+    opponent.conquer(staleIntent.tile);
+    const staleWarning = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => undefined);
+    execute([staleIntent]);
+    updateActionTracking(staleBuildTracking, runner.game, runner.game.ticks());
+    execute();
+    updateActionTracking(staleBuildTracking, runner.game, runner.game.ticks());
+    expect(
+      actionOutcomes(staleBuildTracking, runner.game, runner.game.ticks())[0],
+    ).toMatchObject({
+      status: "failed",
+      startedAtTick: null,
+      failureCode: "anchor_lost",
+      detail: expect.stringContaining("was no longer owned"),
+    });
+    staleWarning.mockRestore();
 
     const expansion = createLegalActions(runner.game, player)
       .filter((candidate) => candidate.category === "expand")

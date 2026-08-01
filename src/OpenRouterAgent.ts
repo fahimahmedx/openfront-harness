@@ -17,7 +17,7 @@ import {
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
-const PROMPT_VERSION = "agent-v9" as const;
+const PROMPT_VERSION = "agent-v10" as const;
 const REASONING_EFFORT = "none" as const;
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_COMPLETION_TOKENS = 512;
@@ -266,6 +266,7 @@ export function promptFor(observation: Observation, candidates: LegalAction[]) {
 export class OpenRouterAgent {
   readonly requestedModel: string;
   readonly provider: string | undefined;
+  readonly promptVersion = PROMPT_VERSION;
   private pricing: Pricing | null = null;
   private pricingLoaded = false;
 

@@ -292,16 +292,61 @@ function deterministicAnchors(game: Game, player: Player): number[] {
   return Array.from(anchors).filter((tile) => game.owner(tile) === player);
 }
 
+function hostileBuildFrontier(game: Game, player: Player): number[] {
+  return Array.from(player.borderTiles())
+    .filter((tile) =>
+      game.neighbors(tile).some((neighbor) => {
+        const owner = game.owner(neighbor);
+        return (
+          owner.isPlayer() && owner !== player && !player.isFriendly(owner)
+        );
+      }),
+    )
+    .sort((a, b) => a - b);
+}
+
+export function selectSafestBuildAnchor(
+  anchors: number[],
+  resolveSpawn: (anchor: number) => number | false,
+  distanceFromHostileFront: (tile: number) => number,
+): number | false {
+  let selected: number | false = false;
+  let selectedSafety = Number.NEGATIVE_INFINITY;
+  for (const anchor of anchors) {
+    const spawn = resolveSpawn(anchor);
+    if (spawn === false) continue;
+    const safety = Math.min(
+      distanceFromHostileFront(anchor),
+      distanceFromHostileFront(spawn),
+    );
+    if (safety > selectedSafety) {
+      selected = anchor;
+      selectedSafety = safety;
+    }
+  }
+  return selected;
+}
+
 function firstBuildTile(
+  game: Game,
   player: Player,
   type: UnitType,
   anchors: number[],
+  hostileFrontier: number[],
 ): number | false {
-  for (const anchor of anchors) {
-    const tile = player.canBuild(type, anchor);
-    if (tile !== false) return anchor;
-  }
-  return false;
+  const distanceFromHostileFront = (tile: number) => {
+    if (hostileFrontier.length === 0) return 0;
+    let minimum = Number.POSITIVE_INFINITY;
+    for (const frontierTile of hostileFrontier) {
+      minimum = Math.min(minimum, game.manhattanDist(tile, frontierTile));
+    }
+    return minimum;
+  };
+  return selectSafestBuildAnchor(
+    anchors,
+    (anchor) => player.canBuild(type, anchor),
+    distanceFromHostileFront,
+  );
 }
 
 function boatDestination(
@@ -419,7 +464,11 @@ function budgetLabel(
   return `${troops.toLocaleString("en-US")} troops (${fraction}% of this slot's safe budget; ${Math.round(budget.reserveRatio * 100)}% capacity reserve)`;
 }
 
-export function createLegalActions(game: Game, player: Player): LegalAction[] {
+export function createLegalActions(
+  game: Game,
+  player: Player,
+  options: { safeBuildAnchors?: boolean } = {},
+): LegalAction[] {
   const actions: LegalAction[] = [
     action("hold:1", "hold", "Hold the first action slot", null),
     action("hold:2", "hold", "Hold the second action slot", null),
@@ -575,8 +624,12 @@ export function createLegalActions(game: Game, player: Player): LegalAction[] {
   }
 
   const anchors = deterministicAnchors(game, player);
+  const hostileFrontier =
+    options.safeBuildAnchors === false
+      ? []
+      : hostileBuildFrontier(game, player);
   for (const type of STRUCTURE_TYPES) {
-    const anchor = firstBuildTile(player, type, anchors);
+    const anchor = firstBuildTile(game, player, type, anchors, hostileFrontier);
     if (anchor !== false) {
       actions.push(
         action(

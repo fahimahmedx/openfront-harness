@@ -152,8 +152,8 @@ afterEach(() => {
 });
 
 describe("OpenRouter action output", () => {
-  it("versions the single gold-spending slot as agent-v9", () => {
-    expect(OpenRouterAgent.promptVersion()).toBe("agent-v9");
+  it("versions stale-build handling as agent-v10", () => {
+    expect(OpenRouterAgent.promptVersion()).toBe("agent-v10");
     expect(OpenRouterAgent.reasoningEffort()).toBe("none");
   });
 

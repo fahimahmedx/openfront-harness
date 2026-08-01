@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
 import { UnitType } from "../OpenFrontIO/src/core/game/Game";
-import { resolveDecisionActions } from "../src/ObservationActions";
+import {
+  resolveDecisionActions,
+  selectSafestBuildAnchor,
+} from "../src/ObservationActions";
 import { LegalAction } from "../src/Types";
 
 const candidates: LegalAction[] = [
@@ -85,6 +88,38 @@ const candidates: LegalAction[] = [
 ];
 
 describe("fixed action slots", () => {
+  test("selects the legal build anchor farthest from a hostile front", () => {
+    const spawnByAnchor = new Map<number, number | false>([
+      [10, 11],
+      [20, 21],
+      [30, false],
+    ]);
+    const distanceByTile = new Map([
+      [10, 3],
+      [11, 2],
+      [20, 8],
+      [21, 7],
+    ]);
+
+    expect(
+      selectSafestBuildAnchor(
+        [10, 20, 30],
+        (anchor) => spawnByAnchor.get(anchor) ?? false,
+        (tile) => distanceByTile.get(tile) ?? 0,
+      ),
+    ).toBe(20);
+  });
+
+  test("preserves deterministic anchor order when safety is tied", () => {
+    expect(
+      selectSafestBuildAnchor(
+        [20, 10],
+        (anchor) => anchor + 1,
+        () => 5,
+      ),
+    ).toBe(20);
+  });
+
   test("keeps two distinct legal actions", () => {
     const result = resolveDecisionActions(
       ["expand:neutral:25", "hold:2"],

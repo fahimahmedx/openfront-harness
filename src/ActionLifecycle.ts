@@ -11,7 +11,7 @@ import {
   GameUpdateViewData,
 } from "../OpenFrontIO/src/core/game/GameUpdates";
 import { Intent } from "../OpenFrontIO/src/core/Schemas";
-import { ActionOutcome, LegalAction } from "./Types";
+import { ActionOutcome, ActionOutcomeFailureCode, LegalAction } from "./Types";
 
 type AllianceRequestRef = ReturnType<
   Player["outgoingAllianceRequests"]
@@ -30,6 +30,7 @@ type ActionTracker = {
   beforeUpgradeLevel: number | null;
   targetSmallId: number | null;
   targetName: string | null;
+  submittedAtTick: number;
   attack?: Attack;
   unit?: Unit;
   allianceRequest?: AllianceRequestRef;
@@ -80,6 +81,7 @@ function outcome(
   tick: number,
   detail: string,
   entityId: string | number | null = null,
+  failureCode?: ActionOutcomeFailureCode,
 ): ActionOutcome {
   const started =
     status === "failed" ? null : (tracker.outcome?.startedAtTick ?? tick);
@@ -91,7 +93,79 @@ function outcome(
       status === "started" ? null : (tracker.outcome?.resolvedAtTick ?? tick),
     entityId,
     detail,
+    ...(failureCode ? { failureCode } : {}),
   };
+}
+
+function failedBuildOutcome(
+  tracker: ActionTracker,
+  game: Game,
+  tick: number,
+  intent: Extract<Intent, { type: "build_unit" }>,
+): ActionOutcome {
+  const prefix = `${intent.unit} build became invalid before execution`;
+  if (!tracker.player.isAlive()) {
+    return outcome(
+      tracker,
+      "failed",
+      tick,
+      `${prefix}: the player was eliminated`,
+      null,
+      "player_eliminated",
+    );
+  }
+  if (!game.isValidRef(intent.tile)) {
+    return outcome(
+      tracker,
+      "failed",
+      tick,
+      `${prefix}: target tile ${intent.tile} is invalid`,
+      null,
+      "placement_blocked",
+    );
+  }
+  if (
+    Structures.has(intent.unit) &&
+    game.owner(intent.tile) !== tracker.player
+  ) {
+    return outcome(
+      tracker,
+      "failed",
+      tick,
+      `${prefix}: anchor tile ${intent.tile} was no longer owned`,
+      null,
+      "anchor_lost",
+    );
+  }
+  const cost = game.unitInfo(intent.unit).cost(game, tracker.player);
+  if (tracker.player.gold() < cost) {
+    return outcome(
+      tracker,
+      "failed",
+      tick,
+      `${prefix}: required ${cost.toString()} gold but only ${tracker.player.gold().toString()} remained`,
+      null,
+      "insufficient_gold",
+    );
+  }
+  if (tracker.player.canBuild(intent.unit, intent.tile) === false) {
+    return outcome(
+      tracker,
+      "failed",
+      tick,
+      `${prefix}: no valid placement remained near tile ${intent.tile}`,
+      null,
+      "placement_blocked",
+    );
+  }
+  return outcome(
+    tracker,
+    "failed",
+    tick,
+    `${intent.unit} build was rejected without an observable start or state change`,
+    null,
+    "runtime_rejected",
+  );
 }
 
 function completeImmediate(
@@ -207,6 +281,12 @@ function detectStart(tracker: ActionTracker, game: Game, tick: number): void {
       return;
     case "build_unit":
       detectUnitStart(tracker, tick, intent.unit);
+      // New executions are initialized after the current tick's active
+      // executions and first run on the following tick. If no unit exists two
+      // ticks after submission, the core has rejected the build.
+      if (!tracker.outcome && tick >= tracker.submittedAtTick + 2) {
+        tracker.outcome = failedBuildOutcome(tracker, game, tick, intent);
+      }
       return;
     case "cancel_attack": {
       const attack =
@@ -475,6 +555,7 @@ export function beginActionTracking(
       beforeUpgradeLevel: upgradeUnit?.level() ?? null,
       targetSmallId: target?.smallID() ?? null,
       targetName: target?.name() ?? null,
+      submittedAtTick: game.ticks(),
     };
     if (intent?.type === "cancel_attack") {
       tracker.attack = player
@@ -551,6 +632,8 @@ export function actionOutcomes(
         "failed",
         tick,
         "The core produced no observable start or state change",
+        null,
+        "runtime_rejected",
       );
     }
     return { ...tracker.outcome };
