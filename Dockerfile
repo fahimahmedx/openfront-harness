@@ -28,6 +28,7 @@ COPY --from=openfront-source /OpenFrontIO ./OpenFrontIO
 COPY tsconfig.json vite.config.ts vitest.config.ts harness.html replay.html ./
 COPY src ./src
 COPY resources ./resources
+COPY videos ./videos
 RUN npm run build
 
 FROM node:24-slim AS production-dependencies
