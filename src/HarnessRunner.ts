@@ -259,7 +259,9 @@ export class HarnessRunner {
           recordedDecision?.candidates ??
           createLegalActions(game, player, {
             safeBuildAnchors:
-              promptVersion === "agent-v10" || promptVersion === "agent-v11",
+              promptVersion === "agent-v10" ||
+              promptVersion === "agent-v11" ||
+              promptVersion === "agent-v12",
           });
         const estimate = await this.agent.estimateNextCost(
           observation,

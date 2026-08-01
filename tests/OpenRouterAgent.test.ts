@@ -50,6 +50,22 @@ const diplomacyCandidates: LegalAction[] = [
   },
 ];
 
+const multiFrontCandidates: LegalAction[] = [
+  ...candidates,
+  {
+    id: "attack:enemy001:100",
+    category: "attack",
+    label: "Attack Enemy One",
+    intent: { type: "attack", targetID: "enemy001", troops: 100 },
+  },
+  {
+    id: "attack:enemy002:100",
+    category: "attack",
+    label: "Attack Enemy Two",
+    intent: { type: "attack", targetID: "enemy002", troops: 100 },
+  },
+];
+
 const buildCandidates: LegalAction[] = [
   ...candidates,
   {
@@ -67,7 +83,7 @@ const buildCandidates: LegalAction[] = [
 ];
 
 const observation: Observation = {
-  scenarioId: "japan-v4",
+  scenarioId: "japan-v5",
   decision: 1,
   tick: 103,
   elapsedSeconds: 10.2,
@@ -152,8 +168,8 @@ afterEach(() => {
 });
 
 describe("OpenRouter action output", () => {
-  it("versions semantic diplomacy guidance as agent-v11", () => {
-    expect(OpenRouterAgent.promptVersion()).toBe("agent-v11");
+  it("versions the one-front offense constraint as agent-v12", () => {
+    expect(OpenRouterAgent.promptVersion()).toBe("agent-v12");
     expect(OpenRouterAgent.reasoningEffort()).toBe("none");
   });
 
@@ -307,6 +323,29 @@ describe("OpenRouter action output", () => {
             "alliance:request:enemy001",
             "embargo:start:enemy001",
           ],
+        },
+      ],
+    });
+  });
+
+  it("rejects proactive attacks against two different opponents", () => {
+    const validated = validateDecisionContent(
+      JSON.stringify({
+        strategy: "Pressure both rivals at once",
+        action1: "attack:enemy001:100",
+        action2: "attack:enemy002:100",
+      }),
+      multiFrontCandidates,
+    );
+
+    expect(validated).toEqual({
+      decision: null,
+      failures: [
+        {
+          code: "conflicting_action_ids",
+          message:
+            "OpenRouter selected proactive attacks against multiple opponents: attack:enemy001:100, attack:enemy002:100",
+          rejectedActionIds: ["attack:enemy001:100", "attack:enemy002:100"],
         },
       ],
     });

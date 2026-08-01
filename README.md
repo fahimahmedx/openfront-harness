@@ -55,7 +55,7 @@ npm run refresh:sample # rebuild sample from its recorded trace, no API call
 
 | Setting           | Value                                                      |
 | ----------------- | ---------------------------------------------------------- |
-| Scenario          | `japan-v4`                                                 |
+| Scenario          | `japan-v5`                                                 |
 | Map               | Japan, Normal                                              |
 | Mode              | Free For All, Singleplayer                                 |
 | Players           | 1 LLM + 3 Nation players                                   |

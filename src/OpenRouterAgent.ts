@@ -10,6 +10,7 @@ import {
   AgentResult,
   isGoldSpendingLegalAction,
   isRepeatableLegalAction,
+  legalActionConflictReason,
   LegalAction,
   Observation,
   TIMER_VICTORY_RULE,
@@ -17,7 +18,7 @@ import {
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
-const PROMPT_VERSION = "agent-v11" as const;
+const PROMPT_VERSION = "agent-v12" as const;
 const REASONING_EFFORT = "none" as const;
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_COMPLETION_TOKENS = 512;
@@ -210,14 +211,17 @@ export function validateDecisionContent(
     const selectedActions = selectedIds.map((id) =>
       candidates.find((candidate) => candidate.id === id),
     );
-    if (
-      selectedActions[0] !== undefined &&
-      selectedActions[1] !== undefined &&
-      areConflictingLegalActions(selectedActions[0], selectedActions[1])
-    ) {
+    const conflictReason =
+      selectedActions[0] === undefined || selectedActions[1] === undefined
+        ? null
+        : legalActionConflictReason(selectedActions[0], selectedActions[1]);
+    if (conflictReason !== null) {
       failures.push({
         code: "conflicting_action_ids",
-        message: `OpenRouter selected actions with conflicting same-target postures: ${selectedIds.join(", ")}`,
+        message:
+          conflictReason === "multi_front_proactive_offense"
+            ? `OpenRouter selected proactive attacks against multiple opponents: ${selectedIds.join(", ")}`
+            : `OpenRouter selected actions with conflicting same-target postures: ${selectedIds.join(", ")}`,
         rejectedActionIds: selectedIds,
       });
     }
@@ -249,6 +253,7 @@ export function promptFor(observation: Observation, candidates: LegalAction[]) {
     "Your goal is to win. Choose one legal ID for action1 and one legal ID for action2.",
     "Both action slots execute simultaneously on the next tick. action2 cannot depend on action1's outcome.",
     "Do not combine cooperative and hostile actions toward the same opponent in one decision (for example, alliance plus attack, embargo, or alliance break).",
+    "Do not proactively attack two different opponents in one decision. You may counter two different opponents when both are already attacking you.",
     "Troop actions with maxUses 2 may be selected in both slots. Do not repeat actions with maxUses 1.",
     "Build and upgrade actions are legal only in action1, so choose at most one gold-spending action per decision. Follow each action's allowedSlots.",
     "In free-for-all play, avoid opening proactive wars against multiple comparable opponents. An alliance can keep one front peaceful; neutral nations are more likely to accept early requests before hostilities.",

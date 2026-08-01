@@ -36,6 +36,24 @@ const candidates: LegalAction[] = [
     intent: { type: "attack", targetID: "opponent", troops: 25 },
   },
   {
+    id: "attack:other:25",
+    category: "attack",
+    label: "Attack another opponent",
+    intent: { type: "attack", targetID: "other", troops: 25 },
+  },
+  {
+    id: "counter:opponent:25",
+    category: "attack",
+    label: "Counter opponent",
+    intent: { type: "attack", targetID: "opponent", troops: 25 },
+  },
+  {
+    id: "counter:other:25",
+    category: "attack",
+    label: "Counter another opponent",
+    intent: { type: "attack", targetID: "other", troops: 25 },
+  },
+  {
     id: "boat:opponent:25",
     category: "boat",
     label: "Invade opponent by sea",
@@ -251,6 +269,32 @@ describe("fixed action slots", () => {
     expect(result.actions.map((action) => action.id)).toEqual([
       "alliance:request:opponent",
       "embargo:start:other",
+    ]);
+    expect(result.fallback).toBe(false);
+  });
+
+  test("rejects proactive attacks against two different opponents", () => {
+    const result = resolveDecisionActions(
+      ["attack:opponent:25", "attack:other:25"],
+      candidates,
+    );
+
+    expect(result.actions.map((action) => action.id)).toEqual([
+      "hold:1",
+      "hold:2",
+    ]);
+    expect(result.fallback).toBe(true);
+  });
+
+  test("allows counters against two different incoming attackers", () => {
+    const result = resolveDecisionActions(
+      ["counter:opponent:25", "counter:other:25"],
+      candidates,
+    );
+
+    expect(result.actions.map((action) => action.id)).toEqual([
+      "counter:opponent:25",
+      "counter:other:25",
     ]);
     expect(result.fallback).toBe(false);
   });
