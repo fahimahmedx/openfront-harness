@@ -23,8 +23,13 @@ dotenv.config({
 });
 const staticDir = path.join(projectRoot, "static");
 const dataDir = path.resolve(
-  process.env.RUN_DATA_DIR ?? path.join(projectRoot, ".data/runs"),
+  process.env.RUN_DATA_DIR ?? path.join(projectRoot, "data/runs"),
 );
+const localDataRoot = path.join(projectRoot, "data");
+const artifactRoot =
+  dataDir === localDataRoot || dataDir.startsWith(`${localDataRoot}${path.sep}`)
+    ? localDataRoot
+    : dataDir;
 const sampleFile = path.join(
   projectRoot,
   "resources/harness/sample-run.json.gz",
@@ -97,7 +102,11 @@ if (!process.env.RATE_LIMIT_SALT) {
   console.warn("RATE_LIMIT_SALT is not set; using a development-only value");
 }
 
-const store = new RunStore(dataDir, [sampleFile, featuredRunFile]);
+const store = new RunStore(
+  dataDir,
+  [sampleFile, featuredRunFile],
+  artifactRoot,
+);
 const limiter = new DailyRateLimiter(
   path.join(dataDir, "rate-limits.json"),
   rateSalt,

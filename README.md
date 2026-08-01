@@ -119,6 +119,7 @@ Public generation is intentionally conservative: one active run globally, one la
 src/                          scenario, runner, agent, storage, API
 src/client/                   dashboard, replay bootstrap, trace panel
 tests/                        focused deterministic tests
+data/                         local run artifacts grouped by run folder (git-ignored)
 resources/harness/            bundled real-model replay artifacts
 OpenFrontIO/                   untouched v0.32.9 source dependency
 vite.config.ts                external build and in-memory replay adapter

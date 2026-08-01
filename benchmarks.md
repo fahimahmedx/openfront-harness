@@ -10,7 +10,7 @@ expose upstream provider queue duration.
 
 - Replay ID: `35fd5d95-ae47-4384-9ab2-9337b9557ace`
 - Replay: http://localhost:3000/replay/35fd5d95-ae47-4384-9ab2-9337b9557ace
-- Artifact: `.data/runs/35fd5d95-ae47-4384-9ab2-9337b9557ace.json.gz`
+- Artifact: `data/runs/35fd5d95-ae47-4384-9ab2-9337b9557ace.json.gz`
 - Model: `openai/gpt-5.6-luna`
 - Provider: OpenAI through OpenRouter
 - Reasoning effort: `low`
@@ -47,7 +47,7 @@ is not a distribution of individual token arrival intervals.
 
 - Replay ID: `1ebe925e-8108-412d-8b2d-8d882822a253`
 - Replay: http://localhost:3000/replay/1ebe925e-8108-412d-8b2d-8d882822a253
-- Artifact: `.data/runs/1ebe925e-8108-412d-8b2d-8d882822a253.json.gz`
+- Artifact: `data/runs/1ebe925e-8108-412d-8b2d-8d882822a253.json.gz`
 - Model: `openai/gpt-5.6-luna`
 - Provider: OpenAI through OpenRouter
 - Reasoning effort: **`none`**

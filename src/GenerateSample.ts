@@ -20,7 +20,7 @@ if (!process.env.OPENROUTER_API_KEY) {
   throw new Error("OPENROUTER_API_KEY is required to generate the sample");
 }
 
-const tempDir = path.join(projectRoot, ".data/sample-generation");
+const tempDir = path.join(projectRoot, "data/sample-generation");
 const store = new RunStore(tempDir);
 await store.init();
 const artifact = await HarnessRunner.fromEnvironment(store).run();

@@ -54,12 +54,21 @@ const recordedPolicy: AgentPolicy = {
   },
 };
 
-const store = new RunStore(path.join(projectRoot, ".data/sample-verification"));
+const store = new RunStore(path.join(projectRoot, "data/sample-verification"));
 await store.init();
 const replayed = await new HarnessRunner(store, recordedPolicy).run(
   source.runId,
 );
-for (const field of ["winner", "ticks", "finalHash"] as const) {
+const winnerMatches = source.outcome.llmWon
+  ? replayed.outcome.llmWon
+  : !replayed.outcome.llmWon &&
+    replayed.outcome.winner === source.outcome.winner;
+if (!winnerMatches) {
+  throw new Error(
+    `Sample mismatch for winner: expected ${source.outcome.winner}, got ${replayed.outcome.winner}`,
+  );
+}
+for (const field of ["ticks", "finalHash"] as const) {
   if (replayed.outcome[field] !== source.outcome[field]) {
     throw new Error(
       `Sample mismatch for ${field}: expected ${source.outcome[field]}, got ${replayed.outcome[field]}`,

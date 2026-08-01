@@ -36,6 +36,7 @@ export class RunStore {
   constructor(
     readonly dataDir: string,
     private readonly bundledFiles: string[] = [],
+    private readonly artifactRoot: string = dataDir,
   ) {}
 
   async init(): Promise<void> {
@@ -92,6 +93,14 @@ export class RunStore {
     const activeFile = path.join(this.dataDir, `${runId}.json.gz`);
     const local = await this.readArtifact(activeFile);
     if (local) return local;
+    const nestedFiles = (await this.findArtifactFiles()).filter(
+      (file) =>
+        file !== activeFile && path.basename(file) === `${runId}.json.gz`,
+    );
+    for (const file of nestedFiles) {
+      const nested = await this.readArtifact(file);
+      if (nested?.runId === runId) return nested;
+    }
     for (const file of this.bundledFiles) {
       const bundled = await this.readArtifact(file);
       if (bundled?.runId === runId) return bundled;
@@ -100,27 +109,56 @@ export class RunStore {
   }
 
   async listArtifacts(): Promise<RunArtifact[]> {
-    const files = (await fs.readdir(this.dataDir))
-      .filter((file) => file.endsWith(".json.gz"))
-      .sort()
-      .reverse();
-    const artifacts = (
-      await Promise.all(
-        files
-          .slice(0, 50)
-          .map((file) => this.readArtifact(path.join(this.dataDir, file))),
-      )
+    const files = await this.findArtifactFiles();
+    const discovered = (
+      await Promise.all(files.map((file) => this.readArtifact(file)))
     ).filter((artifact): artifact is RunArtifact => artifact !== null);
+    const artifactsById = new Map<string, RunArtifact>();
+    for (const artifact of discovered) {
+      if (!artifactsById.has(artifact.runId)) {
+        artifactsById.set(artifact.runId, artifact);
+      }
+    }
     for (const file of this.bundledFiles) {
       const bundled = await this.readArtifact(file);
       if (
         bundled &&
-        !artifacts.some((artifact) => artifact.runId === bundled.runId)
+        (!artifactsById.has(bundled.runId) || bundled.status === "sample")
       ) {
-        artifacts.push(bundled);
+        artifactsById.set(bundled.runId, bundled);
       }
     }
+    const artifacts = Array.from(artifactsById.values());
     return artifacts.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  }
+
+  private async findArtifactFiles(): Promise<string[]> {
+    const files: string[] = [];
+    const directories = [this.artifactRoot];
+    while (directories.length > 0) {
+      const directory = directories.pop()!;
+      let entries;
+      try {
+        entries = await fs.readdir(directory, { withFileTypes: true });
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") continue;
+        throw error;
+      }
+      entries.sort((a, b) => a.name.localeCompare(b.name));
+      for (const entry of entries) {
+        const target = path.join(directory, entry.name);
+        if (entry.isDirectory()) {
+          directories.push(target);
+        } else if (entry.isFile() && entry.name.endsWith(".json.gz")) {
+          files.push(target);
+        }
+      }
+    }
+    return files.sort((a, b) => {
+      const aIsPrimary = path.dirname(a) === this.dataDir;
+      const bIsPrimary = path.dirname(b) === this.dataDir;
+      return Number(bIsPrimary) - Number(aIsPrimary) || a.localeCompare(b);
+    });
   }
 
   private async readArtifact(file: string): Promise<RunArtifact | null> {
