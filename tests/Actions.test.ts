@@ -76,6 +76,12 @@ const candidates: LegalAction[] = [
     label: "Build Factory near (3, 4)",
     intent: { type: "build_unit", unit: UnitType.Factory, tile: 456 },
   },
+  {
+    id: "build:Port:789",
+    category: "build",
+    label: "Build Port near (5, 6)",
+    intent: { type: "build_unit", unit: UnitType.Port, tile: 789 },
+  },
 ];
 
 describe("fixed action slots", () => {
@@ -121,9 +127,9 @@ describe("fixed action slots", () => {
     ).toEqual(["hold:1", "hold:2"]);
   });
 
-  test("replaces a second structure build at the same coordinate with a hold", () => {
+  test("allows a build only in the first action slot", () => {
     const result = resolveDecisionActions(
-      ["build:City:123", "build:Defense Post:123"],
+      ["build:City:123", "build:Factory:456"],
       candidates,
     );
 
@@ -132,19 +138,16 @@ describe("fixed action slots", () => {
       "hold:2",
     ]);
     expect(result.fallback).toBe(true);
-  });
 
-  test("keeps structure builds at different coordinates", () => {
-    const result = resolveDecisionActions(
-      ["build:City:123", "build:Factory:456"],
+    const wrongSlot = resolveDecisionActions(
+      ["expand:neutral:25", "build:Port:789"],
       candidates,
     );
-
-    expect(result.actions.map((action) => action.id)).toEqual([
-      "build:City:123",
-      "build:Factory:456",
+    expect(wrongSlot.actions.map((action) => action.id)).toEqual([
+      "expand:neutral:25",
+      "hold:2",
     ]);
-    expect(result.fallback).toBe(false);
+    expect(wrongSlot.fallback).toBe(true);
   });
 
   test.each([

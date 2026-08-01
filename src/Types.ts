@@ -29,6 +29,13 @@ export function isRepeatableLegalAction(action: LegalAction): boolean {
   );
 }
 
+export function isGoldSpendingLegalAction(action: LegalAction): boolean {
+  return (
+    action.intent?.type === "build_unit" ||
+    action.intent?.type === "upgrade_structure"
+  );
+}
+
 type PlayerInteraction = {
   targetID: string;
   posture: "cooperate" | "oppose";
@@ -352,6 +359,7 @@ export const RunArtifactSchema = z.object({
       "agent-v6",
       "agent-v7",
       "agent-v8",
+      "agent-v9",
     ]),
     // Retained only for parsing artifacts created before model seeding was
     // removed. New runs omit this field.

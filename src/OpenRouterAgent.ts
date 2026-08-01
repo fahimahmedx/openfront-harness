@@ -8,6 +8,7 @@ import {
   AgentDecision,
   AgentDecisionSchema,
   AgentResult,
+  isGoldSpendingLegalAction,
   isRepeatableLegalAction,
   LegalAction,
   Observation,
@@ -16,7 +17,7 @@ import {
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
-const PROMPT_VERSION = "agent-v8" as const;
+const PROMPT_VERSION = "agent-v9" as const;
 const REASONING_EFFORT = "none" as const;
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_COMPLETION_TOKENS = 512;
@@ -112,7 +113,8 @@ function actionIdsForSlot(candidates: LegalAction[], slot: 1 | 2): string[] {
   return candidates
     .filter(
       (candidate) =>
-        candidate.category !== "hold" || candidate.id === `hold:${slot}`,
+        (candidate.category !== "hold" || candidate.id === `hold:${slot}`) &&
+        (slot === 1 || !isGoldSpendingLegalAction(candidate)),
     )
     .map((candidate) => candidate.id);
 }
@@ -238,6 +240,9 @@ export function promptFor(observation: Observation, candidates: LegalAction[]) {
     category: candidate.category,
     label: candidate.label,
     maxUses: isRepeatableLegalAction(candidate) ? SCENARIO.actionSlots : 1,
+    allowedSlots: ([1, 2] as const).filter((slot) =>
+      actionIdsForSlot([candidate], slot).includes(candidate.id),
+    ),
   }));
   return [
     "You control the human player in a deterministic OpenFront match.",
@@ -245,6 +250,7 @@ export function promptFor(observation: Observation, candidates: LegalAction[]) {
     "Both action slots execute simultaneously on the next tick. action2 cannot depend on action1's outcome.",
     "Do not combine cooperative and hostile actions toward the same opponent in one decision (for example, alliance plus attack, embargo, or alliance break).",
     "Troop actions with maxUses 2 may be selected in both slots. Do not repeat actions with maxUses 1.",
+    "Build and upgrade actions are legal only in action1, so choose at most one gold-spending action per decision. Follow each action's allowedSlots.",
     "Use hold:1 only for action1 or hold:2 only for action2 when that slot should do nothing. Never invent an ID.",
     "self.troopCapacityPercent is current troops divided by self.maxTroops; troop growth approaches zero near 100% capacity, so holding at maximum capacity cannot rebuild or increase reserves further.",
     "Every listed troop action already preserves self.reserveFloorTroops. self.spendableTroops is safe surplus divided across the two slots, so listed troop amounts do not violate the displayed reserve.",

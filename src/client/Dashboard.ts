@@ -65,7 +65,12 @@ function ordinal(value: number): string {
 }
 
 function scenarioLabel(scenarioId: string): string {
-  if (scenarioId === "japan-v2" || scenarioId === "japan-v3") return "Japan";
+  if (
+    scenarioId === "japan-v2" ||
+    scenarioId === "japan-v3" ||
+    scenarioId === "japan-v4"
+  )
+    return "Japan";
 
   return scenarioId
     .split("-")

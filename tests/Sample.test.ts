@@ -48,9 +48,9 @@ describe("bundled sample", () => {
     const current = RunArtifactSchema.parse({
       ...sample,
       schemaVersion: 2,
-      model: { ...sample.model, promptVersion: "agent-v8" },
+      model: { ...sample.model, promptVersion: "agent-v9" },
     });
-    expect(current.model.promptVersion).toBe("agent-v8");
+    expect(current.model.promptVersion).toBe("agent-v9");
     expect(current.decisions[0].attemptFailures).toEqual([]);
     expect(current.decisions[0].attemptTimings).toEqual([]);
   });

@@ -11,6 +11,7 @@ import { SCENARIO } from "./Scenario";
 import {
   areConflictingLegalActions,
   DecisionRecord,
+  isGoldSpendingLegalAction,
   isRepeatableLegalAction,
   LegalAction,
   Observation,
@@ -30,6 +31,7 @@ export type TroopBudget = {
   spendableTroops: number;
   perActionTroopBudget: number;
 };
+
 const STRUCTURE_TYPES = [
   UnitType.City,
   UnitType.DefensePost,
@@ -692,7 +694,6 @@ export function resolveDecisionActions(
     candidates.map((candidate) => [candidate.id, candidate]),
   );
   const uses = new Map<string, number>();
-  const structureBuildTiles = new Set<number>();
   let fallback = false;
   const resolved = [0, 1].map((slot) => {
     const id = selectedIds[slot];
@@ -700,27 +701,17 @@ export function resolveDecisionActions(
     const slotHoldId = `hold:${slot + 1}`;
     const allowedInSlot =
       candidate !== undefined &&
-      (candidate.category !== "hold" || candidate.id === slotHoldId);
+      (candidate.category !== "hold" || candidate.id === slotHoldId) &&
+      (slot === 0 || !isGoldSpendingLegalAction(candidate));
     const priorUses = id === undefined ? 0 : (uses.get(id) ?? 0);
     const repeatAllowed =
       candidate !== undefined &&
       (priorUses === 0 || isRepeatableLegalAction(candidate));
-    const structureBuildTile =
-      candidate?.intent?.type === "build_unit" &&
-      Structures.has(candidate.intent.unit)
-        ? candidate.intent.tile
-        : undefined;
-    const coordinateAvailable =
-      structureBuildTile === undefined ||
-      !structureBuildTiles.has(structureBuildTile);
-    if (!allowedInSlot || !repeatAllowed || !coordinateAvailable) {
+    if (!allowedInSlot || !repeatAllowed) {
       fallback = true;
       return byId.get(slotHoldId)!;
     }
     uses.set(id!, priorUses + 1);
-    if (structureBuildTile !== undefined) {
-      structureBuildTiles.add(structureBuildTile);
-    }
     return candidate;
   });
   if (areConflictingLegalActions(resolved[0], resolved[1])) {

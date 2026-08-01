@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { UnitType } from "../OpenFrontIO/src/core/game/Game";
 import {
   actionResponseJsonSchema,
   OpenRouterAgent,
@@ -49,8 +50,24 @@ const diplomacyCandidates: LegalAction[] = [
   },
 ];
 
+const buildCandidates: LegalAction[] = [
+  ...candidates,
+  {
+    id: "build:Factory:456",
+    category: "build",
+    label: "Build Factory near (3, 4)",
+    intent: { type: "build_unit", unit: UnitType.Factory, tile: 456 },
+  },
+  {
+    id: "build:Port:789",
+    category: "build",
+    label: "Build Port near (5, 6)",
+    intent: { type: "build_unit", unit: UnitType.Port, tile: 789 },
+  },
+];
+
 const observation: Observation = {
-  scenarioId: "japan-v3",
+  scenarioId: "japan-v4",
   decision: 1,
   tick: 103,
   elapsedSeconds: 10.2,
@@ -135,8 +152,8 @@ afterEach(() => {
 });
 
 describe("OpenRouter action output", () => {
-  it("versions simultaneous action semantics as agent-v8", () => {
-    expect(OpenRouterAgent.promptVersion()).toBe("agent-v8");
+  it("versions the single gold-spending slot as agent-v9", () => {
+    expect(OpenRouterAgent.promptVersion()).toBe("agent-v9");
     expect(OpenRouterAgent.reasoningEffort()).toBe("none");
   });
 
@@ -178,6 +195,18 @@ describe("OpenRouter action output", () => {
     expect(prompt).toContain(
       "Do not combine cooperative and hostile actions toward the same opponent",
     );
+  });
+
+  it("limits gold-spending actions to the first slot", () => {
+    const prompt = promptFor(observation, buildCandidates);
+    const schema = actionResponseJsonSchema(buildCandidates);
+
+    expect(prompt).toContain("legal only in action1");
+    expect(prompt).toContain("at most one gold-spending action per decision");
+    expect(prompt).toContain('"allowedSlots":[1]');
+    expect(schema.properties.action1.enum).toContain("build:Factory:456");
+    expect(schema.properties.action2.enum).not.toContain("build:Factory:456");
+    expect(schema.properties.action2.enum).not.toContain("build:Port:789");
   });
 
   it("normalizes the legacy unsigned gap as a deficit when ranked second", () => {
@@ -270,6 +299,28 @@ describe("OpenRouter action output", () => {
             "alliance:request:enemy001",
             "embargo:start:enemy001",
           ],
+        },
+      ],
+    });
+  });
+
+  it("rejects a build selected in action2", () => {
+    const validated = validateDecisionContent(
+      JSON.stringify({
+        strategy: "Build two structures",
+        action1: "build:Factory:456",
+        action2: "build:Port:789",
+      }),
+      buildCandidates,
+    );
+
+    expect(validated).toEqual({
+      decision: null,
+      failures: [
+        {
+          code: "unknown_action_id",
+          message: "OpenRouter selected unknown action ID: build:Port:789",
+          rejectedActionIds: ["build:Port:789"],
         },
       ],
     });
