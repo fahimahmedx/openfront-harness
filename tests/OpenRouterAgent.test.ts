@@ -33,8 +33,24 @@ const candidates: LegalAction[] = [
   },
 ];
 
+const diplomacyCandidates: LegalAction[] = [
+  ...candidates,
+  {
+    id: "alliance:request:enemy001",
+    category: "diplomacy",
+    label: "Request an alliance with Enemy",
+    intent: { type: "allianceRequest", recipient: "enemy001" },
+  },
+  {
+    id: "embargo:start:enemy001",
+    category: "diplomacy",
+    label: "Start an embargo against Enemy",
+    intent: { type: "embargo", targetID: "enemy001", action: "start" },
+  },
+];
+
 const observation: Observation = {
-  scenarioId: "japan-v2",
+  scenarioId: "japan-v3",
   decision: 1,
   tick: 103,
   elapsedSeconds: 10.2,
@@ -119,8 +135,8 @@ afterEach(() => {
 });
 
 describe("OpenRouter action output", () => {
-  it("versions the explicit standings contract as agent-v7", () => {
-    expect(OpenRouterAgent.promptVersion()).toBe("agent-v7");
+  it("versions simultaneous action semantics as agent-v8", () => {
+    expect(OpenRouterAgent.promptVersion()).toBe("agent-v8");
     expect(OpenRouterAgent.reasoningEffort()).toBe("none");
   });
 
@@ -150,6 +166,18 @@ describe("OpenRouter action output", () => {
     );
     expect(prompt).toContain("Never describe a deficit as a lead");
     expect(prompt).not.toContain("territoryGapToLeader");
+  });
+
+  it("states that slots execute simultaneously and cannot be conditional", () => {
+    const prompt = promptFor(observation, diplomacyCandidates);
+
+    expect(prompt).toContain(
+      "Both action slots execute simultaneously on the next tick",
+    );
+    expect(prompt).toContain("action2 cannot depend on action1's outcome");
+    expect(prompt).toContain(
+      "Do not combine cooperative and hostile actions toward the same opponent",
+    );
   });
 
   it("normalizes the legacy unsigned gap as a deficit when ranked second", () => {
@@ -219,6 +247,85 @@ describe("OpenRouter action output", () => {
       },
       failures: [],
     });
+  });
+
+  it("rejects conflicting same-target diplomacy actions", () => {
+    const validated = validateDecisionContent(
+      JSON.stringify({
+        strategy: "Seek an alliance and embargo if rejected",
+        action1: "alliance:request:enemy001",
+        action2: "embargo:start:enemy001",
+      }),
+      diplomacyCandidates,
+    );
+
+    expect(validated).toEqual({
+      decision: null,
+      failures: [
+        {
+          code: "conflicting_action_ids",
+          message:
+            "OpenRouter selected actions with conflicting same-target postures: alliance:request:enemy001, embargo:start:enemy001",
+          rejectedActionIds: [
+            "alliance:request:enemy001",
+            "embargo:start:enemy001",
+          ],
+        },
+      ],
+    });
+  });
+
+  it("retries a conflicting pair with corrective feedback", async () => {
+    const conflictingContent = JSON.stringify({
+      strategy: "Seek an alliance and embargo if rejected",
+      action1: "alliance:request:enemy001",
+      action2: "embargo:start:enemy001",
+    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(completion(conflictingContent))
+      .mockResolvedValueOnce(
+        completion(
+          JSON.stringify({
+            strategy: "Seek an alliance without a contradictory action",
+            action1: "alliance:request:enemy001",
+            action2: "hold:2",
+          }),
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await new OpenRouterAgent("test-key").decide(
+      observation,
+      diplomacyCandidates,
+    );
+
+    expect(result).toMatchObject({
+      decision: {
+        actions: ["alliance:request:enemy001", "hold:2"],
+      },
+      attempts: 2,
+      attemptFailures: [
+        {
+          attempt: 1,
+          code: "conflicting_action_ids",
+          rejectedActionIds: [
+            "alliance:request:enemy001",
+            "embargo:start:enemy001",
+          ],
+        },
+      ],
+    });
+    const retryRequest = JSON.parse(
+      String((fetchMock.mock.calls[1][1] as RequestInit).body),
+    ) as { messages: Array<{ role: string; content: string }> };
+    expect(retryRequest.messages[retryRequest.messages.length - 2]).toEqual({
+      role: "assistant",
+      content: conflictingContent,
+    });
+    expect(
+      retryRequest.messages[retryRequest.messages.length - 1]?.content,
+    ).toContain("conflicting same-target postures");
   });
 
   it("reports malformed JSON and slot-invalid holds precisely", () => {

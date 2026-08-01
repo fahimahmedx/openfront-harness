@@ -55,7 +55,7 @@ npm run refresh:sample # rebuild sample from its recorded trace, no API call
 
 | Setting           | Value                                                      |
 | ----------------- | ---------------------------------------------------------- |
-| Scenario          | `japan-v2`                                                 |
+| Scenario          | `japan-v3`                                                 |
 | Map               | Japan, Normal                                              |
 | Mode              | Free For All, Singleplayer                                 |
 | Players           | 1 LLM + 3 Nation players                                   |
@@ -69,7 +69,7 @@ npm run refresh:sample # rebuild sample from its recorded trace, no API call
 | Match ceiling     | 20 simulated minutes                                       |
 | OpenFront         | v0.32.9, commit `dcc18d5231af6253b0e991bf04a4c764982fe262` |
 
-The model is never given permission to invent a command. The server enumerates a deterministic set of legal action IDs from current state and gives each named output slot its own strict enum. Repeatable troop actions may fill both slots because each commitment is already bounded to half of the shared safe budget; repeated non-repeatable actions normalize to a hold. The selected IDs resolve to ordinary OpenFront intents. Invalid output is retried once and then converted to two holds. Five consecutive complete decision failures abort a run.
+The model is never given permission to invent a command. The server enumerates a deterministic set of legal action IDs from current state and gives each named output slot its own strict enum. Both slots execute simultaneously, so the second action cannot depend on the first action's result. Repeatable troop actions may fill both slots because each commitment is already bounded to half of the shared safe budget; repeated non-repeatable actions normalize to a hold. Cooperative and hostile actions toward the same opponent are rejected as a conflicting pair and retried. The selected IDs resolve to ordinary OpenFront intents. Invalid output is retried once and then converted to two holds. Five consecutive complete decision failures abort a run.
 
 Troop-spending actions share one two-slot budget instead of independently spending percentages of the same balance. Neutral expansion preserves 15% of troop capacity, ordinary combat preserves 35% and unlocks at 55% capacity, and attacks against stronger defenders are withheld. During an invasion, unrelated troop spending is suppressed and bounded counterattacks preserve a 15% emergency reserve.
 

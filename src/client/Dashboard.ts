@@ -16,8 +16,7 @@ type RunSummary = {
   replayUrl: string;
 };
 
-const featuredReplayUrl =
-  "/replay/9f73a404-ae98-430f-be5b-ea22fb1755a6";
+const featuredReplayUrl = "/replay/9f73a404-ae98-430f-be5b-ea22fb1755a6";
 const sourceLink = document.querySelector<HTMLAnchorElement>("#source-link")!;
 const refreshButton =
   document.querySelector<HTMLButtonElement>("#refresh-button")!;
@@ -66,7 +65,7 @@ function ordinal(value: number): string {
 }
 
 function scenarioLabel(scenarioId: string): string {
-  if (scenarioId === "japan-v2") return "Japan";
+  if (scenarioId === "japan-v2" || scenarioId === "japan-v3") return "Japan";
 
   return scenarioId
     .split("-")

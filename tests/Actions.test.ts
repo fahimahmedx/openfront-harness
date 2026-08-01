@@ -19,6 +19,42 @@ const candidates: LegalAction[] = [
     intent: { type: "allianceRequest", recipient: "opponent" },
   },
   {
+    id: "embargo:start:opponent",
+    category: "diplomacy",
+    label: "Embargo opponent",
+    intent: { type: "embargo", targetID: "opponent", action: "start" },
+  },
+  {
+    id: "attack:opponent:25",
+    category: "attack",
+    label: "Attack opponent",
+    intent: { type: "attack", targetID: "opponent", troops: 25 },
+  },
+  {
+    id: "boat:opponent:25",
+    category: "boat",
+    label: "Invade opponent by sea",
+    intent: { type: "boat", dst: 789, troops: 25 },
+  },
+  {
+    id: "embargo:start:other",
+    category: "diplomacy",
+    label: "Embargo another opponent",
+    intent: { type: "embargo", targetID: "other", action: "start" },
+  },
+  {
+    id: "alliance:extend:opponent",
+    category: "diplomacy",
+    label: "Extend alliance",
+    intent: { type: "allianceExtension", recipient: "opponent" },
+  },
+  {
+    id: "alliance:break:opponent",
+    category: "diplomacy",
+    label: "Break alliance",
+    intent: { type: "breakAlliance", recipient: "opponent" },
+  },
+  {
     id: "build:City:123",
     category: "build",
     label: "Build City near (1, 2)",
@@ -107,6 +143,37 @@ describe("fixed action slots", () => {
     expect(result.actions.map((action) => action.id)).toEqual([
       "build:City:123",
       "build:Factory:456",
+    ]);
+    expect(result.fallback).toBe(false);
+  });
+
+  test.each([
+    ["alliance:request:opponent", "embargo:start:opponent"],
+    ["attack:opponent:25", "alliance:request:opponent"],
+    ["alliance:request:opponent", "boat:opponent:25"],
+    ["alliance:extend:opponent", "alliance:break:opponent"],
+  ])(
+    "replaces conflicting same-target actions %s and %s with holds",
+    (action1, action2) => {
+      const result = resolveDecisionActions([action1, action2], candidates);
+
+      expect(result.actions.map((action) => action.id)).toEqual([
+        "hold:1",
+        "hold:2",
+      ]);
+      expect(result.fallback).toBe(true);
+    },
+  );
+
+  test("allows different postures toward different opponents", () => {
+    const result = resolveDecisionActions(
+      ["alliance:request:opponent", "embargo:start:other"],
+      candidates,
+    );
+
+    expect(result.actions.map((action) => action.id)).toEqual([
+      "alliance:request:opponent",
+      "embargo:start:other",
     ]);
     expect(result.fallback).toBe(false);
   });

@@ -9,6 +9,7 @@ import { canBuildTransportShip } from "../OpenFrontIO/src/core/game/TransportShi
 import { Intent } from "../OpenFrontIO/src/core/Schemas";
 import { SCENARIO } from "./Scenario";
 import {
+  areConflictingLegalActions,
   DecisionRecord,
   isRepeatableLegalAction,
   LegalAction,
@@ -722,5 +723,12 @@ export function resolveDecisionActions(
     }
     return candidate;
   });
+  if (areConflictingLegalActions(resolved[0], resolved[1])) {
+    return {
+      actions: [byId.get("hold:1")!, byId.get("hold:2")!],
+      fallback: true,
+    };
+  }
+
   return { actions: resolved, fallback };
 }

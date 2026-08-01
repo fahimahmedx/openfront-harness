@@ -11,9 +11,9 @@ import {
   SCENARIO_GAME_CONFIG,
 } from "../src/Scenario";
 
-describe("japan-v2 scenario", () => {
+describe("japan-v3 scenario", () => {
   test("locks the benchmark knobs", () => {
-    expect(SCENARIO.id).toBe("japan-v2");
+    expect(SCENARIO.id).toBe("japan-v3");
     expect(SCENARIO_GAME_CONFIG.gameMap).toBe("Japan");
     expect(SCENARIO_GAME_CONFIG.nations).toBe(3);
     expect(SCENARIO_GAME_CONFIG.bots).toBe(0);

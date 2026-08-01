@@ -38,7 +38,7 @@ function configuredModel(): string {
 }
 
 export const SCENARIO = {
-  id: "japan-v2",
+  id: "japan-v3",
   seed: "JAPAN01A",
   clientID: "LLMAGENT",
   playerName: modelPlayerName(configuredModel()),

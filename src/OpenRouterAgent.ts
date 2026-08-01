@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createParser } from "eventsource-parser";
 import { DEFAULT_OPENROUTER_MODEL, SCENARIO } from "./Scenario";
 import {
+  areConflictingLegalActions,
   AgentAttemptFailure,
   AgentAttemptTiming,
   AgentDecision,
@@ -15,7 +16,7 @@ import {
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
-const PROMPT_VERSION = "agent-v7" as const;
+const PROMPT_VERSION = "agent-v8" as const;
 const REASONING_EFFORT = "none" as const;
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_COMPLETION_TOKENS = 512;
@@ -203,6 +204,22 @@ export function validateDecisionContent(
       rejectedActionIds: unknownIds,
     });
   }
+  if (unknownIds.length === 0) {
+    const selectedActions = selectedIds.map((id) =>
+      candidates.find((candidate) => candidate.id === id),
+    );
+    if (
+      selectedActions[0] !== undefined &&
+      selectedActions[1] !== undefined &&
+      areConflictingLegalActions(selectedActions[0], selectedActions[1])
+    ) {
+      failures.push({
+        code: "conflicting_action_ids",
+        message: `OpenRouter selected actions with conflicting same-target postures: ${selectedIds.join(", ")}`,
+        rejectedActionIds: selectedIds,
+      });
+    }
+  }
   return {
     decision:
       failures.length === 0
@@ -225,6 +242,8 @@ export function promptFor(observation: Observation, candidates: LegalAction[]) {
   return [
     "You control the human player in a deterministic OpenFront match.",
     "Your goal is to win. Choose one legal ID for action1 and one legal ID for action2.",
+    "Both action slots execute simultaneously on the next tick. action2 cannot depend on action1's outcome.",
+    "Do not combine cooperative and hostile actions toward the same opponent in one decision (for example, alliance plus attack, embargo, or alliance break).",
     "Troop actions with maxUses 2 may be selected in both slots. Do not repeat actions with maxUses 1.",
     "Use hold:1 only for action1 or hold:2 only for action2 when that slot should do nothing. Never invent an ID.",
     "self.troopCapacityPercent is current troops divided by self.maxTroops; troop growth approaches zero near 100% capacity, so holding at maximum capacity cannot rebuild or increase reserves further.",

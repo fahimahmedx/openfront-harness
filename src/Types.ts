@@ -29,6 +29,52 @@ export function isRepeatableLegalAction(action: LegalAction): boolean {
   );
 }
 
+type PlayerInteraction = {
+  targetID: string;
+  posture: "cooperate" | "oppose";
+};
+
+function playerInteraction(action: LegalAction): PlayerInteraction | null {
+  const intent = action.intent;
+  if (intent === null) return null;
+
+  switch (intent.type) {
+    case "allianceRequest":
+    case "allianceExtension":
+      return { targetID: intent.recipient, posture: "cooperate" };
+    case "breakAlliance":
+      return { targetID: intent.recipient, posture: "oppose" };
+    case "embargo":
+      return intent.action === "start"
+        ? { targetID: intent.targetID, posture: "oppose" }
+        : null;
+    case "attack":
+      return intent.targetID === null
+        ? null
+        : { targetID: intent.targetID, posture: "oppose" };
+    case "boat": {
+      const match = /^(?:counter-)?boat:([^:]+):/.exec(action.id);
+      return match?.[1] ? { targetID: match[1], posture: "oppose" } : null;
+    }
+    default:
+      return null;
+  }
+}
+
+export function areConflictingLegalActions(
+  first: LegalAction,
+  second: LegalAction,
+): boolean {
+  const firstInteraction = playerInteraction(first);
+  const secondInteraction = playerInteraction(second);
+  return (
+    firstInteraction !== null &&
+    secondInteraction !== null &&
+    firstInteraction.targetID === secondInteraction.targetID &&
+    firstInteraction.posture !== secondInteraction.posture
+  );
+}
+
 export const AgentDecisionSchema = z.object({
   strategy: z.string().trim().max(160),
   actions: z.array(z.string().min(1).max(160)).length(2),
@@ -43,6 +89,7 @@ export const AgentAttemptFailureSchema = z.object({
     "invalid_shape",
     "unknown_action_id",
     "duplicate_action_id",
+    "conflicting_action_ids",
     "truncated_response",
     "refusal",
     "request_error",
@@ -304,6 +351,7 @@ export const RunArtifactSchema = z.object({
       "agent-v5",
       "agent-v6",
       "agent-v7",
+      "agent-v8",
     ]),
     // Retained only for parsing artifacts created before model seeding was
     // removed. New runs omit this field.
