@@ -1,198 +1,240 @@
-# I Put an LLM Inside a Deterministic Strategy Game—and Made Every Move Replayable
+# Building a Reliable Agent Harness for OpenFront
 
-I wanted an agent project that was more convincing than a chat box wrapped around an API. The result is an LLM harness for [OpenFront](https://openfront.io/), an open-source real-time strategy game: one model plays a fixed match on Japan against three built-in nations, and anyone can replay the entire game while inspecting what the model saw, chose, cost, and changed.
+Written by Fahim Ahmed
 
-The interesting part was not getting a model to return a command. It was building a trustworthy boundary between a probabilistic service and a deterministic game.
+<CLIP OF ATTACK-2-CLIPPED.mov HERE>
 
-## The constraint that shaped the project
+Harnesses enable LLMs to do more than produce text. They turn it into a system that can observe an environment, choose actions, use tools, and work toward a goal over time.
 
-I want this harness to become a benchmark with a leaderboard. That changes the engineering question from “can an LLM play?” to “can two runs be compared honestly?”
+In the real world, harnesses need to be reliable. An unreliable harness turns a model mistake (or even what the model thinks is a correct decision) into an incorrect action. The main danger is that the harness connects probabilistic reasoning to deterministic systems such as databases, payment APIs, production infrastructure, robots, and customer accounts.
+For example, if the model says “refund the latest $10 duplicate charge” but the harness refunds every $10 charge, that could be thousands in financial losses to the company.
 
-The current `japan-v2` scenario therefore fixes everything I can reasonably fix:
+The central engineering problem around bringing harnesses to production environments is "How do you make the harness reliable?".
 
-- OpenFront v0.32.9 at one exact commit;
-- Japan at Normal size;
-- Free For All with one LLM and three Medium nation players;
-- game seed `JAPAN01A`;
-- a Kanto spawn at tile `(1613, 1133)`;
-- Hokkaido, Shikoku, and Kansai as opponents;
-- one decision every 100 ticks;
-- exactly two action slots;
-- a 120-decision and 20-simulated-minute ceiling.
+To learn how to build a reliable harness, I built an agent harness around [OpenFront](https://openfront.io/), an open-source real-time strategy game. In this harness, an LLM plays a complete match against three built-in nations. Instead of giving the model authority to issue arbitrary game commands, I built a system that controls what the model can observe, limits it to legal and resource-safe actions, places limits on runtime and model costs, and records the game and model's thinking for auditability.
 
-If one of those values changes, it is a new scenario—not a quiet configuration tweak.
 
-## I used the game, not a simplified clone
+## 2. OpenFront in 60 seconds
 
-The fastest route would have been to model OpenFront as a small grid and declare success when an LLM moved around it. That would have discarded the hard and useful parts: real attacks, boats, structures, diplomacy, built-in AI, timing, map geometry, victory logic, state hashes, and native replay.
+OpenFront is an open-source, browser-based real-time strategy game about territorial control. Each player begins with a small foothold on a map based on real-world geography, then sends troops into neutral land or enemy territory to expand. Troops regenerate over time, but every attack also pulls strength away from defense, so growing too quickly can leave a player exposed. Gold adds another layer, and can be invested in cities, ports, defenses, and military units, while naval invasions and alliances create routes around an otherwise unfavorable land border.
 
-Instead, the harness runs OpenFront's deterministic core directly in Node. The LLM occupies the normal human-player path. Its choices become ordinary OpenFront intents, and the existing client renderer plays the resulting `GameRecord`.
+In the match used by this harness, one player competes against three built-in nations on Japan. The game progresses in simulation ticks. In each tick, troops grow, attacks advance, nations respond, buildings finish, and borders change. A player wins immediately by capturing 80% of territory on the map. If time expires first, the surviving player with the most territory wins.
 
-I kept this integration outside the game repository. `OpenFrontIO/` remains a clean checkout of the pinned tag. The harness imports the core from that read-only tree, owns its own server and UI, and builds the renderer externally. A small Vite transform adds the replay-tick event in memory and fails if its pinned source marker moves; it never patches the checkout on disk.
+## 3. How the harness works
 
-This cost more integration work, but it means the replay is evidence. It is not a video generated after the fact and it is not an animation driven by a second approximation of the rules.
+```mermaid
+flowchart LR
+    subgraph Harness["Agent harness"]
+        Runner["Harness runner"]
+        Actions["Observation and<br/>legal-action builder"]
+        Agent["Model adapter"]
+        Validator["Validate actions and<br/>resolve game intents"]
+        Store["Run store"]
+    end
 
-## The model never writes raw game commands
+    Game["OpenFront game engine"]
+    OpenRouter["OpenRouter and LLM provider"]
+    Files["Versioned run artifacts"]
 
-Giving a model an intent schema and hoping it fills every field correctly is a fragile interface. It also lets the model propose actions that the current state cannot support.
+    Runner -- "Read current state" --> Game
+    Game -- "State snapshot" --> Actions
+    Actions -- "Observation + legal actions" --> Agent
+    Agent -- "Observation + legal actions" --> OpenRouter
+    OpenRouter -- "Selected action IDs" --> Agent
+    Agent -- "Decision or failure" --> Validator
+    Validator -- "Validated game intents" --> Runner
+    Runner -- "Submit intents + advance ticks" --> Game
+    Runner -- "Decisions, outcomes, and metrics" --> Store
+    Store --> Files
+```
 
-At each decision point, the harness builds a deterministic menu of currently legal candidates. It covers explicit holds, neutral expansion, attacks at several troop levels, boats, retreats, structures, upgrades, and diplomacy. Every candidate has a stable ID, a human-readable label, and the exact native intent it will produce.
+Every 100 ticks, the harness reads the current OpenFront state and gives the model a compact observation. The observation contains information on time, standings, troops, gold, nearby opponents, active attacks, recent outcomes, and a safe troop budget.
 
-Version 2 also treats the two action slots as one resource decision. It first subtracts a capacity-based reserve from current troops, then divides the remaining surplus across both slots. Expansion preserves 15% of capacity; combat preserves 35%; emergency defense preserves 15%. Each troop candidate is 25%, 50%, 75%, or 100% of one slot's budget, so two choices cannot independently spend percentages of the same garrison.
-
-The menu also encodes the strategic preconditions the raw v1 interface hid. Ordinary attacks appear only after recovery to 55% capacity, only when the LLM has more troops than the target, and only when a candidate can commit at least 20% of the defender's force. Hostile incoming troops take precedence: expansion and unrelated offense disappear, while counterattacks are capped by the safe slot budget and the recorded incoming force. The observation states troop capacity, absolute growth per second, incoming and outgoing troops, reserve mode and floor, safe spend per slot, and relative opponent strength instead of expecting the model to infer all of that from two raw integers.
-
-The model sees a normalized observation plus that menu and must fill two named slots:
+Let's give an example from replay `9f73a404-ae98-430f-be5b-ea22fb1755a6`. At 5:50 into the match, the agent controlled 31.884% of Japan with 290,851 troops. It shared land borders with Kansai and Hokkaido, while Shikoku was reachable across the water.
 
 ```json
 {
-  "strategy": "Expand early, then protect the coast.",
-  "action1": "expand:neutral:100",
-  "action2": "expand:neutral:100"
-}
+    "observation": {
+      "elapsedTime": "05:50",
+      "territoryPercent": 31.884,
+      "troops": {
+        "total": 290851,
+        "reserve": 102486,
+        "spendable": 188364,
+        "perActionBudget": 94182
+      },
+      "opponents": [
+        { "name": "Hokkaido", "troops": 93158, "sharedBorder": true },
+        { "name": "Kansai", "troops": 55101, "sharedBorder": true },
+        { "name": "Shikoku", "troops": 66632, "sharedBorder": false }
+      ]
+    }
+  }
 ```
 
-OpenRouter enforces a strict JSON Schema. Agent v4 introduced the current slot shape: the schema is generated from the current menu, with separate legal-ID enums for `action1` and `action2`. Troop candidates advertise `maxUses: 2` and may fill both slots because each exact commitment was calculated from one half of the shared safe budget. Other actions have `maxUses: 1`; repeating one deterministically turns the second use into a hold.
+From the same state, the harness builds a menu of actions that are legal at that moment. These can include expanding, attacking, launching a boat, retreating, constructing or upgrading a building, changing diplomacy, and holding. Each option has a stable ID and maps to an exact OpenFront game command. 
 
-The `agent-v5` contract also makes the end condition explicit. The old `winPercent` name was dangerously easy to read as a probability; it was actually the territory threshold for immediate victory. The observation now calls it `instantVictoryTerritoryPercent`, reports current rank and the territory leader, and states that the living player with the most land wins when the timer expires. Agent v6 added troop-capacity saturation, reserve-safe listed budgets, and the distinction between neutral expansion and attacking an opponent without prescribing when the model must hold. The current `agent-v7` contract replaces the unsigned territory gap with explicit leader status and separate lead/deficit fields, and makes clear that holding at maximum capacity cannot rebuild reserves further.
+```json
+"legalActionExcerpt": [
+    { "id": "attack:jld9qemv:100", "label": "Attack Kansai by land with 94,182 troops" },
+    { "id": "attack:mx6susv9:100", "label": "Attack Hokkaido by land with 94,182 troops" },
+    { "id": "boat:d8c1rits:100", "label": "Invade Shikoku by sea with 94,182 troops" },
+    { "id": "alliance:request:d8c1rits", "label": "Request an alliance with Shikoku" },
+    { "id": "embargo:start:jld9qemv", "label": "Start an embargo against Kansai" },
+    { "id": "hold:1", "label": "Hold the first action slot" }
+  ]
+```
 
-These versions came from observed failures rather than speculative prompt tuning. In the agent-v5 DeepSeek replay `e5165ff3-d610-4705-acce-76b5e7102da8`, 118 of 122 action slots were holds; the model saturated its troops, stopped at 0.57% territory, and finished fourth while safe neutral expansion was still available. Agent v6 fixed that opening stall, and DeepSeek won replay `b379c919-17ed-453b-a7f4-008258e3b471`, but the trace exposed a second failure: it double-held for the final 66 decisions, remained at 99.99% troop capacity, and described a 0.942-point deficit while ranked second as “Leading by 0.94%.” It won only after rival nations reduced Hokkaido's lead. Those two traces motivated the saturation clarification and the split between unambiguous territory-lead and territory-deficit fields.
+Both the observation and legal actions from above are fed as input into the model. The model chooses up to two IDs instead of generating raw game commands. In this example, the model chose to attack Kansai by land with 94,182 troops and invade Shikoku by sea with 94,182 troops.
+```json
+{
+  "strategy": "Exploit overwhelming reserves: launch decisive attacks on the two weakest rivals while retaining the required 35% troop floor.",
+  "action1": "attack:jld9qemv:100",
+  "action2": "boat:d8c1rits:100"
+}
+```
+To prevent hallicunation from the model, the harness only accepts valid moves that it gave to the model as legal actions. It also validates the two actions together, for example preventing two individually valid attack actions from spending more than the troop count available.
 
-A malformed or invented action is retried once. The retry includes the rejected JSON and a specific validation error, instead of blindly sending the same request again. If it also fails, both slots become holds. Every failed attempt is recorded with a stable error code and any rejected IDs, while the raw rejected response is not persisted. Provider refusals and token-limit truncation have distinct diagnostics. Five consecutive complete failures stop the run.
+Once the harness submits an accepted action, OpenFront’s game engine applies it and determines the outcome according to the game’s rules. At the next desicion point 100 ticks later, the harness observes the new state and includes recent action outcomes, so the model can view the results of a previously submitted attack or building.
 
-This changed how I think about agents: the most important prompt is often the API you design around the prompt.
+If a model request times out or returns an invalid response, the harness retries once with the validation error. If the retry also fails, the harness uses a safe fallback by submitting a hold for both action slots and recording the failure in the run trace.
 
-## Determinism has layers
+At each decision point, the harness records the state shown to the model, the actions the model selected, any provider or validation errors, and the latency and cost of the request. This is to be able to audit the harness and the model's performance.
 
-The game is deterministic for a given start configuration and intent sequence. The hosted model is not deterministic in the same strong sense. The game seed fixes the environment, while model generation is intentionally unseeded so the benchmark measures the provider's natural sampling behavior and remains compatible with providers that do not implement seeds.
+This cycle repeats until a player wins or the match reaches its time limit.
 
-The model route is pinned to one provider with fallbacks disabled. That reduces hidden variance, but it does not freeze a hosted model's weights or infrastructure. A future benchmark cannot claim bit-for-bit model reproducibility from hosted generation. It needs to treat the submitted action trace as the reproducible object and replay that trace server-side against a content-addressed game build.
+## 4. Why is reliability hard? How do you test a harness when the LLM is nondeterministic?
 
-That distinction—deterministic environment versus deterministic policy—is probably the most important thing I learned.
+A production harness should make its reliability guarantees explicit before the model ever acts. It should constrain what the model can do, make unsafe choices unrepresentable, verify what the environment actually executes, and preserve enough evidence to explain every result.
 
-## Replay became the observability system
+OpenFront makes those reliability problems concrete. The game expects precise commands, while an LLM produces probabilistic text. If I exposed the game's raw command types directly, the model could invent a player ID, attack an unreachable target, build on an invalid tile, spend the same troops twice, or return malformed JSON. Even a syntactically correct action might no longer be valid by the time the simulation applied it.
 
-A normal agent log tells me what a model requested. A game replay tells me what the system actually simulated.
+I defined reliability across three dimensions:
 
-Each artifact contains:
+1. **Action reliability:** every accepted decision must resolve to legal, resource-safe game commands.
+2. **Operational reliability:** each run remains bounded in latency and cost, and degrades safely when the model provider fails.
+3. **Evaluation reliability:** runs are inspectable and replayable, allowing model failures to be distinguished from harness failures. Furthermore, is the agent playing the game in a way that makes sense wins? 
 
-- the exact scenario, source commit, model, provider, prompt version, reasoning configuration, and game seed;
-- every normalized observation and legal candidate menu;
-- selected and applied action IDs;
-- structured post-execution status for both actions—started, failed, completed, or destroyed—with lifecycle ticks and an entity ID when available;
-- for `agent-v3` and newer runs, per-attempt validation codes and rejected IDs; older artifacts default this list to empty;
-- fallback status, total latency, per-attempt client-observed TTFT, generation time, time per output token (TPOT), token usage, and reported cost;
-- winner, placement, terminal tick, simulated time, and final state hash;
-- a native OpenFront replay record.
+The harness enforces these properties structurally rather than relying on prompting alone. The next section describes the mechanisms that make this possible.
 
-During playback, a trace panel follows the replay tick. It shows the latest public strategy note, both actions and their actual lifecycle status, state summary, latency, tokens, and cost next to the real renderer.
+## 5. How I made the harness reliable.
 
-Fresh runs stream structured model output to measure each attempt from the harness. The artifact records total attempt time, time to first received token, time from that token to stream completion, and TPOT as generation time divided by one fewer than the reported completion-token count. Provider queue time remains null because OpenRouter does not expose it separately; TTFT necessarily includes network transit, routing, queueing, and prompt processing. Legacy artifacts default the attempt-timing list to empty.
+Each of the three dimensions from above is enforced by a different part of the harness, and each surfaced differently once real models started playing.
 
-The replay record stores only turns with intents or periodic hashes, while retaining the original total turn count. That keeps the bundled artifact small without weakening the engine's normal reconstruction path.
+### Action reliability: keeping every accepted move legal
 
-I also added a no-network verification command. It feeds the bundled sample's recorded decisions back through the game and requires the final winner, terminal tick, and state hash to match. This is a much stronger fixture than “the JSON parsed successfully.”
+The model never writes OpenFront commands directly. At each decision point, the harness reads the current game state and generates a deterministic menu of actions that are legal at that moment. Each option has a stable ID and maps to an exact game intent, so the model chooses from bounded capabilities instead of inventing player IDs, troop counts, build locations, or command shapes.
 
-## A real sample, including the failures
+I enforce that boundary twice. The request uses a strict JSON Schema whose `action1` and `action2` enums contain only the IDs available to each slot for that decision. When the response returns, the harness parses it with Zod and checks both selections against the original menu again. This second check matters because structured output is supplied by an external provider; it improves reliability, but it is not a substitute for validation at the point where the harness grants authority.
 
-I deliberately bundled a real run rather than a hand-written golden path. The default model was `openai/gpt-5.6-luna` through OpenRouter's OpenAI route.
+A move also has to be safe in combination with the other move. The legal-action builder calculates one troop surplus above a reserve floor and divides it across the two action slots. It only offers troop amounts within those slot budgets, which prevents two individually valid attacks from spending the same troops twice. The resolver also replaces invalid duplicates, such as trying to construct two buildings on the same tile, with the appropriate slot's hold action.
 
-The sample produced:
+If a response is malformed or selects an invalid ID, the harness retries once and includes the specific validation error so the model can correct itself. If the retry also fails, it submits two holds rather than guessing what the model intended. OpenFront remains the final authority after submission: an action that was legal when offered can still fail as the simulation changes, so the harness records whether each action actually started, failed, completed, or was destroyed and feeds recent outcomes into the next observation. This separates a legal model decision from a successful game outcome while ensuring that invalid model output never crosses the action boundary.
 
-| Metric                        |             Result |
-| ----------------------------- | -----------------: |
-| Model decisions while alive   |                106 |
-| Prompt tokens                 |            180,599 |
-| Completion tokens             |             20,095 |
-| Reported inference cost       |        $0.31777925 |
-| Decisions requiring a retry   |                 15 |
-| Complete validation fallbacks |                  8 |
-| Average model latency         |       3.35 seconds |
-| Winner                        |          LLM Agent |
-| LLM placement                 |                1st |
-| Terminal tick                 |             10,561 |
-| Simulated time                |      1,056 seconds |
-| Final state hash              | `4090602815772241` |
+### Operational reliability: staying inside latency and cost budgets
 
-The v2 LLM won. That is an encouraging regression result, but one match is anecdotal rather than proof that the policy is generally strong. The more important harness result is mechanical: across all 106 decisions, the combined troop commitments selected for the two slots never exceeded the observation's shared spendable budget. Ordinary land attacks passed the 55% readiness and troop-advantage gates, and bounded counterattacks never exceeded the recorded incoming force.
+The most important operational lesson from this project was that a model name is not an API contract. OpenRouter can expose the same model through several providers, but each route can have different latency, pricing, defaults, and feature support. If the harness allowed OpenRouter to select a route automatically, two nominally identical runs could use materially different backends.
 
-The run was not cosmetically cleaned up. Fifteen decisions needed the allowed retry and eight still fell back to two holds after both responses failed validation. The immutable sample predates the structured diagnostics, so it retains the older combined “unknown or duplicate action ID” message and does not contain the rejected raw response needed to classify Decision 2 retroactively. A later v3 audit showed why distinctness was the wrong rule: every duplicate selected the `100%` version of a troop action twice, exactly consuming the two safe slot budgets. The v4 contract makes that choice valid while retaining precise diagnostics for genuine provider failures. The sample still records its fallbacks and billable usage, then continues through the same deterministic game path. The original v1 sample also remains useful historical evidence: it finished fourth after repeatedly draining its garrison, which is what exposed the shared-resource defect fixed by v2.
+I therefore pin both the model and provider, disable provider fallbacks, explicitly set reasoning to `none`, and record which provider actually served every decision. Each request has a ten-second timeout and one retry. A run also has a $1 inference ceiling, a ten-minute wall-clock limit, and a five-consecutive-failure abort. If both attempts for a decision fail, the harness submits two holds rather than letting an unavailable provider stall the simulation or letting malformed output cross the action boundary.
 
-I validated v4 with a fresh live run rather than relying only on unit tests. The model reused a troop action in 75 of 84 decisions—18 expansions, 55 land attacks or counters, and two boats. All 75 stayed within the shared spendable budget, none caused a duplicate validation failure or action fallback, and the LLM won at tick 8,321. One provider request timed out and succeeded on retry; that remained a genuine transport failure rather than an action-contract failure.
+The final evaluation shows what those controls looked like in practice. These are client-observed measurements pooled from the three runs for each model; cost is the mean total inference cost per run.
 
-I then replayed the artifact without network access. The engine reproduced the LLM victory at tick 10,561 with final state hash `4090602815772241`. The suite passed all 36 tests, TypeScript checking passed, and the production client built successfully. A second offline replay of a timer-ended trace corrected the surviving LLM from the old hard-coded second place to third; its nine Defense Post attempts resolved as one completed, five destroyed, and three failed. Those checks establish that the v2 trajectories remain reproducible and the v5 observation, placement, and lifecycle boundary is enforced; they do not turn individual runs into a broad benchmark claim.
+| Model and pinned provider | Decisions | Median / p95 latency | Completion tokens per decision | Mean cost per run | Retries / fallbacks |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| GPT-5.6 Luna / OpenAI | 261 | 1.02 s / 1.49 s | 55.5 | $0.0315 | 0 / 0 |
+| GLM-5.2 / Baidu | 336 | 2.80 s / 3.37 s | 59.4 | $0.0762 | 2 / 0 |
+| DeepSeek V4 Flash / StreamLake | 343 | 2.89 s / 3.87 s | 50.6 | $0.0229 | 1 / 0 |
 
-## Bugs that only appeared at the boundaries
+Across the nine runs, none of the 940 decisions had a timeout, transport failure, or JSON Schema violation. The three retries in the table came from a separate semantic rule that prevents proactive attacks against two opponents in one turn; each model corrected the choice on its next attempt. This distinction matters operationally because the artifacts make it possible to tell provider failures from model decisions that passed the provider's schema but violated a game-specific invariant.
 
-Several of the best lessons came from integration failures.
+Setting reasoning explicitly was necessary because provider defaults were inconsistent. In early tests of DeepSeek routes, omitting the option caused some providers to enable reasoning and emit more than 1,000 completion tokens, often running into the timeout. Other routes returned the roughly 50-token response the harness expected. In the final nine runs, reasoning was explicitly disabled and the three model-provider pairs averaged between 50.6 and 59.4 completion tokens per decision. A provider default was no longer allowed to silently change the latency and cost profile of a run.
 
-### Strict provider routing exposed a parameter mismatch
+Pricing varied by route too. At the time I captured the provider listings, OpenRouter showed 36% discounts for DeepSeek through Baidu and StreamLake, while some GLM routes showed discounts as high as 72%. That makes provider selection a real cost optimization, especially for an agent that may make hundreds of calls in one task. But the cheapest route is not useful if it cannot honor the interface the harness depends on, and discounts can change independently of the model.
 
-My first live sample made no billable calls. Every request returned “no endpoints found.” The selected model supported structured output, reasoning, and a seed, so the request looked valid at a glance.
+Strict structured output exposed the most surprising inconsistency. The harness sends a JSON Schema with `strict: true`; the two action fields contain the exact legal IDs for that decision. Some DeepSeek routes did not advertise this feature at all. Baidu did advertise support, accepted the request, and was initially chosen for the DeepSeek evaluation, but its responses showed that accepting the parameter was not the same as enforcing it.
 
-The live endpoint metadata showed the actual mismatch: the pinned OpenAI route advertised `max_tokens`, while I sent `max_completion_tokens`, which was available on the Azure route. Because `require_parameters` was enabled and fallback was disabled, OpenRouter correctly refused to route the request.
+Across three DeepSeek V4 Flash runs through Baidu, 45 of 327 decision attempts violated the requested schema: 43 strategy strings exceeded the schema's 160-character limit, and two responses selected action IDs outside the slot-specific enums. Forty-one decisions required a retry, and four exhausted both attempts and safely fell back to holds. There were no rate limits or transport failures; the route returned successful HTTP responses containing data that a strict-schema provider should not have produced.
 
-Strictness created an early failure instead of silently dropping a parameter or switching infrastructure. That was exactly the behavior a benchmark needs.
+I then changed only the pinned DeepSeek provider to StreamLake. Across the three StreamLake runs used in the results, all 343 decisions conformed to the JSON Schema and none needed a provider-related fallback. That does not prove StreamLake will always enforce the schema, but it does show that the repeated Baidu failures were not inherent to the DeepSeek model or the harness request. Baidu's GLM route was also clean across 336 decisions, making the capability specific to the model-provider combination rather than to Baidu as a whole.
 
-### Living players are not all players
+The resulting rule is to treat provider capability listings as discovery metadata, not as a reliability guarantee. A production harness should test the exact model-provider route, pin it, set every consequential option explicitly, record the resolved route and usage, and validate the response locally even when the provider claims strict enforcement. Provider diversity creates useful competition on price and performance, but it also creates another interface boundary that the harness has to distrust.
 
-The first completed artifact said the eliminated LLM finished first. The reason was subtle: OpenFront's `players()` method returns living players only. Sorting that list and looking for the dead human produced index `-1`, which my defensive `Math.max` turned into first place.
+### Evaluation reliability: making every run auditable
+ 
+One of my key design decisions was to make every run auditable. At each decision point, the harness records what the model observed, which actions it could take, what it chose, and why. This let me watch the agent play, inspect unexpected decisions or error flags, and use the trace to determine whether a problem came from the model or from the harness. To judge replays concretely, I checked two things: whether the agent was making moves a real player would plausibly make, and how many of its turns produced an error. The first was a judgment call from watching the replay, the second was a direct count from the trace.
+ 
+That auditability is also what let me diagnose two of the more interesting failures I ran into, rather than just seeing an agent lose and guessing why.
+ 
+An early version of the observation JSON called the immediate territory threshold `winPercent`. In one evaluation, GLM-5.2 interpreted a value of `80` as an 80% probability of winning and used it to justify holding off from any action, even though it controlled far less than 80% of the map. Because the decision trace showed exactly what the model had seen and how it reasoned from that value, I could pin the failure to the field name rather than the model's judgment. To fix this, I renamed the field to `instantVictoryTerritoryPercent`, and GLM-5.2 won in its next run. From this, I learned that even a small ambiguity in the wording of a state variable could cause the model to behave incorrectly.
+ 
+In another run with DeepSeek V4 Flash, an older version of the instruction prompt told the model to "hold while rebuilding", but did not explain that troop growth approaches zero near full capacity. The model made no moves for 58 of its 61 decisions, stopped gaining meaningful troops, and was eventually conquered by another nation. This failure did not trigger a harness error because every hold was valid. The trace showed the problem, where the model repeatedly chose to hold because it believed doing so would rebuild its troops, even near full capacity. I removed the "hold while rebuilding" instruction and made the underlying troop-growth mechanic explicit. More specifically, the observation now reports the agent's troop-capacity percentage and current growth rate, and the prompt explains that holding near 100% capacity will not rebuild the army further. As a result, the next DeepSeek run, the agent expanded aggressively and reached first place!
+From this, I learned the importance of not having biases in a prompt, and the importance of exposing more relevant information to the model for it to use when making a decision.
+ 
+From having to manually judge multiple runs, I learned that while the harness should prevent invalid actions, but it should not encode an entire winning strategy. Telling the model what to do in the prompt may backfire and have the model behave unexpectedly. As a result, I kept the harness neutral and would only expose game state and game mechanics, rather than biasing the prompts with what the model should or shouldn't do.
 
-The first fix was to record each player's elimination tick from `allPlayers()` and derive eliminated placements from elimination order. The corrected v1 artifact reported the eliminated LLM in fourth place; the replacement v2 sample reports first because the core actually declared the LLM the winner.
+---
 
-A later timer-ended run exposed the other half of the bug: every living non-winner was hard-coded to second place, even when two surviving players owned more territory. Terminal placement now ranks all survivors by final land tiles before applying elimination order to dead players.
+**Note — doesn't belong to the reliability framework above:** The user interface presented a different challenge from the harness itself. GPT-5.6 was useful for quickly scaffolding most of the interface, but when creating a frontpage and overlay for this project, it introduced unnecessary design elements and jargon. GPT-5.6 doesn't seem to be good at a sales-oriented presentation, so manual judgment was needed. 
 
-### Two legal actions could spend the same troops twice
+## 6. Results and limitations
 
-The v1 menu described each attack as a percentage of “current troops,” but both slots were materialized from the same snapshot. A `75%` expansion followed by `25%` therefore committed the entire garrison; `75% + 50%` asked the core for 125%, and the second execution consumed whatever remained. The model repeated that pattern while calling a 1–2% capacity position a “large reserve.”
+I ran three evaluations each of DeepSeek V4 Flash, GLM-5.2, and GPT-5.6 Luna. Every run used the same Japan map, spawn point, three medium difficulty opponent bots with the same seed, one decision every 100 ticks, and a 20-minute limit. Model reasoning was disabled for all the runs. I pinned the provider as well as the model, with StreamLake for DeepSeek, Baidu for GLM, and OpenAI for GPT, all through OpenRouter.
 
-This was an interface defect, not just weak play. In v2, exact troop amounts come from a shared two-slot surplus above deterministic reserve floors. Ordinary attacks also require recovery to 55% capacity, a troop advantage over the target, and a meaningful commitment. Incoming attacks switch the menu to bounded counters rather than opening an unrestricted all-in exception.
+| Model and provider | Wins | How the wins ended | Mean final territory | Mean decisions | Mean prompt / completion tokens | Median decision latency | Mean inference cost |
+| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| GPT-5.6 Luna / OpenAI | 3/3 | 3 at 80% | 81.1% | 87.0 | 229,773 / 4,829 | 1.02 s | $0.0315 |
+| GLM-5.2 / Baidu | 3/3 | 1 at 80%, 2 on timer | 68.9% | 112.0 | 277,792 / 6,653 | 2.80 s | $0.0762 |
+| DeepSeek V4 Flash / StreamLake | 2/3 | 2 timer wins, 1 loss | 29.9% | 114.3 | 289,736 / 5,785 | 2.89 s | $0.0229 |
 
-### “Legal when proposed” is not “valid when executed”
+GPT produced the strongest and most consistent results in this small sample. It captured 80% of territory to win instantly in all three runs. GLM also won every run, but only one captured 80% of territory. The other two wins came from leading when the timer expired. DeepSeek's two wins were timer wins with 32.2% and 40.1% of the territory captured, while its remaining run ended in second place with 17.5%. It's important to distingush between these two types of wins, as the win rate hides a meaningful difference between conquering the map and surviving with a plurality of territory. If the game was longer, would the model's win still have occured?
 
-The action menu is derived from one state snapshot, but OpenFront applies intents inside a changing simulation. During verification, a Defense Post and a Factory intent were legal candidates when proposed and were later rejected by the core as state changed.
+![GPT-5.6 Luna territory controlled over time in run 5c3016b7](charts/gpt-5.6-territory-over-time.svg)
 
-Schema 2 now follows each applied action after submission. It records whether the core actually started it, rejected it, completed it, or destroyed the entity before completion, along with start/resolution ticks and an attack or unit ID where one exists. Long-running attacks and construction update the original decision record on later ticks, and the next observations include those results. Legacy schema-v1 artifacts remain readable but use `unknown` where their old “queued as a legal core intent” string cannot prove execution.
+The shape of the win is easier to see in the decision trace. In the representative run above, GPT expanded rapidly for the first three minutes, consolidated around 30% of the map, then converted a series of later attacks into an 82.4% victory at 13:25.
 
-### Production HTML was not actually static
+![Three separate territory races between GPT-5.6 Luna and the built-in nations](charts/gpt-5.6-territory-races.svg)
 
-The local dashboard worked, and the production build succeeded, but a server smoke test showed literal EJS expressions in script URLs. OpenFront's Vite pipeline intentionally emits runtime placeholders so its normal server can apply a hashed asset manifest and optional CDN prefix.
+Separating the three matches also shows that there was no single path to victory. GPT sometimes removed opponents early and sometimes let them survive deep into the match, but it ultimately established a territory lead and crossed the same 80% threshold in every run.
 
-Serving the built HTML with `sendFile` was therefore wrong. The harness server now renders both HTML entry points against the runtime asset manifest and caches the result. This is the kind of defect a type-check and unit test cannot find.
+The decision traces show different play styles behind those outcomes. Counting attack, boat, and counter actions together, GPT used a combat action in 228 of 522 action slots (43.7%), compared with 221 of 672 for GLM (32.9%) and 21 of 686 for DeepSeek (3.1%). DeepSeek selected a hold in 76.2% of its slots and made no combat move at all in one of its two wins.
 
-## Treating cost and abuse controls as product features
+Deepseek's passiveness was not accidental. In fact, it cleverly recognized that it did not need to conquer 80% of the map to win. If it was still alive and held the most territory when time expired, it would win. Once it established a lead, its recorded strategies repeatedly said that holding would preserve the lead while the other three bot nations fought one another. In the 40.1% win, it explicitly reasoned that holding preserved its troops "for timer victory." This turned inaction into a strategy where it would avoid the downside of further combat, protect a plurality of the map, and run out the clock. It worked in two of the three runs, however, in the last run it backfired when Hokkaido overtook it, rejected DeepSeek's alliance renewal, and attacked the weaker DeepSeek.
 
-The deployed app can spend money, so operational limits are part of correctness.
+![Comparison of how GPT-5.6 Luna, GLM-5.2, and DeepSeek V4 Flash used their action slots](charts/model-action-mix.svg)
 
-Before a model request, the harness estimates a conservative worst-case price for both possible attempts. A run cannot begin the next decision if that reservation would cross $1. It also stops at ten wall-clock minutes, 120 live decisions, or five consecutive model failures.
+The models showed different play styles. GPT attacked most often, GLM was less aggressive, and DeepSeek mostly held. Despite those differences, the harness kept execution safe. Every final action was legal and stayed within its troop budget. Three responses initially attempted conflicting attacks, but the validator rejected them and the models corrected themselves on retry. No invalid command reached the game.
 
-Public Railway deployment allows one active match globally, five launches per UTC day, and one launch per source network per day. It stores an HMAC of the IP rather than the raw address. Run files and quota state use atomic writes on a Railway Volume.
+These results are only apply to this test setup in this harness. Each model was tested three times under a single game setup, and the harness limited which actions were available. The models also used different providers, so the results (especially latency and cost) should not be treated as universal model rankings.
 
-Those limits are intentionally simple. They fit a portfolio deployment, not a horizontally scaled service. The design document says so explicitly.
 
-## What I would build next
+## 7. What I would build next
 
-The harness is ready to demonstrate an inspectable agent run, but a credible leaderboard needs more:
+Currently this harness works as to inspect how an agent plays a game. A more interesting next step for this harness would be to turn it into a public benchmark to evaluate how different LLMs perform.
 
-1. Define a public scoring formula that separates outcome, placement, survival, cost, and latency.
-2. Add several hidden, versioned seeds to reduce memorization.
-3. Accept signed action traces and replay every submission server-side.
-4. Pin a content-addressed engine/container for each season.
-5. Split model/provider configurations into explicit divisions.
-6. Add browser-level replay screenshots and visual regression tests.
-7. Move jobs and artifacts to shared infrastructure before horizontal scaling.
+This would be done by benchmarking on different maps, seeds, and spawn locations, alongside defining a scoring formula based on wins, placement, and territory.
 
-I would not start by adding more models. The hard part is making one result interpretable and reproducible. Once that contract is solid, adding competitors is easy.
+Another interesting angle would be to implement multiagent support on the harness, so you can have multiple agents competing against each other (PvP, or more specificially Agent vs. Agent) as opposed to agent vs. 3 bots.
 
-## The takeaway
+## 8. What I learned
 
-An agent demo becomes substantially more credible when a viewer can answer four questions:
+Four lessons from this project will shape how I build future agent systems.
+
+First, agent reliability depends as much on interface design as model capability. A bounded legal menu, shared resource accounting, explicit state semantics, and deterministic fallbacks did more for the system than adding increasingly prescriptive prompt text.
+
+Second, observability should connect requests to real effects. Recording the model's answer was not enough. I needed to know which intents the harness applied, whether the game started them, how they resolved, and what state followed. Replay became both the user experience and the debugging tool.
+
+Third, determinism has layers. I can reproduce a game trajectory from a recorded action trace, but I cannot honestly promise that a hosted model will generate the same trace forever. Separating environment reproducibility from policy reproducibility leads to better artifacts and more defensible benchmark claims.
+
+Fourth, a model name is not a complete API contract. Different providers serving the same model can expose different features, defaults, data policies, latency, and failure modes. I encountered this directly with structured output: some endpoints supported JSON mode, which only asks for a valid JSON object, but not strict JSON Schema enforcement. Other providers for the same model supported the schema contract the harness required. Reasoning controls also varied, so relying on a provider's default could silently turn reasoning on and increase latency and output tokens. This means a reproducible evaluation must pin both the model and provider, check the endpoint's advertised capabilities, set options such as reasoning explicitly, record the provider that actually served each request, and still validate every response locally.
+
+The broader takeaway is that an agent demo becomes substantially more credible when a reviewer can answer four questions:
 
 1. What did the model know?
 2. What was it allowed to do?
 3. What did the real system execute?
-4. Can I replay and verify the result?
+4. Can the claimed result be replayed and verified?
 
-This project is my answer for a strategy game. The model is only one component. The harness—the constraints, legal-action boundary, artifacts, replay, verification, cost controls, and honest failure modes—is the actual product.
+This harness is my answer to those questions for a real-time strategy game.
 
-The complete trade-offs are documented in the [design decision log](/docs/decisions). The harness is published under compatible AGPL terms and preserves OpenFront's attribution and asset licensing notices; the OpenFront checkout itself remains untouched.
+
+# Is your company building harnesses? Let's chat!

@@ -31,9 +31,7 @@ const artifactRoot =
     ? localDataRoot
     : dataDir;
 const bundledRunRoot = path.join(projectRoot, "resources/harness");
-const bundledRunFiles = (
-  await fs.readdir(bundledRunRoot, { recursive: true })
-)
+const bundledRunFiles = (await fs.readdir(bundledRunRoot, { recursive: true }))
   .filter((file) => file.endsWith(".json.gz"))
   .sort()
   .map((file) => path.join(bundledRunRoot, file));
@@ -101,11 +99,7 @@ if (!process.env.RATE_LIMIT_SALT) {
   console.warn("RATE_LIMIT_SALT is not set; using a development-only value");
 }
 
-const store = new RunStore(
-  dataDir,
-  bundledRunFiles,
-  artifactRoot,
-);
+const store = new RunStore(dataDir, bundledRunFiles, artifactRoot);
 const limiter = new DailyRateLimiter(
   path.join(dataDir, "rate-limits.json"),
   rateSalt,
@@ -264,6 +258,73 @@ app.get("/api/runs/:runId/artifact", async (req, res, next) => {
   }
 });
 
+function architectureVisual(): string {
+  return `<figure class="system-map" aria-labelledby="architecture-caption">
+    <figcaption id="architecture-caption"><span class="visual-kicker">System architecture</span><span class="visual-meta">One bounded decision loop</span></figcaption>
+    <div class="architecture-stage">
+      <div class="architecture-main">
+        <div class="arch-card"><small>01 · Environment</small><div><strong>OpenFront engine</strong><p>Advances ticks and returns the authoritative game state.</p></div></div>
+        <div class="arch-card"><small>02 · Observe</small><div><strong>Observation + legal actions</strong><p>Compacts state and builds a resource-safe action menu.</p></div></div>
+        <div class="arch-card model"><small>03 · Decide</small><div><strong>Model adapter</strong><p>Sends the bounded contract to the pinned LLM provider.</p></div></div>
+        <div class="arch-card"><small>04 · Verify</small><div><strong>Validate + resolve</strong><p>Rejects unknown IDs and unsafe action combinations.</p></div></div>
+        <div class="arch-card"><small>05 · Execute</small><div><strong>Harness runner</strong><p>Submits exact intents, advances time, and repeats.</p></div></div>
+      </div>
+      <div class="architecture-support">
+        <div class="support-card"><b>Run store</b><span>Decisions, outcomes, latency, cost, and errors</span></div>
+        <div class="support-card"><b>Artifacts</b><span>Versioned files for replay, audit, and verification</span></div>
+      </div>
+    </div>
+  </figure>`;
+}
+
+function prepareDocumentMarkdown(markdown: string, isWriteup: boolean): string {
+  if (!isWriteup) return markdown;
+  return markdown
+    .replace(
+      "<CLIP OF ATTACK-2-CLIPPED.mov HERE>",
+      `<figure class="hero-media">
+        <video autoplay muted loop playsinline preload="metadata" poster="/media/writeup/attack-2-clipped-poster.jpg" aria-label="Recorded OpenFront match showing the agent launching an attack">
+          <source src="/media/writeup/attack-2-clipped.webm" type="video/webm">
+          <source src="/media/writeup/attack-2-clipped.mp4" type="video/mp4">
+        </video>
+        <figcaption><span class="live-pill">Recorded agent run</span><span>OpenFront · Japan scenario</span></figcaption>
+      </figure>`,
+    )
+    .replace(/```mermaid[\s\S]*?```/, architectureVisual())
+    .replaceAll("](charts/", "](/media/writeup/")
+    .replace(/\n# Is your company building harnesses\? Let's chat!\s*$/, "");
+}
+
+const authorSocials = `<div class="author-block"><span class="author-credit">Built by <strong>Fahim Ahmed</strong></span><span class="author-socials" role="group" aria-label="Fahim Ahmed on social media"><a href="https://x.com/0xOptimus" target="_blank" rel="noopener noreferrer" aria-label="Fahim Ahmed on X" title="Fahim Ahmed on X"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.657l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25h6.826l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/></svg></a><a href="https://www.linkedin.com/in/fahim-a/" target="_blank" rel="noopener noreferrer" aria-label="Fahim Ahmed on LinkedIn" title="Fahim Ahmed on LinkedIn"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.94v5.666H9.351V9h3.414v1.561h.047c.476-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg></a></span></div>`;
+
+app.get("/assets/writeup.css", (_req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  res.sendFile(path.join(projectRoot, "src/client/writeup.css"));
+});
+
+app.get("/assets/writeup.js", (_req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  res
+    .type("text/javascript")
+    .sendFile(path.join(projectRoot, "src/client/Writeup.js"));
+});
+
+const writeupMedia: Record<string, string> = {
+  "attack-2-clipped.webm": "videos/attack-2-clipped.webm",
+  "attack-2-clipped.mp4": "videos/attack-2-clipped.mp4",
+  "attack-2-clipped-poster.jpg": "videos/attack-2-clipped-poster.jpg",
+  "gpt-5.6-territory-over-time.svg": "charts/gpt-5.6-territory-over-time.svg",
+  "gpt-5.6-territory-races.svg": "charts/gpt-5.6-territory-races.svg",
+  "model-action-mix.svg": "charts/model-action-mix.svg",
+};
+
+app.get("/media/writeup/:asset", (req, res) => {
+  const file = writeupMedia[req.params.asset];
+  if (!file) return res.status(404).send("Not found");
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  return res.sendFile(path.join(projectRoot, file));
+});
+
 app.get("/docs/:document", async (req, res) => {
   const allowed: Record<string, string> = {
     writeup: "writeup.md",
@@ -272,34 +333,40 @@ app.get("/docs/:document", async (req, res) => {
   };
   const file = allowed[req.params.document];
   if (!file) return res.status(404).send("Not found");
-  const markdown = await fs.readFile(path.join(projectRoot, file), "utf8");
+  const isWriteup = req.params.document === "writeup";
+  const markdown = prepareDocumentMarkdown(
+    await fs.readFile(path.join(projectRoot, file), "utf8"),
+    isWriteup,
+  );
   const title =
     req.params.document === "writeup"
       ? "Project write-up"
       : req.params.document === "decisions"
         ? "Design decisions"
         : "OpenFront LLM Harness";
+  const html = await marked.parse(markdown);
   res.type("html")
     .send(`<!doctype html><html lang="en" data-theme="light"><head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta id="theme-color" name="theme-color" content="#f3f1ea">
+    <meta id="theme-color" name="theme-color" content="#f2f0e9">
+    <meta name="description" content="How a bounded, auditable agent harness made LLMs reliably play OpenFront.">
     <title>${title} · OpenFront LLM Harness</title>
+    <link rel="stylesheet" href="/assets/writeup.css">
     <script>try{if(localStorage.getItem("openfront-docs-theme")==="dark")document.documentElement.dataset.theme="dark"}catch{}</script>
-    <style>
-      :root{color-scheme:light;--paper:#f3f1ea;--raised:#faf9f4;--ink:#101614;--muted:#5f6863;--faint:#858d88;--line:#d2d6ce;--line-strong:#aeb5ad;--signal:#1e7a5a;--code:#e5e8e1;--quote:#46504b}
-      :root[data-theme="dark"]{color-scheme:dark;--paper:#0b1713;--raised:#10211a;--ink:#f3f1ea;--muted:#a8b5af;--faint:#7c8d85;--line:#2c4037;--line-strong:#496056;--signal:#64e2aa;--code:#14271f;--quote:#bdc8c2}
-      *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.75 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-rendering:optimizeLegibility;transition:background-color .18s ease,color .18s ease}a{color:var(--signal);text-underline-offset:3px}a:hover{text-decoration-thickness:2px}nav{position:sticky;z-index:10;top:0;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(14px)}.nav-inner{width:min(100% - 40px,960px);min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:30px;margin:0 auto}.brand{flex:none;color:var(--ink);font-size:20px;font-weight:900;letter-spacing:-.055em;text-decoration:none}.brand span{color:var(--signal);padding-inline:3px;letter-spacing:0}.theme-toggle{min-width:102px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line-strong);border-radius:3px;background:transparent;color:var(--ink);padding:8px 10px;cursor:pointer;font:700 10px/1.2 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;text-transform:uppercase}.theme-toggle:hover{border-color:var(--signal);color:var(--signal)}.theme-icon{font-size:13px}:focus-visible{outline:3px solid #2c86d3;outline-offset:3px}article{width:min(100% - 40px,860px);margin:0 auto;padding:clamp(54px,8vw,88px) 0 120px}h1,h2,h3{line-height:1.12;text-wrap:balance}h1{max-width:820px;margin:0 0 .7em;font-size:clamp(2.65rem,7vw,5rem);font-weight:720;letter-spacing:-.065em}h2{margin:2.4em 0 .7em;border-top:1px solid var(--line-strong);padding-top:.75em;font-size:clamp(1.75rem,4vw,2.45rem);letter-spacing:-.045em}h3{margin:2em 0 .55em;font-size:1.3rem;letter-spacing:-.025em}p,li{color:var(--muted)}strong{color:var(--ink)}article>p:first-of-type{font-size:1.12rem}code{border:1px solid var(--line);border-radius:3px;background:var(--code);padding:.12em .35em;color:var(--ink);font:600 .88em/1.5 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}pre{overflow:auto;border:1px solid var(--line-strong);border-radius:4px;background:var(--raised);padding:20px}pre code{border:0;background:transparent;padding:0}blockquote{margin:2em 0;border-left:2px solid var(--signal);padding:.25em 0 .25em 22px;color:var(--quote)}blockquote p{margin:0;color:inherit}table{width:100%;display:block;overflow:auto;border-collapse:collapse;margin:1.8em 0}th,td{border-bottom:1px solid var(--line);padding:10px 14px;text-align:left;white-space:nowrap}th{color:var(--ink);font-size:.82rem}td{color:var(--muted)}hr{border:0;border-top:1px solid var(--line-strong);margin:3.5rem 0}img{max-width:100%}
-      .nav-left,.author-socials{display:flex;align-items:center}.nav-left{min-width:0;gap:24px}.author-block{display:flex;align-items:center;gap:14px}.author-credit{color:var(--faint);font-size:12px;font-weight:700;white-space:nowrap}.author-credit strong{color:var(--ink);font-weight:800}.author-socials{gap:7px}.author-socials a{width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;color:var(--muted);transition:border-color 150ms ease,background-color 150ms ease,color 150ms ease,transform 150ms ease}.author-socials a:hover{transform:translateY(-1px);border-color:var(--ink);background:var(--ink);color:var(--paper)}.author-socials svg{width:13px;height:13px;fill:currentColor}
-      @media(max-width:680px){.nav-inner{width:min(100% - 24px,960px);min-height:64px}.brand{font-size:18px}.theme-toggle{min-width:0}.theme-toggle span:last-child{display:none}article{width:min(100% - 30px,860px);padding-top:48px}h1{font-size:clamp(2.5rem,13vw,4rem)}pre{padding:14px}}
-      @media(max-width:680px){.nav-left{gap:14px}.author-credit{display:none}.author-block{gap:0}.author-socials{gap:5px}.author-socials a{width:28px;height:28px}}
-      article.writeup>h1{max-width:none;border-top:2px solid var(--ink);padding-top:.9em;font-size:clamp(2.35rem,5vw,4rem);letter-spacing:-.055em}
-      article.writeup>h2{border-top:2px solid var(--ink)}
-      @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition-duration:.01ms!important}}
-    </style></head><body>
-      <nav><div class="nav-inner"><div class="nav-left"><a class="brand" href="/" aria-label="OpenFront Harness home">OpenFront <span>Harness</span></a>${req.params.document === "writeup" ? `<div class="author-block"><span class="author-credit">Built by <strong>Fahim Ahmed</strong></span><span class="author-socials" role="group" aria-label="Fahim Ahmed on social media"><a href="https://x.com/0xOptimus" target="_blank" rel="noopener noreferrer" aria-label="Fahim Ahmed on X" title="Fahim Ahmed on X"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.657l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25h6.826l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/></svg></a><a href="https://www.linkedin.com/in/fahim-a/" target="_blank" rel="noopener noreferrer" aria-label="Fahim Ahmed on LinkedIn" title="Fahim Ahmed on LinkedIn"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.94v5.666H9.351V9h3.414v1.561h.047c.476-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg></a></span></div>` : ""}</div><button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false"><span class="theme-icon" aria-hidden="true">◐</span><span id="theme-label">Dark mode</span></button></div></nav>
-      <article${req.params.document === "writeup" ? ' class="writeup"' : ""}>${await marked.parse(markdown)}</article>
-      <script>(()=>{const root=document.documentElement;const button=document.querySelector("#theme-toggle");const label=document.querySelector("#theme-label");const color=document.querySelector("#theme-color");const apply=(theme)=>{const dark=theme==="dark";root.dataset.theme=dark?"dark":"light";button.setAttribute("aria-pressed",String(dark));label.textContent=dark?"Light mode":"Dark mode";color.setAttribute("content",dark?"#0b1713":"#f3f1ea")};apply(root.dataset.theme==="dark"?"dark":"light");button.addEventListener("click",()=>{const next=root.dataset.theme==="dark"?"light":"dark";apply(next);try{localStorage.setItem("openfront-docs-theme",next)}catch{}})})()</script>
-    </body></html>`);
+    <script type="module" src="/assets/writeup.js"></script>
+  </head><body>
+    <a class="skip-link" href="#writeup-article">Skip to article</a>
+    <div id="read-progress" class="read-progress" aria-hidden="true"></div>
+    <header class="site-nav"><nav class="nav-inner" aria-label="Primary navigation">
+      <div class="nav-left"><a class="brand" href="/" aria-label="OpenFront Harness home">OpenFront <span>Harness</span></a><span class="section-label">${title}</span>${isWriteup ? authorSocials : ""}</div>
+      <div class="nav-actions"><a class="replay-link" href="/replay/9f73a404-ae98-430f-be5b-ea22fb1755a6" aria-label="Open interactive replay"><span>Replay</span> ↗</a><button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false"><span aria-hidden="true">◐</span><span id="theme-label">Dark mode</span></button></div>
+    </nav></header>
+    <main class="writeup-shell">
+      <aside class="reading-rail" aria-label="Article contents"><p class="rail-kicker">In this case study</p><nav id="toc" class="toc"></nav><p class="rail-meta">A real-time strategy game as a test bed for reliable agent infrastructure.</p></aside>
+      <article id="writeup-article" class="writeup">${html}${isWriteup ? `<div class="article-end"><p>Building a reliable agent harness?</p><a href="https://www.linkedin.com/in/fahim-a/" target="_blank" rel="noopener noreferrer">Let's chat ↗</a></div>` : ""}</article>
+    </main>
+    <footer class="site-footer"><div class="footer-inner"><span>OpenFront Harness · Built by Fahim Ahmed</span><span>OpenFront v0.32.9 · <a href="https://github.com/openfrontio/OpenFrontIO">Upstream project</a></span></div></footer>
+  </body></html>`);
 });
 
 app.get(["/replay.html", "/replay/:runId"], (_req, res, next) => {
