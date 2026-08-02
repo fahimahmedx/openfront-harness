@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="610" viewBox="0 0 1200 610" role="img" aria-labelledby="title description">
+  <title id="title">How the evaluated models used their action slots</title>
+  <desc id="description">One hundred percent stacked bars compare combat, hold, expansion, and other actions selected by GPT-5.6 Luna, GLM-5.2, and DeepSeek V4 Flash.</desc>
+  <rect width="1200" height="610" fill="#FFFFFF"/>
+  <style>
+    text { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #172033; }
+    .title { font-size: 34px; font-weight: 750; letter-spacing: -0.7px; }
+    .subtitle { font-size: 17px; fill: #64748B; }
+    .axis { font-size: 14px; fill: #64748B; }
+    .axis-label { font-size: 15px; font-weight: 600; fill: #475569; }
+    .panel-title { font-size: 18px; font-weight: 700; }
+    .panel-result { font-size: 14px; fill: #64748B; }
+    .legend { font-size: 14px; fill: #475569; }
+    .threshold-label { fill: #9A3412; }
+  </style>
+  
+      <text class="title" x="300" y="58">Three models, three different play styles</text>
+      <text class="subtitle" x="300" y="91">Share of accepted action slots across three runs per model</text>
+      <rect x="300" y="126" width="18" height="18" rx="5" fill="#5B5BD6"/><text class="legend" x="329" y="140">Combat</text><rect x="480" y="126" width="18" height="18" rx="5" fill="#CBD5E1"/><text class="legend" x="509" y="140">Hold</text><rect x="660" y="126" width="18" height="18" rx="5" fill="#169C8C"/><text class="legend" x="689" y="140">Expand</text><rect x="840" y="126" width="18" height="18" rx="5" fill="#F2C46D"/><text class="legend" x="869" y="140">Other</text>
+      
+        <defs><clipPath id="action-bar-0"><rect x="300" y="205" width="830" height="70" rx="15"/></clipPath></defs>
+        <text x="276" y="230" text-anchor="end" font-size="19" font-weight="750">GPT-5.6 Luna</text>
+        <text x="276" y="256" text-anchor="end" font-size="14" style="fill:#64748B">43.7% combat · 522 slots</text>
+        <g clip-path="url(#action-bar-0)"><rect x="300" y="205" width="362.52873563218395" height="70" fill="#5B5BD6"/><text x="481.264367816092" y="245" text-anchor="middle" font-size="14" font-weight="700" style="fill:#FFFFFF">Combat 43.7%</text><rect x="662.528735632184" y="205" width="227.37547892720306" height="70" fill="#CBD5E1"/><text x="776.2164750957854" y="245" text-anchor="middle" font-size="14" font-weight="700" style="fill:#172033">Hold 27.4%</text><rect x="889.904214559387" y="205" width="186.0344827586207" height="70" fill="#169C8C"/><text x="982.9214559386974" y="245" text-anchor="middle" font-size="14" font-weight="700" style="fill:#FFFFFF">Expand 22.4%</text><rect x="1075.9386973180076" y="205" width="54.06130268199233" height="70" fill="#F2C46D"/></g>
+        <defs><clipPath id="action-bar-1"><rect x="300" y="335" width="830" height="70" rx="15"/></clipPath></defs>
+        <text x="276" y="360" text-anchor="end" font-size="19" font-weight="750">GLM-5.2</text>
+        <text x="276" y="386" text-anchor="end" font-size="14" style="fill:#64748B">32.9% combat · 672 slots</text>
+        <g clip-path="url(#action-bar-1)"><rect x="300" y="335" width="272.9613095238095" height="70" fill="#5B5BD6"/><text x="436.48065476190476" y="375" text-anchor="middle" font-size="14" font-weight="700" style="fill:#FFFFFF">Combat 32.9%</text><rect x="572.9613095238095" y="335" width="358.18452380952385" height="70" fill="#CBD5E1"/><text x="752.0535714285714" y="375" text-anchor="middle" font-size="14" font-weight="700" style="fill:#172033">Hold 43.2%</text><rect x="931.1458333333334" y="335" width="133.39285714285714" height="70" fill="#169C8C"/><text x="997.8422619047619" y="375" text-anchor="middle" font-size="14" font-weight="700" style="fill:#FFFFFF">Expand 16.1%</text><rect x="1064.5386904761906" y="335" width="65.46130952380952" height="70" fill="#F2C46D"/></g>
+        <defs><clipPath id="action-bar-2"><rect x="300" y="465" width="830" height="70" rx="15"/></clipPath></defs>
+        <text x="276" y="490" text-anchor="end" font-size="19" font-weight="750">DeepSeek V4 Flash</text>
+        <text x="276" y="516" text-anchor="end" font-size="14" style="fill:#64748B">3.1% combat · 686 slots</text>
+        <g clip-path="url(#action-bar-2)"><rect x="300" y="465" width="25.408163265306122" height="70" fill="#5B5BD6"/><rect x="325.40816326530614" y="465" width="632.7842565597667" height="70" fill="#CBD5E1"/><text x="641.8002915451896" y="505" text-anchor="middle" font-size="14" font-weight="700" style="fill:#172033">Hold 76.2%</text><rect x="958.1924198250729" y="465" width="112.52186588921282" height="70" fill="#169C8C"/><text x="1014.4533527696793" y="505" text-anchor="middle" font-size="14" font-weight="700" style="fill:#FFFFFF">Expand 13.6%</text><rect x="1070.7142857142858" y="465" width="59.285714285714285" height="70" fill="#F2C46D"/></g>
+      <text class="axis" x="1130" y="570" text-anchor="end">Combat includes attack, boat, and counter actions</text>
+</svg>
