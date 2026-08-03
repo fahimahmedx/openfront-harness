@@ -14,13 +14,15 @@ The central engineering problem around bringing harnesses to production environm
 To learn how to build a reliable harness, I built an agent harness around [OpenFront](https://openfront.io/), an open-source real-time strategy game. In this harness, an LLM plays a complete match against three built-in nations. Instead of giving the model authority to issue arbitrary game commands, I built a system that controls what the model can observe, limits it to legal and resource-safe actions, places limits on runtime and model costs, and records the game and model's thinking for auditability.
 
 
-## 2. OpenFront in 60 seconds
+## OpenFront in 60 seconds
 
-OpenFront is an open-source, browser-based real-time strategy game about territorial control. Each player begins with a small foothold on a map based on real-world geography, then sends troops into neutral land or enemy territory to expand. Troops regenerate over time, but every attack also pulls strength away from defense, so growing too quickly can leave a player exposed. Gold adds another layer, and can be invested in cities, ports, defenses, and military units, while naval invasions and alliances create routes around an otherwise unfavorable land border.
+[OpenFront](https://openfront.io/) is an open-source, browser-based real-time strategy game about territorial control. Each player begins with a small foothold on a map based on real-world geography, then sends troops into neutral land or enemy territory to expand. Troops regenerate over time, but every attack also pulls strength away from defense, so growing too quickly can leave a player exposed. Gold adds another layer, and can be invested in cities, ports, defenses, and military units, while naval invasions and alliances create routes around an otherwise unfavorable land border.
+
+<OPENFRONT GAMEPLAY CLIP HERE>
 
 In the match used by this harness, one player competes against three built-in nations on Japan. The game progresses in simulation ticks. In each tick, troops grow, attacks advance, nations respond, buildings finish, and borders change. A player wins immediately by capturing 80% of territory on the map. If time expires first, the surviving player with the most territory wins.
 
-## 3. How the harness works
+## How the harness works
 
 ```mermaid
 flowchart LR
@@ -50,7 +52,7 @@ flowchart LR
 
 Every 100 ticks, the harness reads the current OpenFront state and gives the model a compact observation. The observation contains information on time, standings, troops, gold, nearby opponents, active attacks, recent outcomes, and a safe troop budget.
 
-Let's give an example from replay `9f73a404-ae98-430f-be5b-ea22fb1755a6`. At 5:50 into the match, the agent controlled 31.884% of Japan with 290,851 troops. It shared land borders with Kansai and Hokkaido, while Shikoku was reachable across the water.
+Let's give an example from replay [9f73a404-ae98-430f-be5b-ea22fb1755a6](https://openfront.fahimahmed.ca/replay/9f73a404-ae98-430f-be5b-ea22fb1755a6). At 5:50 into the match, the agent controlled 31.884% of Japan with 290,851 troops. It shared land borders with Kansai and Hokkaido, while Shikoku was reachable across the water.
 
 ```json
 {
@@ -103,21 +105,19 @@ At each decision point, the harness records the state shown to the model, the ac
 
 This cycle repeats until a player wins or the match reaches its time limit.
 
-## 4. Why is reliability hard? How do you test a harness when the LLM is nondeterministic?
+## Why is reliability hard?
 
-A production harness should make its reliability guarantees explicit before the model ever acts. It should constrain what the model can do, make unsafe choices unrepresentable, verify what the environment actually executes, and preserve enough evidence to explain every result.
+Reliability is difficult because an LLM produces probabilistic responses, while OpenFront requires precise, valid commands. The model could invent a player ID, choose an unreachable target, overspend its troops, or return malformed JSON. Even a valid action can become invalid before execution if the game state changes.
 
-OpenFront makes those reliability problems concrete. The game expects precise commands, while an LLM produces probabilistic text. If I exposed the game's raw command types directly, the model could invent a player ID, attack an unreachable target, build on an invalid tile, spend the same troops twice, or return malformed JSON. Even a syntactically correct action might no longer be valid by the time the simulation applied it.
+This raises the question: **How do you test a harness when the LLM is nondeterministic?** For this harness, I broke that question into three parts:
 
-I defined reliability across three dimensions:
+1. **Action reliability:** Did every accepted decision resolve to a legal game action?
+2. **Operational reliability:** Did each run stay within its model latency and cost limits, and fail safely when the model provider fails?
+3. **Evaluation reliability:** Could I inspect and replay the run to distinguish bad model decisions from harness failures? Furthermore, is the agent playing the game in a way that makes sense wins? 
 
-1. **Action reliability:** every accepted decision must resolve to legal, resource-safe game commands.
-2. **Operational reliability:** each run remains bounded in latency and cost, and degrades safely when the model provider fails.
-3. **Evaluation reliability:** runs are inspectable and replayable, allowing model failures to be distinguished from harness failures. Furthermore, is the agent playing the game in a way that makes sense wins? 
+The harness enforces these properties rather than relying on prompting alone. The next section describes the mechanisms that make this possible.
 
-The harness enforces these properties structurally rather than relying on prompting alone. The next section describes the mechanisms that make this possible.
-
-## 5. How I made the harness reliable.
+## How I made the harness reliable.
 
 Each of the three dimensions from above is enforced by a different part of the harness, and each surfaced differently once real models started playing.
 
@@ -174,9 +174,9 @@ From having to manually judge multiple runs, I learned that while the harness sh
 
 ---
 
-**Note — doesn't belong to the reliability framework above:** The user interface presented a different challenge from the harness itself. GPT-5.6 was useful for quickly scaffolding most of the interface, but when creating a frontpage and overlay for this project, it introduced unnecessary design elements and jargon. GPT-5.6 doesn't seem to be good at a sales-oriented presentation, so manual judgment was needed. 
+**Note that doesn't belong to the reliability framework above:** The user interface presented a different challenge from the harness itself. GPT-5.6 was useful for quickly scaffolding most of the interface, but when creating a frontpage and overlay for this project, it introduced unnecessary design elements and jargon. GPT-5.6 doesn't seem to be good at a sales-oriented presentation, so manual judgment was needed.
 
-## 6. Results and limitations
+## Results
 
 I ran three evaluations each of DeepSeek V4 Flash, GLM-5.2, and GPT-5.6 Luna. Every run used the same Japan map, spawn point, three medium difficulty opponent bots with the same seed, one decision every 100 ticks, and a 20-minute limit. Model reasoning was disabled for all the runs. I pinned the provider as well as the model, with StreamLake for DeepSeek, Baidu for GLM, and OpenAI for GPT, all through OpenRouter.
 
@@ -207,34 +207,20 @@ The models showed different play styles. GPT attacked most often, GLM was less a
 These results are only apply to this test setup in this harness. Each model was tested three times under a single game setup, and the harness limited which actions were available. The models also used different providers, so the results (especially latency and cost) should not be treated as universal model rankings.
 
 
-## 7. What I would build next
+## What I would build next
 
-Currently this harness works as to inspect how an agent plays a game. A more interesting next step for this harness would be to turn it into a public benchmark to evaluate how different LLMs perform.
+The harness currently makes it possible to inspect how an LLM plays the game. The next step would be to turn it into a public benchmark for evaluating agent performance.
 
-This would be done by benchmarking on different maps, seeds, and spawn locations, alongside defining a scoring formula based on wins, placement, and territory.
+This would require testing models across different maps, seeds, spawn locations, opponent lineups, and difficulty levels. I would also define a scoring system that considers wins, placement, territory, and consistency across runs.
 
-Another interesting angle would be to implement multiagent support on the harness, so you can have multiple agents competing against each other (PvP, or more specificially Agent vs. Agent) as opposed to agent vs. 3 bots.
+I would also add multi-agent support so models could compete directly against one another. This would enable agent versus agent matches instead of limiting each evaluation to one agent playing against three bots.
 
-## 8. What I learned
+## What I learned
 
-Four lessons from this project will shape how I build future agent systems.
+If there's three lessons you should takeaway from this project when it comes to making harnesses reliable, here's what I learned:
 
-First, agent reliability depends as much on interface design as model capability. A bounded legal menu, shared resource accounting, explicit state semantics, and deterministic fallbacks did more for the system than adding increasingly prescriptive prompt text.
+First, when a model behaves unexpectedly, avoid biasing the prompt toward a particular solution. Instead, explain the relevant mechanics neutrally and expose enough information for the model to make a better decision. For example, rather than instructing the agent to attack more often, I exposed troop capacity and growth so it could recognize when holding was no longer useful.
 
-Second, observability should connect requests to real effects. Recording the model's answer was not enough. I needed to know which intents the harness applied, whether the game started them, how they resolved, and what state followed. Replay became both the user experience and the debugging tool.
+Second, observability is essential for reliability. It is difficult to evaluate an agent without being able to inspect what it observed, why it chose an action, what the system executed, and what happened afterward. Logs and replays made it possible to distinguish model mistakes from being a harness issue vs. model failure.
 
-Third, determinism has layers. I can reproduce a game trajectory from a recorded action trace, but I cannot honestly promise that a hosted model will generate the same trace forever. Separating environment reproducibility from policy reproducibility leads to better artifacts and more defensible benchmark claims.
-
-Fourth, a model name is not a complete API contract. Different providers serving the same model can expose different features, defaults, data policies, latency, and failure modes. I encountered this directly with structured output: some endpoints supported JSON mode, which only asks for a valid JSON object, but not strict JSON Schema enforcement. Other providers for the same model supported the schema contract the harness required. Reasoning controls also varied, so relying on a provider's default could silently turn reasoning on and increase latency and output tokens. This means a reproducible evaluation must pin both the model and provider, check the endpoint's advertised capabilities, set options such as reasoning explicitly, record the provider that actually served each request, and still validate every response locally.
-
-The broader takeaway is that an agent demo becomes substantially more credible when a reviewer can answer four questions:
-
-1. What did the model know?
-2. What was it allowed to do?
-3. What did the real system execute?
-4. Can the claimed result be replayed and verified?
-
-This harness is my answer to those questions for a real-time strategy game.
-
-
-# Is your company building harnesses? Let's chat!
+Third, the same model served by different providers are not actually the same. Providers can differ in JSON schema enforcement, reasoning defaults, quantization, and latency. I encountered this with structured output, where some endpoints supported basic JSON mode but not the strict JSON Schema contract required by the harness. Provider defaults also varied, where some providers didn't have reasoning set to off by default, causing increased model generation time.

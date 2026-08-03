@@ -265,9 +265,9 @@ function architectureVisual(): string {
       <div class="architecture-main">
         <div class="arch-card"><small>01 · Environment</small><div><strong>OpenFront engine</strong><p>Advances ticks and returns the authoritative game state.</p></div></div>
         <div class="arch-card"><small>02 · Observe</small><div><strong>Observation + legal actions</strong><p>Compacts state and builds a resource-safe action menu.</p></div></div>
-        <div class="arch-card model"><small>03 · Decide</small><div><strong>Model adapter</strong><p>Sends the bounded contract to the pinned LLM provider.</p></div></div>
+        <div class="arch-card model"><small>03 · Decide</small><div><strong>Model adapter</strong><p>Sends the observation and legal actions to the selected LLM provider.</p></div></div>
         <div class="arch-card"><small>04 · Verify</small><div><strong>Validate + resolve</strong><p>Rejects unknown IDs and unsafe action combinations.</p></div></div>
-        <div class="arch-card"><small>05 · Execute</small><div><strong>Harness runner</strong><p>Submits exact intents, advances time, and repeats.</p></div></div>
+        <div class="arch-card"><small>05 · Execute</small><div><strong>Harness runner</strong><p>Submits exact commands, advances time, and repeats.</p></div></div>
       </div>
       <div class="architecture-support">
         <div class="support-card"><b>Run store</b><span>Decisions, outcomes, latency, cost, and errors</span></div>
@@ -290,12 +290,27 @@ function prepareDocumentMarkdown(markdown: string, isWriteup: boolean): string {
         <figcaption><span class="live-pill">Recorded agent run</span><span>OpenFront · Japan scenario</span></figcaption>
       </figure>`,
     )
+    .replace(
+      "<OPENFRONT GAMEPLAY CLIP HERE>",
+      `<figure class="gameplay-media">
+        <video autoplay muted loop playsinline preload="metadata" aria-label="Recorded OpenFront gameplay showing the agent attacking Hokkaido">
+          <source src="/media/writeup/attack-1-clipped.webm" type="video/webm">
+          <source src="/media/writeup/attack-1-clipped.mp4" type="video/mp4">
+        </video>
+      </figure>`,
+    )
     .replace(/```mermaid[\s\S]*?```/, architectureVisual())
-    .replaceAll("](charts/", "](/media/writeup/")
-    .replace(/\n# Is your company building harnesses\? Let's chat!\s*$/, "");
+    .replaceAll("](charts/", "](/media/writeup/");
 }
 
-const authorSocials = `<div class="author-block"><span class="author-credit">Built by <strong>Fahim Ahmed</strong></span><span class="author-socials" role="group" aria-label="Fahim Ahmed on social media"><a href="https://x.com/0xOptimus" target="_blank" rel="noopener noreferrer" aria-label="Fahim Ahmed on X" title="Fahim Ahmed on X"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.657l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25h6.826l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/></svg></a><a href="https://www.linkedin.com/in/fahim-a/" target="_blank" rel="noopener noreferrer" aria-label="Fahim Ahmed on LinkedIn" title="Fahim Ahmed on LinkedIn"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.94v5.666H9.351V9h3.414v1.561h.047c.476-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg></a></span></div>`;
+const authorSocials = `<div class="author-block">
+  <span class="author-credit">Built by <strong>Fahim Ahmed</strong></span>
+  <span class="author-socials" role="group" aria-label="Fahim Ahmed on social media">
+    <a href="https://x.com/0xOptimus" target="_blank" rel="noopener noreferrer" aria-label="Fahim Ahmed on X" title="Fahim Ahmed on X"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.657l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25h6.826l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/></svg></a>
+    <a href="https://www.linkedin.com/in/fahim-a/" target="_blank" rel="noopener noreferrer" aria-label="Fahim Ahmed on LinkedIn" title="Fahim Ahmed on LinkedIn"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.94v5.666H9.351V9h3.414v1.561h.047c.476-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124ZM7.119 20.452H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z"/></svg></a>
+    <a href="https://github.com/fahimahmedx/" target="_blank" rel="noopener noreferrer" aria-label="Fahim Ahmed on GitHub" title="Fahim Ahmed on GitHub"><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 3.82c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg></a>
+  </span>
+</div>`;
 
 app.get("/assets/writeup.css", (_req, res) => {
   res.setHeader("Cache-Control", "public, max-age=3600");
@@ -313,6 +328,8 @@ const writeupMedia: Record<string, string> = {
   "attack-2-clipped.webm": "videos/attack-2-clipped.webm",
   "attack-2-clipped.mp4": "videos/attack-2-clipped.mp4",
   "attack-2-clipped-poster.jpg": "videos/attack-2-clipped-poster.jpg",
+  "attack-1-clipped.webm": "videos/attack-1-clipped.webm",
+  "attack-1-clipped.mp4": "videos/attack-1-clipped.mp4",
   "gpt-5.6-territory-over-time.svg": "charts/gpt-5.6-territory-over-time.svg",
   "gpt-5.6-territory-races.svg": "charts/gpt-5.6-territory-races.svg",
   "model-action-mix.svg": "charts/model-action-mix.svg",
@@ -362,8 +379,8 @@ app.get("/docs/:document", async (req, res) => {
       <div class="nav-actions"><button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false"><span aria-hidden="true">◐</span><span id="theme-label">Dark mode</span></button></div>
     </nav></header>
     <main class="writeup-shell">
-      <aside class="reading-rail" aria-label="Article contents"><p class="rail-kicker">In this case study</p><nav id="toc" class="toc"></nav><p class="rail-meta">A real-time strategy game as a test bed for reliable agent infrastructure.</p></aside>
-      <article id="writeup-article" class="writeup">${html}${isWriteup ? `<div class="article-end"><p>Building a reliable agent harness?</p><a href="https://www.linkedin.com/in/fahim-a/" target="_blank" rel="noopener noreferrer">Let's chat ↗</a></div>` : ""}</article>
+      <aside class="reading-rail" aria-label="Article contents"><p class="rail-kicker">In this case study</p><nav id="toc" class="toc"></nav></aside>
+      <article id="writeup-article" class="writeup">${html}${isWriteup ? `<div class="article-end"><p>Building an agent where reliability matter?</p><div class="article-end-cta"><span>I’d love to hear what you’re working on!</span><a href="https://www.linkedin.com/in/fahim-a/" target="_blank" rel="noopener noreferrer">Let’s chat ↗</a></div></div>` : ""}</article>
     </main>
     <footer class="site-footer"><div class="footer-inner"><span>OpenFront Harness · Built by Fahim Ahmed</span><span>OpenFront v0.32.9 · <a href="https://github.com/openfrontio/OpenFrontIO">Upstream project</a></span></div></footer>
   </body></html>`);

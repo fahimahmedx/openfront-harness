@@ -297,7 +297,8 @@ svg {
 .writeup > h1:first-child + .hero-media {
   margin-top: clamp(38px, 6vw, 67px);
 }
-.hero-media {
+.hero-media,
+.gameplay-media {
   position: relative;
   width: 100%;
   margin-left: 0;
@@ -308,9 +309,21 @@ svg {
   box-shadow: var(--shadow);
   color: white;
 }
-.hero-media video {
+.hero-media video,
+.gameplay-media video {
   width: 100%;
+  display: block;
+}
+.hero-media video {
   aspect-ratio: 1.53 / 1;
+  object-fit: cover;
+}
+.gameplay-media {
+  width: min(76%, 680px);
+  margin: 38px auto 42px;
+}
+.gameplay-media video {
+  aspect-ratio: 640 / 381;
   object-fit: cover;
 }
 .hero-media::after {
@@ -662,8 +675,19 @@ svg {
   letter-spacing: -0.05em;
   line-height: 1.06;
 }
+.article-end-cta {
+  display: grid;
+  gap: 18px;
+  justify-items: end;
+}
+.article-end-cta span {
+  max-width: 420px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+  text-align: right;
+}
 .article-end a {
-  justify-self: end;
   border: 1px solid var(--ink);
   border-radius: 3px;
   background: var(--ink);
@@ -713,6 +737,9 @@ svg {
   .article-end {
     width: min(100%, 1000px);
   }
+  .gameplay-media {
+    width: min(82%, 680px);
+  }
   .table-scroll {
     margin-inline: 0;
   }
@@ -750,6 +777,9 @@ svg {
   .writeup > h1:first-child {
     font-size: clamp(43px, 14vw, 66px);
   }
+  .gameplay-media {
+    width: 100%;
+  }
   .hero-media figcaption span:last-child,
   .visual-meta {
     display: none;
@@ -778,8 +808,11 @@ svg {
   .article-end {
     grid-template-columns: 1fr;
   }
-  .article-end a {
-    justify-self: start;
+  .article-end-cta {
+    justify-items: start;
+  }
+  .article-end-cta span {
+    text-align: left;
   }
   .footer-inner {
     flex-direction: column;
