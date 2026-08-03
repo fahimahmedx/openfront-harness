@@ -141,22 +141,9 @@ svg {
   padding-inline: 3px;
   letter-spacing: 0;
 }
-.section-label {
-  overflow: hidden;
+.author-block {
   border-left: 1px solid var(--line);
   padding-left: 24px;
-  color: var(--faint);
-  font:
-    750 9px/1.2 ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    monospace;
-  letter-spacing: 0.15em;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.author-block {
   gap: 13px;
 }
 .author-credit {
@@ -192,7 +179,6 @@ svg {
 .nav-actions {
   gap: 9px;
 }
-.replay-link,
 .theme-toggle {
   min-height: 35px;
   display: inline-flex;
@@ -213,7 +199,6 @@ svg {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.replay-link:hover,
 .theme-toggle:hover {
   border-color: var(--green);
   color: var(--green);
@@ -739,9 +724,7 @@ svg {
   .footer-inner {
     width: min(100% - 30px, 1360px);
   }
-  .section-label,
-  .author-credit,
-  .replay-link span {
+  .author-credit {
     display: none;
   }
   .nav-left {
@@ -752,10 +735,6 @@ svg {
   }
   .brand {
     font-size: 17px;
-  }
-  .replay-link {
-    width: 35px;
-    padding: 0;
   }
   .theme-toggle {
     width: 35px;

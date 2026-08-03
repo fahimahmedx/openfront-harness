@@ -358,8 +358,8 @@ app.get("/docs/:document", async (req, res) => {
     <a class="skip-link" href="#writeup-article">Skip to article</a>
     <div id="read-progress" class="read-progress" aria-hidden="true"></div>
     <header class="site-nav"><nav class="nav-inner" aria-label="Primary navigation">
-      <div class="nav-left"><a class="brand" href="/" aria-label="OpenFront Harness home">OpenFront <span>Harness</span></a><span class="section-label">${title}</span>${isWriteup ? authorSocials : ""}</div>
-      <div class="nav-actions"><a class="replay-link" href="/replay/9f73a404-ae98-430f-be5b-ea22fb1755a6" aria-label="Open interactive replay"><span>Replay</span> ↗</a><button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false"><span aria-hidden="true">◐</span><span id="theme-label">Dark mode</span></button></div>
+      <div class="nav-left"><a class="brand" href="/" aria-label="OpenFront Harness home">OpenFront <span>Harness</span></a>${isWriteup ? authorSocials : ""}</div>
+      <div class="nav-actions"><button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false"><span aria-hidden="true">◐</span><span id="theme-label">Dark mode</span></button></div>
     </nav></header>
     <main class="writeup-shell">
       <aside class="reading-rail" aria-label="Article contents"><p class="rail-kicker">In this case study</p><nav id="toc" class="toc"></nav><p class="rail-meta">A real-time strategy game as a test bed for reliable agent infrastructure.</p></aside>
