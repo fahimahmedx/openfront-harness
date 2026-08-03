@@ -380,7 +380,7 @@ app.get("/docs/:document", async (req, res) => {
     </nav></header>
     <main class="writeup-shell">
       <aside class="reading-rail" aria-label="Article contents"><p class="rail-kicker">In this case study</p><nav id="toc" class="toc"></nav></aside>
-      <article id="writeup-article" class="writeup">${html}${isWriteup ? `<div class="article-end"><p>Building an agent where reliability matter?</p><div class="article-end-cta"><span>I’d love to hear what you’re working on!</span><a href="https://www.linkedin.com/in/fahim-a/" target="_blank" rel="noopener noreferrer">Let’s chat ↗</a></div></div>` : ""}</article>
+      <article id="writeup-article" class="writeup">${html}${isWriteup ? `<div class="article-end"><p>Building an agent where reliability matters?</p><div class="article-end-cta"><span>I’d love to hear what you’re working on!</span><a href="https://www.linkedin.com/in/fahim-a/" target="_blank" rel="noopener noreferrer">Let’s chat ↗</a></div></div>` : ""}</article>
     </main>
     <footer class="site-footer"><div class="footer-inner"><span>OpenFront Harness · Built by Fahim Ahmed</span><span>OpenFront v0.32.9 · <a href="https://github.com/openfrontio/OpenFrontIO">Upstream project</a></span></div></footer>
   </body></html>`);
