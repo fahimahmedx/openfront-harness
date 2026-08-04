@@ -1,0 +1,7575 @@
+{
+  "saturated-capacity-expansion": {
+    "sourceArtifact": "data/previous/runs/e5165ff3-d610-4705-acce-76b5e7102da8.json.gz",
+    "sourceArtifactSha256": "f9aeef70432f22543e4f460340060685d0cf6e236f15c244f26cb2b19b235bf2",
+    "sourceDecisionIndex": 9,
+    "checkpointTick": 903,
+    "preparationTurns": [
+      {
+        "turnNumber": 0,
+        "intents": [
+          {
+            "type": "spawn",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 3,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          }
+        ]
+      },
+      {
+        "turnNumber": 100,
+        "intents": []
+      },
+      {
+        "turnNumber": 103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 4142
+          }
+        ]
+      },
+      {
+        "turnNumber": 200,
+        "intents": []
+      },
+      {
+        "turnNumber": 300,
+        "intents": []
+      },
+      {
+        "turnNumber": 303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 32137
+          }
+        ]
+      },
+      {
+        "turnNumber": 400,
+        "intents": []
+      },
+      {
+        "turnNumber": 500,
+        "intents": []
+      },
+      {
+        "turnNumber": 600,
+        "intents": []
+      },
+      {
+        "turnNumber": 700,
+        "intents": []
+      },
+      {
+        "turnNumber": 800,
+        "intents": []
+      },
+      {
+        "turnNumber": 900,
+        "intents": []
+      }
+    ],
+    "recentDecisions": [
+      {
+        "tick": 603,
+        "strategy": "Hold to accumulate troops; opponents have larger territories and higher growth.",
+        "appliedActionIds": [
+          "hold:1",
+          "hold:2"
+        ],
+        "outcomes": [
+          "completed: Held intentionally",
+          "completed: Held intentionally"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "hold:1",
+            "status": "completed",
+            "startedAtTick": 604,
+            "resolvedAtTick": 604,
+            "entityId": null,
+            "detail": "Held intentionally"
+          },
+          {
+            "actionId": "hold:2",
+            "status": "completed",
+            "startedAtTick": 604,
+            "resolvedAtTick": 604,
+            "entityId": null,
+            "detail": "Held intentionally"
+          }
+        ]
+      },
+      {
+        "tick": 703,
+        "strategy": "Hold both slots to rebuild reserves; troop capacity at 95% and growth low. Opponents out-territory us 6:1, so delay attacks until we have a meaningful troop and",
+        "appliedActionIds": [
+          "hold:1",
+          "hold:2"
+        ],
+        "outcomes": [
+          "completed: Held intentionally",
+          "completed: Held intentionally"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "hold:1",
+            "status": "completed",
+            "startedAtTick": 704,
+            "resolvedAtTick": 704,
+            "entityId": null,
+            "detail": "Held intentionally"
+          },
+          {
+            "actionId": "hold:2",
+            "status": "completed",
+            "startedAtTick": 704,
+            "resolvedAtTick": 704,
+            "entityId": null,
+            "detail": "Held intentionally"
+          }
+        ]
+      },
+      {
+        "tick": 803,
+        "strategy": "Hold both slots to accumulate troops; capacity growth is low and opponents have 8-9x our territory.",
+        "appliedActionIds": [
+          "hold:1",
+          "hold:2"
+        ],
+        "outcomes": [
+          "completed: Held intentionally",
+          "completed: Held intentionally"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "hold:1",
+            "status": "completed",
+            "startedAtTick": 804,
+            "resolvedAtTick": 804,
+            "entityId": null,
+            "detail": "Held intentionally"
+          },
+          {
+            "actionId": "hold:2",
+            "status": "completed",
+            "startedAtTick": 804,
+            "resolvedAtTick": 804,
+            "entityId": null,
+            "detail": "Held intentionally"
+          }
+        ]
+      }
+    ]
+  },
+  "weaker-target-selection": {
+    "sourceArtifact": "data/previous/runs/35fd5d95-ae47-4384-9ab2-9337b9557ace.json.gz",
+    "sourceArtifactSha256": "b0134cacbf3ab1c46e3e8fe517201037c4710df8d67101e8bbde759ab616ec9f",
+    "sourceDecisionIndex": 26,
+    "checkpointTick": 2603,
+    "preparationTurns": [
+      {
+        "turnNumber": 0,
+        "intents": [
+          {
+            "type": "spawn",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 3,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          }
+        ]
+      },
+      {
+        "turnNumber": 100,
+        "intents": []
+      },
+      {
+        "turnNumber": 103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 16571
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 16571
+          }
+        ]
+      },
+      {
+        "turnNumber": 200,
+        "intents": []
+      },
+      {
+        "turnNumber": 203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 18290
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 18290
+          }
+        ]
+      },
+      {
+        "turnNumber": 300,
+        "intents": []
+      },
+      {
+        "turnNumber": 303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 31052
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 31052
+          }
+        ]
+      },
+      {
+        "turnNumber": 400,
+        "intents": []
+      },
+      {
+        "turnNumber": 403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 36515
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 36515
+          }
+        ]
+      },
+      {
+        "turnNumber": 500,
+        "intents": []
+      },
+      {
+        "turnNumber": 503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 45530
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 45530
+          }
+        ]
+      },
+      {
+        "turnNumber": 600,
+        "intents": []
+      },
+      {
+        "turnNumber": 603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 52676
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 52676
+          }
+        ]
+      },
+      {
+        "turnNumber": 700,
+        "intents": []
+      },
+      {
+        "turnNumber": 703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60409
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60409
+          }
+        ]
+      },
+      {
+        "turnNumber": 800,
+        "intents": []
+      },
+      {
+        "turnNumber": 803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67705
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67705
+          }
+        ]
+      },
+      {
+        "turnNumber": 900,
+        "intents": []
+      },
+      {
+        "turnNumber": 903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 75306
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 75306
+          }
+        ]
+      },
+      {
+        "turnNumber": 1000,
+        "intents": []
+      },
+      {
+        "turnNumber": 1003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 81341
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 81341
+          }
+        ]
+      },
+      {
+        "turnNumber": 1100,
+        "intents": []
+      },
+      {
+        "turnNumber": 1103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 87824
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 87824
+          }
+        ]
+      },
+      {
+        "turnNumber": 1200,
+        "intents": []
+      },
+      {
+        "turnNumber": 1203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 94698
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 94698
+          }
+        ]
+      },
+      {
+        "turnNumber": 1300,
+        "intents": []
+      },
+      {
+        "turnNumber": 1303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 100861
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 100861
+          }
+        ]
+      },
+      {
+        "turnNumber": 1400,
+        "intents": []
+      },
+      {
+        "turnNumber": 1403,
+        "intents": [
+          {
+            "type": "build_unit",
+            "unit": "City",
+            "tile": 2834113
+          },
+          {
+            "type": "build_unit",
+            "unit": "Factory",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 1500,
+        "intents": []
+      },
+      {
+        "turnNumber": 1503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 22721
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 22721
+          }
+        ]
+      },
+      {
+        "turnNumber": 1600,
+        "intents": []
+      },
+      {
+        "turnNumber": 1603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 157537
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 157537
+          }
+        ]
+      },
+      {
+        "turnNumber": 1700,
+        "intents": []
+      },
+      {
+        "turnNumber": 1703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 136773
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 136773
+          }
+        ]
+      },
+      {
+        "turnNumber": 1800,
+        "intents": []
+      },
+      {
+        "turnNumber": 1803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 46713
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 46713
+          }
+        ]
+      },
+      {
+        "turnNumber": 1900,
+        "intents": []
+      },
+      {
+        "turnNumber": 1903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 96871
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 96871
+          }
+        ]
+      },
+      {
+        "turnNumber": 2000,
+        "intents": []
+      },
+      {
+        "turnNumber": 2003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 103546
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 103546
+          }
+        ]
+      },
+      {
+        "turnNumber": 2100,
+        "intents": []
+      },
+      {
+        "turnNumber": 2103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 409228
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 409228
+          }
+        ]
+      },
+      {
+        "turnNumber": 2200,
+        "intents": []
+      },
+      {
+        "turnNumber": 2203,
+        "intents": [
+          {
+            "type": "boat",
+            "troops": 538228,
+            "dst": 3366107
+          },
+          {
+            "type": "boat",
+            "troops": 538228,
+            "dst": 3366107
+          }
+        ]
+      },
+      {
+        "turnNumber": 2300,
+        "intents": []
+      },
+      {
+        "turnNumber": 2303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 181199
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 181199
+          }
+        ]
+      },
+      {
+        "turnNumber": 2400,
+        "intents": []
+      },
+      {
+        "turnNumber": 2403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 91986
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 91986
+          }
+        ]
+      },
+      {
+        "turnNumber": 2500,
+        "intents": []
+      },
+      {
+        "turnNumber": 2503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 252394
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 252394
+          }
+        ]
+      },
+      {
+        "turnNumber": 2600,
+        "intents": []
+      }
+    ],
+    "recentDecisions": [
+      {
+        "tick": 2303,
+        "strategy": "Expand aggressively into neutral land using the full safe budget twice; retain the 35% reserve floor and rebuild rapidly before confronting Hokkaido.",
+        "appliedActionIds": [
+          "expand:neutral:100",
+          "expand:neutral:100"
+        ],
+        "outcomes": [
+          "queued as a legal core intent",
+          "queued as a legal core intent"
+        ],
+        "actionOutcomes": []
+      },
+      {
+        "tick": 2403,
+        "strategy": "Counter Hokkaido twice to neutralize its naval attack while preserving the reserve floor; maintain our decisive overall advantage and continue rebuilding.",
+        "appliedActionIds": [
+          "counter:mx6susv9:25",
+          "counter:mx6susv9:25"
+        ],
+        "outcomes": [
+          "queued as a legal core intent",
+          "queued as a legal core intent"
+        ],
+        "actionOutcomes": []
+      },
+      {
+        "tick": 2503,
+        "strategy": "Expand into neutral land twice while maintaining the reserve floor; strong growth and overwhelming troop advantage support continued territorial gain.",
+        "appliedActionIds": [
+          "expand:neutral:100",
+          "expand:neutral:100"
+        ],
+        "outcomes": [
+          "queued as a legal core intent",
+          "queued as a legal core intent"
+        ],
+        "actionOutcomes": []
+      }
+    ]
+  },
+  "incoming-attack-response": {
+    "sourceArtifact": "data/previous/runs/35fd5d95-ae47-4384-9ab2-9337b9557ace.json.gz",
+    "sourceArtifactSha256": "b0134cacbf3ab1c46e3e8fe517201037c4710df8d67101e8bbde759ab616ec9f",
+    "sourceDecisionIndex": 27,
+    "checkpointTick": 2703,
+    "preparationTurns": [
+      {
+        "turnNumber": 0,
+        "intents": [
+          {
+            "type": "spawn",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 3,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          }
+        ]
+      },
+      {
+        "turnNumber": 100,
+        "intents": []
+      },
+      {
+        "turnNumber": 103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 16571
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 16571
+          }
+        ]
+      },
+      {
+        "turnNumber": 200,
+        "intents": []
+      },
+      {
+        "turnNumber": 203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 18290
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 18290
+          }
+        ]
+      },
+      {
+        "turnNumber": 300,
+        "intents": []
+      },
+      {
+        "turnNumber": 303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 31052
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 31052
+          }
+        ]
+      },
+      {
+        "turnNumber": 400,
+        "intents": []
+      },
+      {
+        "turnNumber": 403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 36515
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 36515
+          }
+        ]
+      },
+      {
+        "turnNumber": 500,
+        "intents": []
+      },
+      {
+        "turnNumber": 503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 45530
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 45530
+          }
+        ]
+      },
+      {
+        "turnNumber": 600,
+        "intents": []
+      },
+      {
+        "turnNumber": 603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 52676
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 52676
+          }
+        ]
+      },
+      {
+        "turnNumber": 700,
+        "intents": []
+      },
+      {
+        "turnNumber": 703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60409
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60409
+          }
+        ]
+      },
+      {
+        "turnNumber": 800,
+        "intents": []
+      },
+      {
+        "turnNumber": 803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67705
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67705
+          }
+        ]
+      },
+      {
+        "turnNumber": 900,
+        "intents": []
+      },
+      {
+        "turnNumber": 903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 75306
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 75306
+          }
+        ]
+      },
+      {
+        "turnNumber": 1000,
+        "intents": []
+      },
+      {
+        "turnNumber": 1003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 81341
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 81341
+          }
+        ]
+      },
+      {
+        "turnNumber": 1100,
+        "intents": []
+      },
+      {
+        "turnNumber": 1103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 87824
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 87824
+          }
+        ]
+      },
+      {
+        "turnNumber": 1200,
+        "intents": []
+      },
+      {
+        "turnNumber": 1203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 94698
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 94698
+          }
+        ]
+      },
+      {
+        "turnNumber": 1300,
+        "intents": []
+      },
+      {
+        "turnNumber": 1303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 100861
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 100861
+          }
+        ]
+      },
+      {
+        "turnNumber": 1400,
+        "intents": []
+      },
+      {
+        "turnNumber": 1403,
+        "intents": [
+          {
+            "type": "build_unit",
+            "unit": "City",
+            "tile": 2834113
+          },
+          {
+            "type": "build_unit",
+            "unit": "Factory",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 1500,
+        "intents": []
+      },
+      {
+        "turnNumber": 1503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 22721
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 22721
+          }
+        ]
+      },
+      {
+        "turnNumber": 1600,
+        "intents": []
+      },
+      {
+        "turnNumber": 1603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 157537
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 157537
+          }
+        ]
+      },
+      {
+        "turnNumber": 1700,
+        "intents": []
+      },
+      {
+        "turnNumber": 1703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 136773
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 136773
+          }
+        ]
+      },
+      {
+        "turnNumber": 1800,
+        "intents": []
+      },
+      {
+        "turnNumber": 1803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 46713
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 46713
+          }
+        ]
+      },
+      {
+        "turnNumber": 1900,
+        "intents": []
+      },
+      {
+        "turnNumber": 1903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 96871
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 96871
+          }
+        ]
+      },
+      {
+        "turnNumber": 2000,
+        "intents": []
+      },
+      {
+        "turnNumber": 2003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 103546
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 103546
+          }
+        ]
+      },
+      {
+        "turnNumber": 2100,
+        "intents": []
+      },
+      {
+        "turnNumber": 2103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 409228
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 409228
+          }
+        ]
+      },
+      {
+        "turnNumber": 2200,
+        "intents": []
+      },
+      {
+        "turnNumber": 2203,
+        "intents": [
+          {
+            "type": "boat",
+            "troops": 538228,
+            "dst": 3366107
+          },
+          {
+            "type": "boat",
+            "troops": 538228,
+            "dst": 3366107
+          }
+        ]
+      },
+      {
+        "turnNumber": 2300,
+        "intents": []
+      },
+      {
+        "turnNumber": 2303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 181199
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 181199
+          }
+        ]
+      },
+      {
+        "turnNumber": 2400,
+        "intents": []
+      },
+      {
+        "turnNumber": 2403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 91986
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 91986
+          }
+        ]
+      },
+      {
+        "turnNumber": 2500,
+        "intents": []
+      },
+      {
+        "turnNumber": 2503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 252394
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 252394
+          }
+        ]
+      },
+      {
+        "turnNumber": 2600,
+        "intents": []
+      },
+      {
+        "turnNumber": 2603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 360131
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 360131
+          }
+        ]
+      },
+      {
+        "turnNumber": 2700,
+        "intents": []
+      }
+    ],
+    "recentDecisions": [
+      {
+        "tick": 2403,
+        "strategy": "Counter Hokkaido twice to neutralize its naval attack while preserving the reserve floor; maintain our decisive overall advantage and continue rebuilding.",
+        "appliedActionIds": [
+          "counter:mx6susv9:25",
+          "counter:mx6susv9:25"
+        ],
+        "outcomes": [
+          "queued as a legal core intent",
+          "queued as a legal core intent"
+        ],
+        "actionOutcomes": []
+      },
+      {
+        "tick": 2503,
+        "strategy": "Expand into neutral land twice while maintaining the reserve floor; strong growth and overwhelming troop advantage support continued territorial gain.",
+        "appliedActionIds": [
+          "expand:neutral:100",
+          "expand:neutral:100"
+        ],
+        "outcomes": [
+          "queued as a legal core intent",
+          "queued as a legal core intent"
+        ],
+        "actionOutcomes": []
+      },
+      {
+        "tick": 2603,
+        "strategy": "Exploit our decisive troop advantage and shared border to strike Kansai twice with the full safe budget, preserving the 35% reserve floor for continued growth.",
+        "appliedActionIds": [
+          "attack:jld9qemv:100",
+          "attack:jld9qemv:100"
+        ],
+        "outcomes": [
+          "queued as a legal core intent",
+          "queued as a legal core intent"
+        ],
+        "actionOutcomes": []
+      }
+    ]
+  },
+  "frontier-restraint": {
+    "sourceArtifact": "data/previous/lifecycle-verification/fa907146-94dc-426b-b49b-a8ea6c641f19.json.gz",
+    "sourceArtifactSha256": "c0b64641436ae519b2c2af8fba7474c66b45aebbc7dff07864c116d1c66466a7",
+    "sourceDecisionIndex": 108,
+    "checkpointTick": 10803,
+    "preparationTurns": [
+      {
+        "turnNumber": 0,
+        "intents": [
+          {
+            "type": "spawn",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 3,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          }
+        ]
+      },
+      {
+        "turnNumber": 100,
+        "intents": []
+      },
+      {
+        "turnNumber": 103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 16571
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 16571
+          }
+        ]
+      },
+      {
+        "turnNumber": 200,
+        "intents": []
+      },
+      {
+        "turnNumber": 203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 18290
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 18290
+          }
+        ]
+      },
+      {
+        "turnNumber": 300,
+        "intents": []
+      },
+      {
+        "turnNumber": 303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 31052
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 31052
+          }
+        ]
+      },
+      {
+        "turnNumber": 400,
+        "intents": []
+      },
+      {
+        "turnNumber": 403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 36515
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 36515
+          }
+        ]
+      },
+      {
+        "turnNumber": 500,
+        "intents": []
+      },
+      {
+        "turnNumber": 503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 45530
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 45530
+          }
+        ]
+      },
+      {
+        "turnNumber": 600,
+        "intents": []
+      },
+      {
+        "turnNumber": 603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 52676
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 52676
+          }
+        ]
+      },
+      {
+        "turnNumber": 700,
+        "intents": []
+      },
+      {
+        "turnNumber": 703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60409
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60409
+          }
+        ]
+      },
+      {
+        "turnNumber": 800,
+        "intents": []
+      },
+      {
+        "turnNumber": 803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67705
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67705
+          }
+        ]
+      },
+      {
+        "turnNumber": 900,
+        "intents": []
+      },
+      {
+        "turnNumber": 903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 75306
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 75306
+          }
+        ]
+      },
+      {
+        "turnNumber": 1000,
+        "intents": []
+      },
+      {
+        "turnNumber": 1003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 81341
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 81341
+          }
+        ]
+      },
+      {
+        "turnNumber": 1100,
+        "intents": []
+      },
+      {
+        "turnNumber": 1103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 87824
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 87824
+          }
+        ]
+      },
+      {
+        "turnNumber": 1200,
+        "intents": []
+      },
+      {
+        "turnNumber": 1203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 94698
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 94698
+          }
+        ]
+      },
+      {
+        "turnNumber": 1300,
+        "intents": []
+      },
+      {
+        "turnNumber": 1303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 100861
+          },
+          {
+            "type": "build_unit",
+            "unit": "Factory",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 1400,
+        "intents": []
+      },
+      {
+        "turnNumber": 1500,
+        "intents": []
+      },
+      {
+        "turnNumber": 1503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 134504
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 134504
+          }
+        ]
+      },
+      {
+        "turnNumber": 1600,
+        "intents": []
+      },
+      {
+        "turnNumber": 1603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 121098
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 121098
+          }
+        ]
+      },
+      {
+        "turnNumber": 1700,
+        "intents": []
+      },
+      {
+        "turnNumber": 1703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 133990
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 133990
+          }
+        ]
+      },
+      {
+        "turnNumber": 1800,
+        "intents": []
+      },
+      {
+        "turnNumber": 1803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 46737
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 46737
+          }
+        ]
+      },
+      {
+        "turnNumber": 1900,
+        "intents": []
+      },
+      {
+        "turnNumber": 1903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 96229
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 96229
+          }
+        ]
+      },
+      {
+        "turnNumber": 2000,
+        "intents": []
+      },
+      {
+        "turnNumber": 2003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 321305
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 321305
+          }
+        ]
+      },
+      {
+        "turnNumber": 2100,
+        "intents": []
+      },
+      {
+        "turnNumber": 2103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 452498
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 452498
+          }
+        ]
+      },
+      {
+        "turnNumber": 2200,
+        "intents": []
+      },
+      {
+        "turnNumber": 2203,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "7v4vbmrw"
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 145578
+          }
+        ]
+      },
+      {
+        "turnNumber": 2300,
+        "intents": []
+      },
+      {
+        "turnNumber": 2303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 432628
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 432628
+          }
+        ]
+      },
+      {
+        "turnNumber": 2400,
+        "intents": []
+      },
+      {
+        "turnNumber": 2403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 213313
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 183531
+          }
+        ]
+      },
+      {
+        "turnNumber": 2500,
+        "intents": []
+      },
+      {
+        "turnNumber": 2503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 10649
+          }
+        ]
+      },
+      {
+        "turnNumber": 2600,
+        "intents": []
+      },
+      {
+        "turnNumber": 2603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 1512
+          }
+        ]
+      },
+      {
+        "turnNumber": 2700,
+        "intents": []
+      },
+      {
+        "turnNumber": 2703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 118739
+          }
+        ]
+      },
+      {
+        "turnNumber": 2800,
+        "intents": []
+      },
+      {
+        "turnNumber": 2803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 47339
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 47339
+          }
+        ]
+      },
+      {
+        "turnNumber": 2900,
+        "intents": []
+      },
+      {
+        "turnNumber": 2903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 454119
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 454119
+          }
+        ]
+      },
+      {
+        "turnNumber": 3000,
+        "intents": []
+      },
+      {
+        "turnNumber": 3003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 113815
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 113815
+          }
+        ]
+      },
+      {
+        "turnNumber": 3100,
+        "intents": []
+      },
+      {
+        "turnNumber": 3103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 140365
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 140365
+          }
+        ]
+      },
+      {
+        "turnNumber": 3200,
+        "intents": []
+      },
+      {
+        "turnNumber": 3203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 434008
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 325506
+          }
+        ]
+      },
+      {
+        "turnNumber": 3300,
+        "intents": []
+      },
+      {
+        "turnNumber": 3303,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "gh7u9omq"
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 179033
+          }
+        ]
+      },
+      {
+        "turnNumber": 3400,
+        "intents": []
+      },
+      {
+        "turnNumber": 3403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 415021
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 311265
+          }
+        ]
+      },
+      {
+        "turnNumber": 3500,
+        "intents": []
+      },
+      {
+        "turnNumber": 3503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 3487
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 3487
+          }
+        ]
+      },
+      {
+        "turnNumber": 3600,
+        "intents": []
+      },
+      {
+        "turnNumber": 3603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 224825
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 224825
+          }
+        ]
+      },
+      {
+        "turnNumber": 3700,
+        "intents": []
+      },
+      {
+        "turnNumber": 3703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 370911
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 278183
+          }
+        ]
+      },
+      {
+        "turnNumber": 3800,
+        "intents": []
+      },
+      {
+        "turnNumber": 3803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 66507
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 66507
+          }
+        ]
+      },
+      {
+        "turnNumber": 3900,
+        "intents": []
+      },
+      {
+        "turnNumber": 3903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 353520
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 265140
+          }
+        ]
+      },
+      {
+        "turnNumber": 4000,
+        "intents": []
+      },
+      {
+        "turnNumber": 4003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 181400
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 181400
+          }
+        ]
+      },
+      {
+        "turnNumber": 4100,
+        "intents": []
+      },
+      {
+        "turnNumber": 4103,
+        "intents": [
+          {
+            "type": "upgrade_structure",
+            "unit": "Factory",
+            "unitId": 6
+          }
+        ]
+      },
+      {
+        "turnNumber": 4200,
+        "intents": []
+      },
+      {
+        "turnNumber": 4203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 419474
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 314605
+          }
+        ]
+      },
+      {
+        "turnNumber": 4300,
+        "intents": []
+      },
+      {
+        "turnNumber": 4303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 257219
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 257219
+          }
+        ]
+      },
+      {
+        "turnNumber": 4400,
+        "intents": []
+      },
+      {
+        "turnNumber": 4403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 201808
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 201808
+          }
+        ]
+      },
+      {
+        "turnNumber": 4500,
+        "intents": []
+      },
+      {
+        "turnNumber": 4600,
+        "intents": []
+      },
+      {
+        "turnNumber": 4603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 151903
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 151903
+          }
+        ]
+      },
+      {
+        "turnNumber": 4700,
+        "intents": []
+      },
+      {
+        "turnNumber": 4703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 230860
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 230860
+          }
+        ]
+      },
+      {
+        "turnNumber": 4800,
+        "intents": []
+      },
+      {
+        "turnNumber": 4803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 360706
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 360706
+          }
+        ]
+      },
+      {
+        "turnNumber": 4900,
+        "intents": []
+      },
+      {
+        "turnNumber": 4903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 192159
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 192159
+          }
+        ]
+      },
+      {
+        "turnNumber": 5000,
+        "intents": []
+      },
+      {
+        "turnNumber": 5003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 365505
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 365505
+          }
+        ]
+      },
+      {
+        "turnNumber": 5100,
+        "intents": []
+      },
+      {
+        "turnNumber": 5103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 41351
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 41351
+          }
+        ]
+      },
+      {
+        "turnNumber": 5200,
+        "intents": []
+      },
+      {
+        "turnNumber": 5203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 351975
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 351975
+          }
+        ]
+      },
+      {
+        "turnNumber": 5300,
+        "intents": []
+      },
+      {
+        "turnNumber": 5303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 126027
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 126027
+          }
+        ]
+      },
+      {
+        "turnNumber": 5400,
+        "intents": []
+      },
+      {
+        "turnNumber": 5500,
+        "intents": []
+      },
+      {
+        "turnNumber": 5503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 213585
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 213585
+          }
+        ]
+      },
+      {
+        "turnNumber": 5600,
+        "intents": []
+      },
+      {
+        "turnNumber": 5603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 428543
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 428543
+          }
+        ]
+      },
+      {
+        "turnNumber": 5700,
+        "intents": []
+      },
+      {
+        "turnNumber": 5703,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "nopzwwt3"
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 143736
+          }
+        ]
+      },
+      {
+        "turnNumber": 5800,
+        "intents": []
+      },
+      {
+        "turnNumber": 5803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 78172
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 34185
+          }
+        ]
+      },
+      {
+        "turnNumber": 5900,
+        "intents": []
+      },
+      {
+        "turnNumber": 5903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 337000
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 195118
+          }
+        ]
+      },
+      {
+        "turnNumber": 6000,
+        "intents": []
+      },
+      {
+        "turnNumber": 6003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 129520
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 31666
+          }
+        ]
+      },
+      {
+        "turnNumber": 6100,
+        "intents": []
+      },
+      {
+        "turnNumber": 6103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 35647
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 24948
+          }
+        ]
+      },
+      {
+        "turnNumber": 6200,
+        "intents": []
+      },
+      {
+        "turnNumber": 6203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 1656
+          },
+          {
+            "type": "build_unit",
+            "unit": "City",
+            "tile": 1944239
+          }
+        ]
+      },
+      {
+        "turnNumber": 6300,
+        "intents": []
+      },
+      {
+        "turnNumber": 6303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 361181
+          },
+          {
+            "type": "build_unit",
+            "unit": "City",
+            "tile": 1976745
+          }
+        ]
+      },
+      {
+        "turnNumber": 6400,
+        "intents": []
+      },
+      {
+        "turnNumber": 6403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 99612
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 99612
+          }
+        ]
+      },
+      {
+        "turnNumber": 6500,
+        "intents": []
+      },
+      {
+        "turnNumber": 6503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 476874
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 476874
+          }
+        ]
+      },
+      {
+        "turnNumber": 6600,
+        "intents": []
+      },
+      {
+        "turnNumber": 6603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 196521
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 196521
+          }
+        ]
+      },
+      {
+        "turnNumber": 6700,
+        "intents": []
+      },
+      {
+        "turnNumber": 6703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 518375
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 388781
+          }
+        ]
+      },
+      {
+        "turnNumber": 6800,
+        "intents": []
+      },
+      {
+        "turnNumber": 6803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 55435
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 55435
+          }
+        ]
+      },
+      {
+        "turnNumber": 6900,
+        "intents": []
+      },
+      {
+        "turnNumber": 6903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 383070
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 287302
+          }
+        ]
+      },
+      {
+        "turnNumber": 7000,
+        "intents": []
+      },
+      {
+        "turnNumber": 7003,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "ndmq9mzg"
+          }
+        ]
+      },
+      {
+        "turnNumber": 7100,
+        "intents": []
+      },
+      {
+        "turnNumber": 7103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 195082
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 175323
+          }
+        ]
+      },
+      {
+        "turnNumber": 7200,
+        "intents": []
+      },
+      {
+        "turnNumber": 7203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 117338
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 117338
+          }
+        ]
+      },
+      {
+        "turnNumber": 7300,
+        "intents": []
+      },
+      {
+        "turnNumber": 7303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 461187
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 345890
+          }
+        ]
+      },
+      {
+        "turnNumber": 7400,
+        "intents": []
+      },
+      {
+        "turnNumber": 7403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 13808
+          },
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2059214
+          }
+        ]
+      },
+      {
+        "turnNumber": 7500,
+        "intents": []
+      },
+      {
+        "turnNumber": 7503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 286382
+          },
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2064212
+          }
+        ]
+      },
+      {
+        "turnNumber": 7600,
+        "intents": []
+      },
+      {
+        "turnNumber": 7603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 73026
+          },
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2091717
+          }
+        ]
+      },
+      {
+        "turnNumber": 7700,
+        "intents": []
+      },
+      {
+        "turnNumber": 7703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 9280
+          },
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2104217
+          }
+        ]
+      },
+      {
+        "turnNumber": 7800,
+        "intents": []
+      },
+      {
+        "turnNumber": 7803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 409974
+          },
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2121759
+          }
+        ]
+      },
+      {
+        "turnNumber": 7900,
+        "intents": []
+      },
+      {
+        "turnNumber": 7903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 125949
+          },
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2154255
+          }
+        ]
+      },
+      {
+        "turnNumber": 8000,
+        "intents": []
+      },
+      {
+        "turnNumber": 8003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 245172
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 226953
+          }
+        ]
+      },
+      {
+        "turnNumber": 8100,
+        "intents": []
+      },
+      {
+        "turnNumber": 8103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 162798
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 162798
+          }
+        ]
+      },
+      {
+        "turnNumber": 8200,
+        "intents": []
+      },
+      {
+        "turnNumber": 8203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 177543
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 177543
+          }
+        ]
+      },
+      {
+        "turnNumber": 8300,
+        "intents": []
+      },
+      {
+        "turnNumber": 8303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 190694
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 121462
+          }
+        ]
+      },
+      {
+        "turnNumber": 8400,
+        "intents": []
+      },
+      {
+        "turnNumber": 8403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 157079
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 157079
+          }
+        ]
+      },
+      {
+        "turnNumber": 8500,
+        "intents": []
+      },
+      {
+        "turnNumber": 8503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 19742
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 19742
+          }
+        ]
+      },
+      {
+        "turnNumber": 8600,
+        "intents": []
+      },
+      {
+        "turnNumber": 8603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 488726
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 44508
+          }
+        ]
+      },
+      {
+        "turnNumber": 8700,
+        "intents": []
+      },
+      {
+        "turnNumber": 8703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 87146
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 87146
+          }
+        ]
+      },
+      {
+        "turnNumber": 8800,
+        "intents": []
+      },
+      {
+        "turnNumber": 8803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 367307
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 306013
+          }
+        ]
+      },
+      {
+        "turnNumber": 8900,
+        "intents": []
+      },
+      {
+        "turnNumber": 8903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 145
+          },
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2406598
+          }
+        ]
+      },
+      {
+        "turnNumber": 9000,
+        "intents": []
+      },
+      {
+        "turnNumber": 9003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 223617
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 215066
+          }
+        ]
+      },
+      {
+        "turnNumber": 9100,
+        "intents": []
+      },
+      {
+        "turnNumber": 9103,
+        "intents": [
+          {
+            "type": "allianceRequest",
+            "recipient": "jld9qemv"
+          },
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2429120
+          }
+        ]
+      },
+      {
+        "turnNumber": 9200,
+        "intents": []
+      },
+      {
+        "turnNumber": 9203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 192525
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 192525
+          }
+        ]
+      },
+      {
+        "turnNumber": 9300,
+        "intents": []
+      },
+      {
+        "turnNumber": 9303,
+        "intents": [
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2459115
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "mx6susv9"
+          }
+        ]
+      },
+      {
+        "turnNumber": 9400,
+        "intents": []
+      },
+      {
+        "turnNumber": 9403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 14212
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "jld9qemv"
+          }
+        ]
+      },
+      {
+        "turnNumber": 9500,
+        "intents": []
+      },
+      {
+        "turnNumber": 9503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 395816
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 395816
+          }
+        ]
+      },
+      {
+        "turnNumber": 9600,
+        "intents": []
+      },
+      {
+        "turnNumber": 9603,
+        "intents": [
+          {
+            "type": "allianceRequest",
+            "recipient": "mx6susv9"
+          }
+        ]
+      },
+      {
+        "turnNumber": 9700,
+        "intents": []
+      },
+      {
+        "turnNumber": 9703,
+        "intents": [
+          {
+            "type": "allianceRequest",
+            "recipient": "jld9qemv"
+          }
+        ]
+      },
+      {
+        "turnNumber": 9800,
+        "intents": []
+      },
+      {
+        "turnNumber": 9803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 373821
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 373821
+          }
+        ]
+      },
+      {
+        "turnNumber": 9900,
+        "intents": []
+      },
+      {
+        "turnNumber": 9903,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "yasi4h4d"
+          }
+        ]
+      },
+      {
+        "turnNumber": 10000,
+        "intents": []
+      },
+      {
+        "turnNumber": 10100,
+        "intents": []
+      },
+      {
+        "turnNumber": 10103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 432954
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 432954
+          }
+        ]
+      },
+      {
+        "turnNumber": 10200,
+        "intents": []
+      },
+      {
+        "turnNumber": 10203,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "nrh9r79g"
+          }
+        ]
+      },
+      {
+        "turnNumber": 10300,
+        "intents": []
+      },
+      {
+        "turnNumber": 10303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 6106
+          }
+        ]
+      },
+      {
+        "turnNumber": 10400,
+        "intents": []
+      },
+      {
+        "turnNumber": 10403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 367895
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 367895
+          }
+        ]
+      },
+      {
+        "turnNumber": 10500,
+        "intents": []
+      },
+      {
+        "turnNumber": 10503,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "a4tk6gpc"
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 113071
+          }
+        ]
+      },
+      {
+        "turnNumber": 10600,
+        "intents": []
+      },
+      {
+        "turnNumber": 10700,
+        "intents": []
+      },
+      {
+        "turnNumber": 10703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 121882
+          },
+          {
+            "type": "build_unit",
+            "unit": "City",
+            "tile": 2763956
+          }
+        ]
+      },
+      {
+        "turnNumber": 10800,
+        "intents": []
+      }
+    ],
+    "recentDecisions": [
+      {
+        "tick": 10503,
+        "strategy": "Retreat tiny 6.6k probe, then counter Hokkaido's 226k incoming with 113k. Rebuild reserves; both foes bleed each other. Hold for decisive late push.",
+        "appliedActionIds": [
+          "retreat:a4tk6gpc",
+          "counter:mx6susv9:50"
+        ],
+        "outcomes": [
+          "completed: Attack a4tk6gpc completed its retreat",
+          "completed: Counter resolved immediately; hostile incoming troops fell from 226142 to 108965"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "retreat:a4tk6gpc",
+            "status": "completed",
+            "startedAtTick": 10505,
+            "resolvedAtTick": 10524,
+            "entityId": "a4tk6gpc",
+            "detail": "Attack a4tk6gpc completed its retreat"
+          },
+          {
+            "actionId": "counter:mx6susv9:50",
+            "status": "completed",
+            "startedAtTick": 10504,
+            "resolvedAtTick": 10504,
+            "entityId": null,
+            "detail": "Counter resolved immediately; hostile incoming troops fell from 226142 to 108965"
+          }
+        ]
+      },
+      {
+        "tick": 10603,
+        "strategy": "139s left, 80% win. Foes fighting each other; Kansai's 431k hits Hokkaido soon. Hold 1.14M troops, rebuild to cap, then decisive strike at end.",
+        "appliedActionIds": [
+          "hold:1",
+          "hold:2"
+        ],
+        "outcomes": [
+          "completed: Held intentionally",
+          "completed: Held intentionally"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "hold:1",
+            "status": "completed",
+            "startedAtTick": 10604,
+            "resolvedAtTick": 10604,
+            "entityId": null,
+            "detail": "Held intentionally"
+          },
+          {
+            "actionId": "hold:2",
+            "status": "completed",
+            "startedAtTick": 10604,
+            "resolvedAtTick": 10604,
+            "entityId": null,
+            "detail": "Held intentionally"
+          }
+        ]
+      },
+      {
+        "tick": 10703,
+        "strategy": "130s left, 80% win. Kansai's 244k hits us but they're also losing 429k to Hokkaido. Counter 122k to grind Kansai, build City for cap growth. Hold reserves.",
+        "appliedActionIds": [
+          "counter:jld9qemv:25",
+          "build:City:2763956"
+        ],
+        "outcomes": [
+          "completed: Counter resolved immediately; hostile incoming troops fell from 243764 to 114760",
+          "completed: City 123 completed construction"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "counter:jld9qemv:25",
+            "status": "completed",
+            "startedAtTick": 10704,
+            "resolvedAtTick": 10704,
+            "entityId": null,
+            "detail": "Counter resolved immediately; hostile incoming troops fell from 243764 to 114760"
+          },
+          {
+            "actionId": "build:City:2763956",
+            "status": "completed",
+            "startedAtTick": 10705,
+            "resolvedAtTick": 10726,
+            "entityId": 123,
+            "detail": "City 123 completed construction"
+          }
+        ]
+      }
+    ]
+  },
+  "split-front-defense": {
+    "sourceArtifact": "data/glm-5.2/f7e8e361-047d-43ab-a53c-1055af01117c.json.gz",
+    "sourceArtifactSha256": "a2c6c8e1092b1f9a6be13be8a35292239e43bfc1f4bfefe0b664f7fb0cbdd5cc",
+    "sourceDecisionIndex": 71,
+    "checkpointTick": 7103,
+    "preparationTurns": [
+      {
+        "turnNumber": 0,
+        "intents": [
+          {
+            "type": "spawn",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 3,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "d8c1rits"
+          }
+        ]
+      },
+      {
+        "turnNumber": 100,
+        "intents": []
+      },
+      {
+        "turnNumber": 103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 20114
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "jld9qemv"
+          }
+        ]
+      },
+      {
+        "turnNumber": 200,
+        "intents": []
+      },
+      {
+        "turnNumber": 203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 33150
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "mx6susv9"
+          }
+        ]
+      },
+      {
+        "turnNumber": 300,
+        "intents": []
+      },
+      {
+        "turnNumber": 303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 49538
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 49538
+          }
+        ]
+      },
+      {
+        "turnNumber": 400,
+        "intents": []
+      },
+      {
+        "turnNumber": 403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 27855
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 27855
+          }
+        ]
+      },
+      {
+        "turnNumber": 500,
+        "intents": []
+      },
+      {
+        "turnNumber": 503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 49233
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 49233
+          }
+        ]
+      },
+      {
+        "turnNumber": 600,
+        "intents": []
+      },
+      {
+        "turnNumber": 603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 52056
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 52056
+          }
+        ]
+      },
+      {
+        "turnNumber": 700,
+        "intents": []
+      },
+      {
+        "turnNumber": 703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 61189
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 61189
+          }
+        ]
+      },
+      {
+        "turnNumber": 800,
+        "intents": []
+      },
+      {
+        "turnNumber": 803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 68122
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "d8c1rits"
+          }
+        ]
+      },
+      {
+        "turnNumber": 900,
+        "intents": []
+      },
+      {
+        "turnNumber": 903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 123429
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 123429
+          }
+        ]
+      },
+      {
+        "turnNumber": 1000,
+        "intents": []
+      },
+      {
+        "turnNumber": 1003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 73096
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 73096
+          }
+        ]
+      },
+      {
+        "turnNumber": 1100,
+        "intents": []
+      },
+      {
+        "turnNumber": 1103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 90524
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 90524
+          }
+        ]
+      },
+      {
+        "turnNumber": 1200,
+        "intents": []
+      },
+      {
+        "turnNumber": 1203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 95444
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 95444
+          }
+        ]
+      },
+      {
+        "turnNumber": 1300,
+        "intents": []
+      },
+      {
+        "turnNumber": 1303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 101798
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 101798
+          }
+        ]
+      },
+      {
+        "turnNumber": 1400,
+        "intents": []
+      },
+      {
+        "turnNumber": 1403,
+        "intents": [
+          {
+            "type": "build_unit",
+            "unit": "Factory",
+            "tile": 2834113
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 107534
+          }
+        ]
+      },
+      {
+        "turnNumber": 1500,
+        "intents": []
+      },
+      {
+        "turnNumber": 1503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 186135
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 186135
+          }
+        ]
+      },
+      {
+        "turnNumber": 1600,
+        "intents": []
+      },
+      {
+        "turnNumber": 1603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 110840
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 110840
+          }
+        ]
+      },
+      {
+        "turnNumber": 1700,
+        "intents": []
+      },
+      {
+        "turnNumber": 1703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 127089
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 127089
+          }
+        ]
+      },
+      {
+        "turnNumber": 1800,
+        "intents": []
+      },
+      {
+        "turnNumber": 1803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 131137
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 131137
+          }
+        ]
+      },
+      {
+        "turnNumber": 1900,
+        "intents": []
+      },
+      {
+        "turnNumber": 1903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 137022
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 137022
+          }
+        ]
+      },
+      {
+        "turnNumber": 2000,
+        "intents": []
+      },
+      {
+        "turnNumber": 2100,
+        "intents": []
+      },
+      {
+        "turnNumber": 2200,
+        "intents": []
+      },
+      {
+        "turnNumber": 2300,
+        "intents": []
+      },
+      {
+        "turnNumber": 2400,
+        "intents": []
+      },
+      {
+        "turnNumber": 2500,
+        "intents": []
+      },
+      {
+        "turnNumber": 2503,
+        "intents": [
+          {
+            "type": "build_unit",
+            "unit": "City",
+            "tile": 1276694
+          }
+        ]
+      },
+      {
+        "turnNumber": 2600,
+        "intents": []
+      },
+      {
+        "turnNumber": 2700,
+        "intents": []
+      },
+      {
+        "turnNumber": 2800,
+        "intents": []
+      },
+      {
+        "turnNumber": 2900,
+        "intents": []
+      },
+      {
+        "turnNumber": 3000,
+        "intents": []
+      },
+      {
+        "turnNumber": 3003,
+        "intents": [
+          {
+            "type": "allianceExtension",
+            "recipient": "mx6susv9"
+          }
+        ]
+      },
+      {
+        "turnNumber": 3100,
+        "intents": []
+      },
+      {
+        "turnNumber": 3103,
+        "intents": [
+          {
+            "type": "allianceExtension",
+            "recipient": "jld9qemv"
+          }
+        ]
+      },
+      {
+        "turnNumber": 3200,
+        "intents": []
+      },
+      {
+        "turnNumber": 3300,
+        "intents": []
+      },
+      {
+        "turnNumber": 3400,
+        "intents": []
+      },
+      {
+        "turnNumber": 3500,
+        "intents": []
+      },
+      {
+        "turnNumber": 3600,
+        "intents": []
+      },
+      {
+        "turnNumber": 3700,
+        "intents": []
+      },
+      {
+        "turnNumber": 3800,
+        "intents": []
+      },
+      {
+        "turnNumber": 3900,
+        "intents": []
+      },
+      {
+        "turnNumber": 4000,
+        "intents": []
+      },
+      {
+        "turnNumber": 4100,
+        "intents": []
+      },
+      {
+        "turnNumber": 4200,
+        "intents": []
+      },
+      {
+        "turnNumber": 4300,
+        "intents": []
+      },
+      {
+        "turnNumber": 4400,
+        "intents": []
+      },
+      {
+        "turnNumber": 4500,
+        "intents": []
+      },
+      {
+        "turnNumber": 4600,
+        "intents": []
+      },
+      {
+        "turnNumber": 4700,
+        "intents": []
+      },
+      {
+        "turnNumber": 4800,
+        "intents": []
+      },
+      {
+        "turnNumber": 4900,
+        "intents": []
+      },
+      {
+        "turnNumber": 5000,
+        "intents": []
+      },
+      {
+        "turnNumber": 5100,
+        "intents": []
+      },
+      {
+        "turnNumber": 5200,
+        "intents": []
+      },
+      {
+        "turnNumber": 5300,
+        "intents": []
+      },
+      {
+        "turnNumber": 5303,
+        "intents": [
+          {
+            "type": "upgrade_structure",
+            "unit": "Factory",
+            "unitId": 7
+          }
+        ]
+      },
+      {
+        "turnNumber": 5400,
+        "intents": []
+      },
+      {
+        "turnNumber": 5500,
+        "intents": []
+      },
+      {
+        "turnNumber": 5600,
+        "intents": []
+      },
+      {
+        "turnNumber": 5700,
+        "intents": []
+      },
+      {
+        "turnNumber": 5800,
+        "intents": []
+      },
+      {
+        "turnNumber": 5900,
+        "intents": []
+      },
+      {
+        "turnNumber": 6000,
+        "intents": []
+      },
+      {
+        "turnNumber": 6100,
+        "intents": []
+      },
+      {
+        "turnNumber": 6103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 485975
+          }
+        ]
+      },
+      {
+        "turnNumber": 6200,
+        "intents": []
+      },
+      {
+        "turnNumber": 6203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 72619
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 72619
+          }
+        ]
+      },
+      {
+        "turnNumber": 6300,
+        "intents": []
+      },
+      {
+        "turnNumber": 6303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 407174
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 407174
+          }
+        ]
+      },
+      {
+        "turnNumber": 6400,
+        "intents": []
+      },
+      {
+        "turnNumber": 6403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 1492
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 1492
+          }
+        ]
+      },
+      {
+        "turnNumber": 6500,
+        "intents": []
+      },
+      {
+        "turnNumber": 6503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 694366
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 694366
+          }
+        ]
+      },
+      {
+        "turnNumber": 6600,
+        "intents": []
+      },
+      {
+        "turnNumber": 6603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 642933
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 642933
+          }
+        ]
+      },
+      {
+        "turnNumber": 6700,
+        "intents": []
+      },
+      {
+        "turnNumber": 6703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 501719
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 501719
+          }
+        ]
+      },
+      {
+        "turnNumber": 6800,
+        "intents": []
+      },
+      {
+        "turnNumber": 6803,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "dskhzowt"
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 114152
+          }
+        ]
+      },
+      {
+        "turnNumber": 6900,
+        "intents": []
+      },
+      {
+        "turnNumber": 6903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 211848
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 72815
+          }
+        ]
+      },
+      {
+        "turnNumber": 7000,
+        "intents": []
+      },
+      {
+        "turnNumber": 7003,
+        "intents": [
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2146751
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 42090
+          }
+        ]
+      },
+      {
+        "turnNumber": 7100,
+        "intents": []
+      }
+    ],
+    "recentDecisions": [
+      {
+        "tick": 6803,
+        "strategy": "17.7% lead, 520s left. Retreat stalled Shikoku attack, counter Kansai's 228k invasion with 114k to defend and keep lead for timer victory.",
+        "appliedActionIds": [
+          "retreat:dskhzowt",
+          "counter:jld9qemv:25"
+        ],
+        "outcomes": [
+          "completed: Attack dskhzowt completed its retreat",
+          "completed: Counter resolved immediately; hostile incoming troops fell from 228304 to 113766"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "retreat:dskhzowt",
+            "status": "completed",
+            "startedAtTick": 6805,
+            "resolvedAtTick": 6824,
+            "entityId": "dskhzowt",
+            "detail": "Attack dskhzowt completed its retreat"
+          },
+          {
+            "actionId": "counter:jld9qemv:25",
+            "status": "completed",
+            "startedAtTick": 6804,
+            "resolvedAtTick": 6804,
+            "entityId": null,
+            "detail": "Counter resolved immediately; hostile incoming troops fell from 228304 to 113766"
+          }
+        ]
+      },
+      {
+        "tick": 6903,
+        "strategy": "17.5% lead, 510s left. Shikoku's 351k attack is main threat; counter 50% to blunt it. Also counter Kansai's 73k. Both already attacking us.",
+        "appliedActionIds": [
+          "counter:d8c1rits:50",
+          "counter:jld9qemv:25"
+        ],
+        "outcomes": [
+          "completed: Counter resolved immediately; hostile incoming troops fell from 350881 to 138452",
+          "completed: Attack hhre9gbe ended after capturing territory"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "counter:d8c1rits:50",
+            "status": "completed",
+            "startedAtTick": 6904,
+            "resolvedAtTick": 6904,
+            "entityId": null,
+            "detail": "Counter resolved immediately; hostile incoming troops fell from 350881 to 138452"
+          },
+          {
+            "actionId": "counter:jld9qemv:25",
+            "status": "completed",
+            "startedAtTick": 6904,
+            "resolvedAtTick": 6911,
+            "entityId": "hhre9gbe",
+            "detail": "Attack hhre9gbe ended after capturing territory"
+          }
+        ]
+      },
+      {
+        "tick": 7003,
+        "strategy": "17% lead, 500s left. Build Defense Post to harden border vs Shikoku's 84k incoming. Counter 25% to blunt attack and preserve lead for timer victory.",
+        "appliedActionIds": [
+          "build:Defense Post:2146751",
+          "counter:d8c1rits:25"
+        ],
+        "outcomes": [
+          "completed: Defense Post 48 completed construction",
+          "completed: Counter resolved immediately; hostile incoming troops fell from 84181 to 41554"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "build:Defense Post:2146751",
+            "status": "completed",
+            "startedAtTick": 7005,
+            "resolvedAtTick": 7056,
+            "entityId": 48,
+            "detail": "Defense Post 48 completed construction"
+          },
+          {
+            "actionId": "counter:d8c1rits:25",
+            "status": "completed",
+            "startedAtTick": 7004,
+            "resolvedAtTick": 7004,
+            "entityId": null,
+            "detail": "Counter resolved immediately; hostile incoming troops fell from 84181 to 41554"
+          }
+        ]
+      }
+    ]
+  },
+  "losing-attack-retreat": {
+    "sourceArtifact": "data/deepseek-v4-flash/8d43865f-2dd0-4cd8-9576-64e6ecd48a2c.json.gz",
+    "sourceArtifactSha256": "4462dcee8ac931f45c6fe68cc3e96f8c71116f3c36e8ed4de9cc6bf2988163b9",
+    "sourceDecisionIndex": 74,
+    "checkpointTick": 7403,
+    "preparationTurns": [
+      {
+        "turnNumber": 0,
+        "intents": [
+          {
+            "type": "spawn",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 3,
+        "intents": [
+          {
+            "type": "allianceRequest",
+            "recipient": "d8c1rits"
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          }
+        ]
+      },
+      {
+        "turnNumber": 100,
+        "intents": []
+      },
+      {
+        "turnNumber": 103,
+        "intents": [
+          {
+            "type": "allianceRequest",
+            "recipient": "jld9qemv"
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 20114
+          }
+        ]
+      },
+      {
+        "turnNumber": 200,
+        "intents": []
+      },
+      {
+        "turnNumber": 203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 33150
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "mx6susv9"
+          }
+        ]
+      },
+      {
+        "turnNumber": 300,
+        "intents": []
+      },
+      {
+        "turnNumber": 303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 49538
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "d8c1rits"
+          }
+        ]
+      },
+      {
+        "turnNumber": 400,
+        "intents": []
+      },
+      {
+        "turnNumber": 403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67031
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67031
+          }
+        ]
+      },
+      {
+        "turnNumber": 500,
+        "intents": []
+      },
+      {
+        "turnNumber": 503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 34601
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 34601
+          }
+        ]
+      },
+      {
+        "turnNumber": 600,
+        "intents": []
+      },
+      {
+        "turnNumber": 603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 57271
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 57271
+          }
+        ]
+      },
+      {
+        "turnNumber": 700,
+        "intents": []
+      },
+      {
+        "turnNumber": 703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60435
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60435
+          }
+        ]
+      },
+      {
+        "turnNumber": 800,
+        "intents": []
+      },
+      {
+        "turnNumber": 803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 68933
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 68933
+          }
+        ]
+      },
+      {
+        "turnNumber": 900,
+        "intents": []
+      },
+      {
+        "turnNumber": 903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 76072
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 76072
+          }
+        ]
+      },
+      {
+        "turnNumber": 1000,
+        "intents": []
+      },
+      {
+        "turnNumber": 1003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 82113
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 82113
+          }
+        ]
+      },
+      {
+        "turnNumber": 1100,
+        "intents": []
+      },
+      {
+        "turnNumber": 1103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 88803
+          }
+        ]
+      },
+      {
+        "turnNumber": 1200,
+        "intents": []
+      },
+      {
+        "turnNumber": 1203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 156314
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 156314
+          }
+        ]
+      },
+      {
+        "turnNumber": 1300,
+        "intents": []
+      },
+      {
+        "turnNumber": 1303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 93552
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 93552
+          }
+        ]
+      },
+      {
+        "turnNumber": 1400,
+        "intents": []
+      },
+      {
+        "turnNumber": 1403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 109206
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 109206
+          }
+        ]
+      },
+      {
+        "turnNumber": 1500,
+        "intents": []
+      },
+      {
+        "turnNumber": 1503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 114165
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 114165
+          }
+        ]
+      },
+      {
+        "turnNumber": 1600,
+        "intents": []
+      },
+      {
+        "turnNumber": 1603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 119726
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 119726
+          }
+        ]
+      },
+      {
+        "turnNumber": 1700,
+        "intents": []
+      },
+      {
+        "turnNumber": 1703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 125749
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 125749
+          }
+        ]
+      },
+      {
+        "turnNumber": 1800,
+        "intents": []
+      },
+      {
+        "turnNumber": 1803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 131411
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 131411
+          }
+        ]
+      },
+      {
+        "turnNumber": 1900,
+        "intents": []
+      },
+      {
+        "turnNumber": 1903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 136843
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 136843
+          }
+        ]
+      },
+      {
+        "turnNumber": 2000,
+        "intents": []
+      },
+      {
+        "turnNumber": 2100,
+        "intents": []
+      },
+      {
+        "turnNumber": 2200,
+        "intents": []
+      },
+      {
+        "turnNumber": 2300,
+        "intents": []
+      },
+      {
+        "turnNumber": 2400,
+        "intents": []
+      },
+      {
+        "turnNumber": 2500,
+        "intents": []
+      },
+      {
+        "turnNumber": 2600,
+        "intents": []
+      },
+      {
+        "turnNumber": 2700,
+        "intents": []
+      },
+      {
+        "turnNumber": 2800,
+        "intents": []
+      },
+      {
+        "turnNumber": 2900,
+        "intents": []
+      },
+      {
+        "turnNumber": 3000,
+        "intents": []
+      },
+      {
+        "turnNumber": 3100,
+        "intents": []
+      },
+      {
+        "turnNumber": 3200,
+        "intents": []
+      },
+      {
+        "turnNumber": 3203,
+        "intents": [
+          {
+            "type": "allianceRequest",
+            "recipient": "jld9qemv"
+          }
+        ]
+      },
+      {
+        "turnNumber": 3300,
+        "intents": []
+      },
+      {
+        "turnNumber": 3303,
+        "intents": [
+          {
+            "type": "allianceRequest",
+            "recipient": "mx6susv9"
+          }
+        ]
+      },
+      {
+        "turnNumber": 3400,
+        "intents": []
+      },
+      {
+        "turnNumber": 3403,
+        "intents": [
+          {
+            "type": "build_unit",
+            "unit": "Port",
+            "tile": 1276694
+          }
+        ]
+      },
+      {
+        "turnNumber": 3500,
+        "intents": []
+      },
+      {
+        "turnNumber": 3503,
+        "intents": [
+          {
+            "type": "allianceRequest",
+            "recipient": "d8c1rits"
+          }
+        ]
+      },
+      {
+        "turnNumber": 3600,
+        "intents": []
+      },
+      {
+        "turnNumber": 3700,
+        "intents": []
+      },
+      {
+        "turnNumber": 3800,
+        "intents": []
+      },
+      {
+        "turnNumber": 3900,
+        "intents": []
+      },
+      {
+        "turnNumber": 4000,
+        "intents": []
+      },
+      {
+        "turnNumber": 4100,
+        "intents": []
+      },
+      {
+        "turnNumber": 4200,
+        "intents": []
+      },
+      {
+        "turnNumber": 4300,
+        "intents": []
+      },
+      {
+        "turnNumber": 4400,
+        "intents": []
+      },
+      {
+        "turnNumber": 4500,
+        "intents": []
+      },
+      {
+        "turnNumber": 4600,
+        "intents": []
+      },
+      {
+        "turnNumber": 4700,
+        "intents": []
+      },
+      {
+        "turnNumber": 4800,
+        "intents": []
+      },
+      {
+        "turnNumber": 4900,
+        "intents": []
+      },
+      {
+        "turnNumber": 5000,
+        "intents": []
+      },
+      {
+        "turnNumber": 5100,
+        "intents": []
+      },
+      {
+        "turnNumber": 5200,
+        "intents": []
+      },
+      {
+        "turnNumber": 5300,
+        "intents": []
+      },
+      {
+        "turnNumber": 5400,
+        "intents": []
+      },
+      {
+        "turnNumber": 5500,
+        "intents": []
+      },
+      {
+        "turnNumber": 5600,
+        "intents": []
+      },
+      {
+        "turnNumber": 5700,
+        "intents": []
+      },
+      {
+        "turnNumber": 5800,
+        "intents": []
+      },
+      {
+        "turnNumber": 5900,
+        "intents": []
+      },
+      {
+        "turnNumber": 6000,
+        "intents": []
+      },
+      {
+        "turnNumber": 6100,
+        "intents": []
+      },
+      {
+        "turnNumber": 6200,
+        "intents": []
+      },
+      {
+        "turnNumber": 6300,
+        "intents": []
+      },
+      {
+        "turnNumber": 6400,
+        "intents": []
+      },
+      {
+        "turnNumber": 6403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 895379
+          }
+        ]
+      },
+      {
+        "turnNumber": 6500,
+        "intents": []
+      },
+      {
+        "turnNumber": 6503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 578305
+          }
+        ]
+      },
+      {
+        "turnNumber": 6600,
+        "intents": []
+      },
+      {
+        "turnNumber": 6700,
+        "intents": []
+      },
+      {
+        "turnNumber": 6703,
+        "intents": [
+          {
+            "type": "allianceRequest",
+            "recipient": "mx6susv9"
+          }
+        ]
+      },
+      {
+        "turnNumber": 6800,
+        "intents": []
+      },
+      {
+        "turnNumber": 6803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 699247
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "jld9qemv"
+          }
+        ]
+      },
+      {
+        "turnNumber": 6900,
+        "intents": []
+      },
+      {
+        "turnNumber": 6903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 509383
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "d8c1rits"
+          }
+        ]
+      },
+      {
+        "turnNumber": 7000,
+        "intents": []
+      },
+      {
+        "turnNumber": 7003,
+        "intents": [
+          {
+            "type": "boat",
+            "troops": 762775,
+            "dst": 1034199
+          }
+        ]
+      },
+      {
+        "turnNumber": 7100,
+        "intents": []
+      },
+      {
+        "turnNumber": 7103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 106921
+          }
+        ]
+      },
+      {
+        "turnNumber": 7200,
+        "intents": []
+      },
+      {
+        "turnNumber": 7203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 465802
+          }
+        ]
+      },
+      {
+        "turnNumber": 7300,
+        "intents": []
+      },
+      {
+        "turnNumber": 7303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 406100
+          }
+        ]
+      },
+      {
+        "turnNumber": 7400,
+        "intents": []
+      }
+    ],
+    "recentDecisions": [
+      {
+        "tick": 7103,
+        "strategy": "Maintain pressure on Hokkaido with a counterattack while conserving gold; allies secure borders.",
+        "appliedActionIds": [
+          "hold:1",
+          "counter:mx6susv9:25"
+        ],
+        "outcomes": [
+          "completed: Held intentionally",
+          "completed: Counter resolved immediately; hostile incoming troops fell from 213842 to 106855"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "hold:1",
+            "status": "completed",
+            "startedAtTick": 7104,
+            "resolvedAtTick": 7104,
+            "entityId": null,
+            "detail": "Held intentionally"
+          },
+          {
+            "actionId": "counter:mx6susv9:25",
+            "status": "completed",
+            "startedAtTick": 7104,
+            "resolvedAtTick": 7104,
+            "entityId": null,
+            "detail": "Counter resolved immediately; hostile incoming troops fell from 213842 to 106855"
+          }
+        ]
+      },
+      {
+        "tick": 7203,
+        "strategy": "Press Hokkaido with 75% budget; allies secure borders, maintain growth lead. Target 80% victory.",
+        "appliedActionIds": [
+          "attack:mx6susv9:75",
+          "hold:2"
+        ],
+        "outcomes": [
+          "completed: Attack oowqeh4v ended after capturing territory",
+          "completed: Held intentionally"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "attack:mx6susv9:75",
+            "status": "completed",
+            "startedAtTick": 7204,
+            "resolvedAtTick": 7304,
+            "entityId": "oowqeh4v",
+            "detail": "Attack oowqeh4v ended after capturing territory"
+          },
+          {
+            "actionId": "hold:2",
+            "status": "completed",
+            "startedAtTick": 7204,
+            "resolvedAtTick": 7204,
+            "entityId": null,
+            "detail": "Held intentionally"
+          }
+        ]
+      },
+      {
+        "tick": 7303,
+        "strategy": "Relentlessly press Hokkaido; allies are secure, avoid overextension. 75% budget sustains pressure without depleting reserves.",
+        "appliedActionIds": [
+          "attack:mx6susv9:75",
+          "hold:2"
+        ],
+        "outcomes": [
+          "completed: Attack wy4yxti5 ended after capturing territory",
+          "completed: Held intentionally"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "attack:mx6susv9:75",
+            "status": "completed",
+            "startedAtTick": 7304,
+            "resolvedAtTick": 7404,
+            "entityId": "wy4yxti5",
+            "detail": "Attack wy4yxti5 ended after capturing territory"
+          },
+          {
+            "actionId": "hold:2",
+            "status": "completed",
+            "startedAtTick": 7304,
+            "resolvedAtTick": 7304,
+            "entityId": null,
+            "detail": "Held intentionally"
+          }
+        ]
+      }
+    ]
+  },
+  "naval-target-recognition": {
+    "sourceArtifact": "data/gpt-5.6-luna/5c3016b7-10bf-4583-af24-b27b8de4e378.json.gz",
+    "sourceArtifactSha256": "d34d6a675c779c3c84d06da2c95f1f953e0aa86cce88d267be0609398fb32323",
+    "sourceDecisionIndex": 54,
+    "checkpointTick": 5403,
+    "preparationTurns": [
+      {
+        "turnNumber": 0,
+        "intents": [
+          {
+            "type": "spawn",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 3,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "d8c1rits"
+          }
+        ]
+      },
+      {
+        "turnNumber": 100,
+        "intents": []
+      },
+      {
+        "turnNumber": 103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 20114
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "jld9qemv"
+          }
+        ]
+      },
+      {
+        "turnNumber": 200,
+        "intents": []
+      },
+      {
+        "turnNumber": 203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 33150
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 33150
+          }
+        ]
+      },
+      {
+        "turnNumber": 300,
+        "intents": []
+      },
+      {
+        "turnNumber": 303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 21464
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 21464
+          }
+        ]
+      },
+      {
+        "turnNumber": 400,
+        "intents": []
+      },
+      {
+        "turnNumber": 403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 40896
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 40896
+          }
+        ]
+      },
+      {
+        "turnNumber": 500,
+        "intents": []
+      },
+      {
+        "turnNumber": 503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 43878
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 43878
+          }
+        ]
+      },
+      {
+        "turnNumber": 600,
+        "intents": []
+      },
+      {
+        "turnNumber": 603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 53214
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 53214
+          }
+        ]
+      },
+      {
+        "turnNumber": 700,
+        "intents": []
+      },
+      {
+        "turnNumber": 703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60318
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60318
+          }
+        ]
+      },
+      {
+        "turnNumber": 800,
+        "intents": []
+      },
+      {
+        "turnNumber": 803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67811
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67811
+          }
+        ]
+      },
+      {
+        "turnNumber": 900,
+        "intents": []
+      },
+      {
+        "turnNumber": 903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 75304
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 75304
+          }
+        ]
+      },
+      {
+        "turnNumber": 1000,
+        "intents": []
+      },
+      {
+        "turnNumber": 1003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 81305
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 81305
+          }
+        ]
+      },
+      {
+        "turnNumber": 1100,
+        "intents": []
+      },
+      {
+        "turnNumber": 1103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 87954
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 87954
+          }
+        ]
+      },
+      {
+        "turnNumber": 1200,
+        "intents": []
+      },
+      {
+        "turnNumber": 1203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 94802
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 94802
+          }
+        ]
+      },
+      {
+        "turnNumber": 1300,
+        "intents": []
+      },
+      {
+        "turnNumber": 1303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 101111
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 101111
+          }
+        ]
+      },
+      {
+        "turnNumber": 1400,
+        "intents": []
+      },
+      {
+        "turnNumber": 1403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 106591
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 106591
+          }
+        ]
+      },
+      {
+        "turnNumber": 1500,
+        "intents": []
+      },
+      {
+        "turnNumber": 1503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 113101
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 113101
+          }
+        ]
+      },
+      {
+        "turnNumber": 1600,
+        "intents": []
+      },
+      {
+        "turnNumber": 1603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 118555
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 118555
+          }
+        ]
+      },
+      {
+        "turnNumber": 1700,
+        "intents": []
+      },
+      {
+        "turnNumber": 1703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 124400
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 124400
+          }
+        ]
+      },
+      {
+        "turnNumber": 1800,
+        "intents": []
+      },
+      {
+        "turnNumber": 1803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 47273
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 47273
+          }
+        ]
+      },
+      {
+        "turnNumber": 1900,
+        "intents": []
+      },
+      {
+        "turnNumber": 1903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 953
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 953
+          }
+        ]
+      },
+      {
+        "turnNumber": 2000,
+        "intents": []
+      },
+      {
+        "turnNumber": 2003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 177147
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 177147
+          }
+        ]
+      },
+      {
+        "turnNumber": 2100,
+        "intents": []
+      },
+      {
+        "turnNumber": 2103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 156844
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 156844
+          }
+        ]
+      },
+      {
+        "turnNumber": 2200,
+        "intents": []
+      },
+      {
+        "turnNumber": 2203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 180330
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 180330
+          }
+        ]
+      },
+      {
+        "turnNumber": 2300,
+        "intents": []
+      },
+      {
+        "turnNumber": 2303,
+        "intents": [
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2429100
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 98211
+          }
+        ]
+      },
+      {
+        "turnNumber": 2400,
+        "intents": []
+      },
+      {
+        "turnNumber": 2403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 42066
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 42066
+          }
+        ]
+      },
+      {
+        "turnNumber": 2500,
+        "intents": []
+      },
+      {
+        "turnNumber": 2503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 433027
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 433027
+          }
+        ]
+      },
+      {
+        "turnNumber": 2600,
+        "intents": []
+      },
+      {
+        "turnNumber": 2603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 379032
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 379032
+          }
+        ]
+      },
+      {
+        "turnNumber": 2700,
+        "intents": []
+      },
+      {
+        "turnNumber": 2703,
+        "intents": [
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2429058
+          }
+        ]
+      },
+      {
+        "turnNumber": 2800,
+        "intents": []
+      },
+      {
+        "turnNumber": 2803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 105828
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 105828
+          }
+        ]
+      },
+      {
+        "turnNumber": 2900,
+        "intents": []
+      },
+      {
+        "turnNumber": 2903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 507131
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 507131
+          }
+        ]
+      },
+      {
+        "turnNumber": 3000,
+        "intents": []
+      },
+      {
+        "turnNumber": 3003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 314402
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 314402
+          }
+        ]
+      },
+      {
+        "turnNumber": 3100,
+        "intents": []
+      },
+      {
+        "turnNumber": 3103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 219627
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 219627
+          }
+        ]
+      },
+      {
+        "turnNumber": 3200,
+        "intents": []
+      },
+      {
+        "turnNumber": 3203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 409695
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 409695
+          }
+        ]
+      },
+      {
+        "turnNumber": 3300,
+        "intents": []
+      },
+      {
+        "turnNumber": 3303,
+        "intents": [
+          {
+            "type": "boat",
+            "troops": 548408,
+            "dst": 1034199
+          },
+          {
+            "type": "boat",
+            "troops": 548408,
+            "dst": 1034199
+          }
+        ]
+      },
+      {
+        "turnNumber": 3400,
+        "intents": []
+      },
+      {
+        "turnNumber": 3403,
+        "intents": [
+          {
+            "type": "build_unit",
+            "unit": "City",
+            "tile": 1276694
+          }
+        ]
+      },
+      {
+        "turnNumber": 3500,
+        "intents": []
+      },
+      {
+        "turnNumber": 3503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 90163
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 90163
+          }
+        ]
+      },
+      {
+        "turnNumber": 3600,
+        "intents": []
+      },
+      {
+        "turnNumber": 3603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 581019
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 581019
+          }
+        ]
+      },
+      {
+        "turnNumber": 3700,
+        "intents": []
+      },
+      {
+        "turnNumber": 3800,
+        "intents": []
+      },
+      {
+        "turnNumber": 3803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 374033
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 374033
+          }
+        ]
+      },
+      {
+        "turnNumber": 3900,
+        "intents": []
+      },
+      {
+        "turnNumber": 4000,
+        "intents": []
+      },
+      {
+        "turnNumber": 4003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 364142
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 364142
+          }
+        ]
+      },
+      {
+        "turnNumber": 4100,
+        "intents": []
+      },
+      {
+        "turnNumber": 4103,
+        "intents": [
+          {
+            "type": "build_unit",
+            "unit": "Factory",
+            "tile": 1624234
+          }
+        ]
+      },
+      {
+        "turnNumber": 4200,
+        "intents": []
+      },
+      {
+        "turnNumber": 4203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 242106
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 242106
+          }
+        ]
+      },
+      {
+        "turnNumber": 4300,
+        "intents": []
+      },
+      {
+        "turnNumber": 4303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 392260
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 392260
+          }
+        ]
+      },
+      {
+        "turnNumber": 4400,
+        "intents": []
+      },
+      {
+        "turnNumber": 4403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 69123
+          },
+          {
+            "type": "allianceRequest",
+            "recipient": "d8c1rits"
+          }
+        ]
+      },
+      {
+        "turnNumber": 4500,
+        "intents": []
+      },
+      {
+        "turnNumber": 4503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 148
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 148
+          }
+        ]
+      },
+      {
+        "turnNumber": 4600,
+        "intents": []
+      },
+      {
+        "turnNumber": 4603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 58239
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 58239
+          }
+        ]
+      },
+      {
+        "turnNumber": 4700,
+        "intents": []
+      },
+      {
+        "turnNumber": 4703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 171573
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 171573
+          }
+        ]
+      },
+      {
+        "turnNumber": 4800,
+        "intents": []
+      },
+      {
+        "turnNumber": 4803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 646093
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 646093
+          }
+        ]
+      },
+      {
+        "turnNumber": 4900,
+        "intents": []
+      },
+      {
+        "turnNumber": 4903,
+        "intents": [
+          {
+            "type": "allianceRequest",
+            "recipient": "jld9qemv"
+          }
+        ]
+      },
+      {
+        "turnNumber": 5000,
+        "intents": []
+      },
+      {
+        "turnNumber": 5003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 398110
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 398110
+          }
+        ]
+      },
+      {
+        "turnNumber": 5100,
+        "intents": []
+      },
+      {
+        "turnNumber": 5103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 77230
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 77230
+          }
+        ]
+      },
+      {
+        "turnNumber": 5200,
+        "intents": []
+      },
+      {
+        "turnNumber": 5203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 377177
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 377177
+          }
+        ]
+      },
+      {
+        "turnNumber": 5300,
+        "intents": []
+      },
+      {
+        "turnNumber": 5400,
+        "intents": []
+      }
+    ],
+    "recentDecisions": [
+      {
+        "tick": 5103,
+        "strategy": "Counter the active Hokkaido invasion twice while preserving the Kansai alliance and decisive territorial lead.",
+        "appliedActionIds": [
+          "counter:mx6susv9:25",
+          "counter:mx6susv9:25"
+        ],
+        "outcomes": [
+          "destroyed: Attack o72dqzjj ended without capturing territory",
+          "destroyed: Attack o72dqzjj ended without capturing territory"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "counter:mx6susv9:25",
+            "status": "destroyed",
+            "startedAtTick": 5104,
+            "resolvedAtTick": 5115,
+            "entityId": "o72dqzjj",
+            "detail": "Attack o72dqzjj ended without capturing territory"
+          },
+          {
+            "actionId": "counter:mx6susv9:25",
+            "status": "destroyed",
+            "startedAtTick": 5104,
+            "resolvedAtTick": 5115,
+            "entityId": "o72dqzjj",
+            "detail": "Attack o72dqzjj ended without capturing territory"
+          }
+        ]
+      },
+      {
+        "tick": 5203,
+        "strategy": "Press the hostile Hokkaido front with both safe attacks while maintaining the decisive lead and Kansai alliance.",
+        "appliedActionIds": [
+          "attack:mx6susv9:100",
+          "attack:mx6susv9:100"
+        ],
+        "outcomes": [
+          "completed: Attack nk7xj361 ended after capturing territory",
+          "completed: Attack nk7xj361 ended after capturing territory"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "attack:mx6susv9:100",
+            "status": "completed",
+            "startedAtTick": 5204,
+            "resolvedAtTick": 5244,
+            "entityId": "nk7xj361",
+            "detail": "Attack nk7xj361 ended after capturing territory"
+          },
+          {
+            "actionId": "attack:mx6susv9:100",
+            "status": "completed",
+            "startedAtTick": 5204,
+            "resolvedAtTick": 5244,
+            "entityId": "nk7xj361",
+            "detail": "Attack nk7xj361 ended after capturing territory"
+          }
+        ]
+      },
+      {
+        "tick": 5303,
+        "strategy": "Maintain the Kansai alliance and avoid unnecessary diplomacy while the decisive territorial lead secures the endgame.",
+        "appliedActionIds": [
+          "hold:1",
+          "hold:2"
+        ],
+        "outcomes": [
+          "completed: Held intentionally",
+          "completed: Held intentionally"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "hold:1",
+            "status": "completed",
+            "startedAtTick": 5304,
+            "resolvedAtTick": 5304,
+            "entityId": null,
+            "detail": "Held intentionally"
+          },
+          {
+            "actionId": "hold:2",
+            "status": "completed",
+            "startedAtTick": 5304,
+            "resolvedAtTick": 5304,
+            "entityId": null,
+            "detail": "Held intentionally"
+          }
+        ]
+      }
+    ]
+  },
+  "construction-failure-recovery": {
+    "sourceArtifact": "data/previous/lifecycle-verification/fa907146-94dc-426b-b49b-a8ea6c641f19.json.gz",
+    "sourceArtifactSha256": "c0b64641436ae519b2c2af8fba7474c66b45aebbc7dff07864c116d1c66466a7",
+    "sourceDecisionIndex": 76,
+    "checkpointTick": 7603,
+    "preparationTurns": [
+      {
+        "turnNumber": 0,
+        "intents": [
+          {
+            "type": "spawn",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 3,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 3559
+          }
+        ]
+      },
+      {
+        "turnNumber": 100,
+        "intents": []
+      },
+      {
+        "turnNumber": 103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 16571
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 16571
+          }
+        ]
+      },
+      {
+        "turnNumber": 200,
+        "intents": []
+      },
+      {
+        "turnNumber": 203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 18290
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 18290
+          }
+        ]
+      },
+      {
+        "turnNumber": 300,
+        "intents": []
+      },
+      {
+        "turnNumber": 303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 31052
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 31052
+          }
+        ]
+      },
+      {
+        "turnNumber": 400,
+        "intents": []
+      },
+      {
+        "turnNumber": 403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 36515
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 36515
+          }
+        ]
+      },
+      {
+        "turnNumber": 500,
+        "intents": []
+      },
+      {
+        "turnNumber": 503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 45530
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 45530
+          }
+        ]
+      },
+      {
+        "turnNumber": 600,
+        "intents": []
+      },
+      {
+        "turnNumber": 603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 52676
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 52676
+          }
+        ]
+      },
+      {
+        "turnNumber": 700,
+        "intents": []
+      },
+      {
+        "turnNumber": 703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60409
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 60409
+          }
+        ]
+      },
+      {
+        "turnNumber": 800,
+        "intents": []
+      },
+      {
+        "turnNumber": 803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67705
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 67705
+          }
+        ]
+      },
+      {
+        "turnNumber": 900,
+        "intents": []
+      },
+      {
+        "turnNumber": 903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 75306
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 75306
+          }
+        ]
+      },
+      {
+        "turnNumber": 1000,
+        "intents": []
+      },
+      {
+        "turnNumber": 1003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 81341
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 81341
+          }
+        ]
+      },
+      {
+        "turnNumber": 1100,
+        "intents": []
+      },
+      {
+        "turnNumber": 1103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 87824
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 87824
+          }
+        ]
+      },
+      {
+        "turnNumber": 1200,
+        "intents": []
+      },
+      {
+        "turnNumber": 1203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 94698
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 94698
+          }
+        ]
+      },
+      {
+        "turnNumber": 1300,
+        "intents": []
+      },
+      {
+        "turnNumber": 1303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 100861
+          },
+          {
+            "type": "build_unit",
+            "unit": "Factory",
+            "tile": 2834113
+          }
+        ]
+      },
+      {
+        "turnNumber": 1400,
+        "intents": []
+      },
+      {
+        "turnNumber": 1500,
+        "intents": []
+      },
+      {
+        "turnNumber": 1503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 134504
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 134504
+          }
+        ]
+      },
+      {
+        "turnNumber": 1600,
+        "intents": []
+      },
+      {
+        "turnNumber": 1603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 121098
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 121098
+          }
+        ]
+      },
+      {
+        "turnNumber": 1700,
+        "intents": []
+      },
+      {
+        "turnNumber": 1703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 133990
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 133990
+          }
+        ]
+      },
+      {
+        "turnNumber": 1800,
+        "intents": []
+      },
+      {
+        "turnNumber": 1803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 46737
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 46737
+          }
+        ]
+      },
+      {
+        "turnNumber": 1900,
+        "intents": []
+      },
+      {
+        "turnNumber": 1903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 96229
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 96229
+          }
+        ]
+      },
+      {
+        "turnNumber": 2000,
+        "intents": []
+      },
+      {
+        "turnNumber": 2003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 321305
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 321305
+          }
+        ]
+      },
+      {
+        "turnNumber": 2100,
+        "intents": []
+      },
+      {
+        "turnNumber": 2103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 452498
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 452498
+          }
+        ]
+      },
+      {
+        "turnNumber": 2200,
+        "intents": []
+      },
+      {
+        "turnNumber": 2203,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "7v4vbmrw"
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 145578
+          }
+        ]
+      },
+      {
+        "turnNumber": 2300,
+        "intents": []
+      },
+      {
+        "turnNumber": 2303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 432628
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 432628
+          }
+        ]
+      },
+      {
+        "turnNumber": 2400,
+        "intents": []
+      },
+      {
+        "turnNumber": 2403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 213313
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 183531
+          }
+        ]
+      },
+      {
+        "turnNumber": 2500,
+        "intents": []
+      },
+      {
+        "turnNumber": 2503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 10649
+          }
+        ]
+      },
+      {
+        "turnNumber": 2600,
+        "intents": []
+      },
+      {
+        "turnNumber": 2603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 1512
+          }
+        ]
+      },
+      {
+        "turnNumber": 2700,
+        "intents": []
+      },
+      {
+        "turnNumber": 2703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 118739
+          }
+        ]
+      },
+      {
+        "turnNumber": 2800,
+        "intents": []
+      },
+      {
+        "turnNumber": 2803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 47339
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 47339
+          }
+        ]
+      },
+      {
+        "turnNumber": 2900,
+        "intents": []
+      },
+      {
+        "turnNumber": 2903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 454119
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 454119
+          }
+        ]
+      },
+      {
+        "turnNumber": 3000,
+        "intents": []
+      },
+      {
+        "turnNumber": 3003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 113815
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 113815
+          }
+        ]
+      },
+      {
+        "turnNumber": 3100,
+        "intents": []
+      },
+      {
+        "turnNumber": 3103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 140365
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 140365
+          }
+        ]
+      },
+      {
+        "turnNumber": 3200,
+        "intents": []
+      },
+      {
+        "turnNumber": 3203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 434008
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 325506
+          }
+        ]
+      },
+      {
+        "turnNumber": 3300,
+        "intents": []
+      },
+      {
+        "turnNumber": 3303,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "gh7u9omq"
+          },
+          {
+            "type": "attack",
+            "targetID": null,
+            "troops": 179033
+          }
+        ]
+      },
+      {
+        "turnNumber": 3400,
+        "intents": []
+      },
+      {
+        "turnNumber": 3403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 415021
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 311265
+          }
+        ]
+      },
+      {
+        "turnNumber": 3500,
+        "intents": []
+      },
+      {
+        "turnNumber": 3503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 3487
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 3487
+          }
+        ]
+      },
+      {
+        "turnNumber": 3600,
+        "intents": []
+      },
+      {
+        "turnNumber": 3603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 224825
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 224825
+          }
+        ]
+      },
+      {
+        "turnNumber": 3700,
+        "intents": []
+      },
+      {
+        "turnNumber": 3703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 370911
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 278183
+          }
+        ]
+      },
+      {
+        "turnNumber": 3800,
+        "intents": []
+      },
+      {
+        "turnNumber": 3803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 66507
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 66507
+          }
+        ]
+      },
+      {
+        "turnNumber": 3900,
+        "intents": []
+      },
+      {
+        "turnNumber": 3903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 353520
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 265140
+          }
+        ]
+      },
+      {
+        "turnNumber": 4000,
+        "intents": []
+      },
+      {
+        "turnNumber": 4003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 181400
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 181400
+          }
+        ]
+      },
+      {
+        "turnNumber": 4100,
+        "intents": []
+      },
+      {
+        "turnNumber": 4103,
+        "intents": [
+          {
+            "type": "upgrade_structure",
+            "unit": "Factory",
+            "unitId": 6
+          }
+        ]
+      },
+      {
+        "turnNumber": 4200,
+        "intents": []
+      },
+      {
+        "turnNumber": 4203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 419474
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 314605
+          }
+        ]
+      },
+      {
+        "turnNumber": 4300,
+        "intents": []
+      },
+      {
+        "turnNumber": 4303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 257219
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 257219
+          }
+        ]
+      },
+      {
+        "turnNumber": 4400,
+        "intents": []
+      },
+      {
+        "turnNumber": 4403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 201808
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 201808
+          }
+        ]
+      },
+      {
+        "turnNumber": 4500,
+        "intents": []
+      },
+      {
+        "turnNumber": 4600,
+        "intents": []
+      },
+      {
+        "turnNumber": 4603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 151903
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 151903
+          }
+        ]
+      },
+      {
+        "turnNumber": 4700,
+        "intents": []
+      },
+      {
+        "turnNumber": 4703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 230860
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 230860
+          }
+        ]
+      },
+      {
+        "turnNumber": 4800,
+        "intents": []
+      },
+      {
+        "turnNumber": 4803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 360706
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 360706
+          }
+        ]
+      },
+      {
+        "turnNumber": 4900,
+        "intents": []
+      },
+      {
+        "turnNumber": 4903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 192159
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 192159
+          }
+        ]
+      },
+      {
+        "turnNumber": 5000,
+        "intents": []
+      },
+      {
+        "turnNumber": 5003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 365505
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 365505
+          }
+        ]
+      },
+      {
+        "turnNumber": 5100,
+        "intents": []
+      },
+      {
+        "turnNumber": 5103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 41351
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 41351
+          }
+        ]
+      },
+      {
+        "turnNumber": 5200,
+        "intents": []
+      },
+      {
+        "turnNumber": 5203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 351975
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 351975
+          }
+        ]
+      },
+      {
+        "turnNumber": 5300,
+        "intents": []
+      },
+      {
+        "turnNumber": 5303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 126027
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 126027
+          }
+        ]
+      },
+      {
+        "turnNumber": 5400,
+        "intents": []
+      },
+      {
+        "turnNumber": 5500,
+        "intents": []
+      },
+      {
+        "turnNumber": 5503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 213585
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 213585
+          }
+        ]
+      },
+      {
+        "turnNumber": 5600,
+        "intents": []
+      },
+      {
+        "turnNumber": 5603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 428543
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 428543
+          }
+        ]
+      },
+      {
+        "turnNumber": 5700,
+        "intents": []
+      },
+      {
+        "turnNumber": 5703,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "nopzwwt3"
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 143736
+          }
+        ]
+      },
+      {
+        "turnNumber": 5800,
+        "intents": []
+      },
+      {
+        "turnNumber": 5803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 78172
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 34185
+          }
+        ]
+      },
+      {
+        "turnNumber": 5900,
+        "intents": []
+      },
+      {
+        "turnNumber": 5903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 337000
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 195118
+          }
+        ]
+      },
+      {
+        "turnNumber": 6000,
+        "intents": []
+      },
+      {
+        "turnNumber": 6003,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 129520
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 31666
+          }
+        ]
+      },
+      {
+        "turnNumber": 6100,
+        "intents": []
+      },
+      {
+        "turnNumber": 6103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 35647
+          },
+          {
+            "type": "attack",
+            "targetID": "jld9qemv",
+            "troops": 24948
+          }
+        ]
+      },
+      {
+        "turnNumber": 6200,
+        "intents": []
+      },
+      {
+        "turnNumber": 6203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 1656
+          },
+          {
+            "type": "build_unit",
+            "unit": "City",
+            "tile": 1944239
+          }
+        ]
+      },
+      {
+        "turnNumber": 6300,
+        "intents": []
+      },
+      {
+        "turnNumber": 6303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 361181
+          },
+          {
+            "type": "build_unit",
+            "unit": "City",
+            "tile": 1976745
+          }
+        ]
+      },
+      {
+        "turnNumber": 6400,
+        "intents": []
+      },
+      {
+        "turnNumber": 6403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 99612
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 99612
+          }
+        ]
+      },
+      {
+        "turnNumber": 6500,
+        "intents": []
+      },
+      {
+        "turnNumber": 6503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 476874
+          },
+          {
+            "type": "attack",
+            "targetID": "d8c1rits",
+            "troops": 476874
+          }
+        ]
+      },
+      {
+        "turnNumber": 6600,
+        "intents": []
+      },
+      {
+        "turnNumber": 6603,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 196521
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 196521
+          }
+        ]
+      },
+      {
+        "turnNumber": 6700,
+        "intents": []
+      },
+      {
+        "turnNumber": 6703,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 518375
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 388781
+          }
+        ]
+      },
+      {
+        "turnNumber": 6800,
+        "intents": []
+      },
+      {
+        "turnNumber": 6803,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 55435
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 55435
+          }
+        ]
+      },
+      {
+        "turnNumber": 6900,
+        "intents": []
+      },
+      {
+        "turnNumber": 6903,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 383070
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 287302
+          }
+        ]
+      },
+      {
+        "turnNumber": 7000,
+        "intents": []
+      },
+      {
+        "turnNumber": 7003,
+        "intents": [
+          {
+            "type": "cancel_attack",
+            "attackID": "ndmq9mzg"
+          }
+        ]
+      },
+      {
+        "turnNumber": 7100,
+        "intents": []
+      },
+      {
+        "turnNumber": 7103,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 195082
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 175323
+          }
+        ]
+      },
+      {
+        "turnNumber": 7200,
+        "intents": []
+      },
+      {
+        "turnNumber": 7203,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 117338
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 117338
+          }
+        ]
+      },
+      {
+        "turnNumber": 7300,
+        "intents": []
+      },
+      {
+        "turnNumber": 7303,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 461187
+          },
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 345890
+          }
+        ]
+      },
+      {
+        "turnNumber": 7400,
+        "intents": []
+      },
+      {
+        "turnNumber": 7403,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 13808
+          },
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2059214
+          }
+        ]
+      },
+      {
+        "turnNumber": 7500,
+        "intents": []
+      },
+      {
+        "turnNumber": 7503,
+        "intents": [
+          {
+            "type": "attack",
+            "targetID": "mx6susv9",
+            "troops": 286382
+          },
+          {
+            "type": "build_unit",
+            "unit": "Defense Post",
+            "tile": 2064212
+          }
+        ]
+      },
+      {
+        "turnNumber": 7600,
+        "intents": []
+      }
+    ],
+    "recentDecisions": [
+      {
+        "tick": 7303,
+        "strategy": "Hokkaido is 0.80x our troops and we have 922k spendable. Hit with 807k to break their border while Kansai is busy with Shikoku. No incoming threats.",
+        "appliedActionIds": [
+          "attack:mx6susv9:100",
+          "attack:mx6susv9:75"
+        ],
+        "outcomes": [
+          "completed: Attack fqi7kkkf ended after capturing territory",
+          "completed: Attack fqi7kkkf ended after capturing territory"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "attack:mx6susv9:100",
+            "status": "completed",
+            "startedAtTick": 7304,
+            "resolvedAtTick": 7337,
+            "entityId": "fqi7kkkf",
+            "detail": "Attack fqi7kkkf ended after capturing territory"
+          },
+          {
+            "actionId": "attack:mx6susv9:75",
+            "status": "completed",
+            "startedAtTick": 7304,
+            "resolvedAtTick": 7337,
+            "entityId": "fqi7kkkf",
+            "detail": "Attack fqi7kkkf ended after capturing territory"
+          }
+        ]
+      },
+      {
+        "tick": 7403,
+        "strategy": "Hokkaido's 27k is trivial. Counter cheaply, build Defense Post to harden border. Kansai absorbing Shikoku's 141k—no threat. Rebuild troops for final push.",
+        "appliedActionIds": [
+          "counter:mx6susv9:25",
+          "build:Defense Post:2059214"
+        ],
+        "outcomes": [
+          "completed: Counter resolved immediately; hostile incoming troops fell from 27616 to 13320",
+          "destroyed: Defense Post 59 was destroyed by Hokkaido"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "counter:mx6susv9:25",
+            "status": "completed",
+            "startedAtTick": 7404,
+            "resolvedAtTick": 7404,
+            "entityId": null,
+            "detail": "Counter resolved immediately; hostile incoming troops fell from 27616 to 13320"
+          },
+          {
+            "actionId": "build:Defense Post:2059214",
+            "status": "destroyed",
+            "startedAtTick": 7405,
+            "resolvedAtTick": 7417,
+            "entityId": 59,
+            "detail": "Defense Post 59 was destroyed by Hokkaido"
+          }
+        ]
+      },
+      {
+        "tick": 7503,
+        "strategy": "Hokkaido's 573k incoming is serious. Counter with 286k to blunt it, build Defense Post to harden border. 1.13M troops remain after spending. Rebuild for final 7",
+        "appliedActionIds": [
+          "counter:mx6susv9:50",
+          "build:Defense Post:2064212"
+        ],
+        "outcomes": [
+          "completed: Counter resolved immediately; hostile incoming troops fell from 572765 to 283285",
+          "failed: The core produced no observable start or state change"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "counter:mx6susv9:50",
+            "status": "completed",
+            "startedAtTick": 7504,
+            "resolvedAtTick": 7504,
+            "entityId": null,
+            "detail": "Counter resolved immediately; hostile incoming troops fell from 572765 to 283285"
+          },
+          {
+            "actionId": "build:Defense Post:2064212",
+            "status": "failed",
+            "startedAtTick": null,
+            "resolvedAtTick": 7603,
+            "entityId": null,
+            "detail": "The core produced no observable start or state change"
+          }
+        ]
+      }
+    ]
+  }
+}

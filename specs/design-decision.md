@@ -388,10 +388,83 @@ and infrastructure errors remain separately eligible for rerun.
 terminated observation as a terminal placement; older schema-version-2
 artifacts need an explicit migration before they carry the new attribution.
 
+## 37. Outcome-based neutral-expansion micro-eval
+
+**Decision:** Implement the first `openfront-micro-v1` capability as a pinned
+tick-171 checkpoint derived from the production Japan scenario. Verify the core
+state, normalized observation, legal menu, and tile-state hashes before every
+trial; apply one production-shaped two-slot agent decision; advance exactly 100
+ticks; and pass only when the player owns land that was neutral at the
+checkpoint. Grade ownership rather than the selected action ID. Run trials
+sequentially and restore OpenFront's module-cached mutable maps after each one.
+
+The live CLI defaults to ten development trials, records full trial traces and
+invalid infrastructure attempts, calculates `pass@1`, a Wilson interval,
+estimated `pass^3`, interface reliability, latency, tokens, and cost, and writes
+the report atomically under `data/evals/`.
+
+**Pros:** The fixture is cheap, deterministic, reproducible, resistant to
+trajectory overfitting, and sensitive to the real passive-opening failure found
+in full-match traces; reference, alternative-expansion, double-hold, and
+diplomacy-control policies establish that the grader rewards the outcome rather
+than a hard-coded move; resetting cached maps makes repeated in-process trials
+independent without modifying the pinned OpenFront checkout.
+
+**Cons:** This is one development fixture rather than the two fixtures required
+for a released capability family; sequential execution does not exploit
+parallelism; the fixed player label and checkpoint can be overfit; restoring a
+large map costs memory and time; and hosted model trials still depend on mutable
+provider behavior even though the engine rollout is deterministic.
+
+## 38. Replay-backed implementation of the remaining micro-evals
+
+**Decision:** Implement capability families 2–10 with one shared replay,
+isolation, trace, rollout, and outcome-grading layer. Seven fixtures replay
+prefixes mined from real full-match traces; post-expansion recovery adds a
+deterministic mid-expansion checkpoint; construction recovery adds a
+deterministic preparation counter so the model sees the recent classified
+placement failure at a hostile border without an active incoming attack. Every
+prefix records the source archive and its SHA-256, and every accepted checkpoint
+pins core-state, normalized-observation, candidate-menu, and tile-state hashes.
+
+Protected-frontier sets are derived from checkpoint ownership by expanding 40
+land steps inward from the relevant hostile border. Split-front regions are
+made disjoint. The weaker-target capture set uses the same land-front method so
+two already-in-flight legacy transports cannot let a hold control satisfy the
+land-target outcome. The calibrated loss ceilings are 5,000 tiles for the single
+incoming fixture and 1,500/900 for the split frontiers. The retreat fixture's
+minimum recovered force is 2,320,000 troops. These are fixture metadata, not
+model-facing goals; graders inspect survival, ownership, capacity, attacks,
+troops, and completed active structures rather than requiring particular action
+IDs.
+
+The suite CLI randomizes/interleaves the requested family schedule, preserves
+provider failures as valid agent-harness trials, reports invalid infrastructure
+attempts separately, macro-averages family pass rates, and writes an atomic JSON
+trace. Reference and control calibration demonstrated the intended outcome
+boundary for all lightweight rollouts; the weaker-target offensive rollout is
+intentionally left out of the routine test gate because advancing that large
+active land battle is materially slower than reconstructing its checkpoint.
+
+**Pros:** Real match states exercise the production menu and engine instead of
+toy mocks; one implementation keeps trace and fallback semantics consistent;
+content-addressed prefixes make ignored source archives optional at runtime;
+and outcome assertions admit alternate successful trajectories.
+
+**Cons:** Version 1 still has only one development fixture per newly implemented
+family, so it is an implementation baseline rather than the 20-task release set
+required by the specification; replaying late-game states and especially a
+large proactive land battle is CPU-intensive; the construction failure code is
+classified while adapting a legacy trace that predates stable failure codes;
+and thresholds are specific to these pinned trajectories and must be versioned
+if recalibrated.
+
 ## Known benchmark limitations
 
 - A fixed engine seed does not make a hosted model deterministic. Sampling, model weights, and provider routing can change generated decisions.
-- The current score surface is outcome, placement, survival, ticks, usage, and trace—not yet a single leaderboard formula.
+- The full-match score surface is outcome, placement, survival, ticks, usage,
+  and trace—not yet a single leaderboard formula. The micro-eval has a separate
+  capability score and must not be folded into the match result.
 - The candidate generator is part of the environment. Improving it can improve every model and therefore requires a scenario version bump.
 - One map, seed, spawn, model run, and opponent set cannot establish general strategy competence.
 - Nation AI and the renderer are pinned implementation dependencies, not immutable external standards.

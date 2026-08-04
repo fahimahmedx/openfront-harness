@@ -43,6 +43,9 @@ Open `http://localhost:3000`. The server reads the workspace-level `.env`; no en
 
 ```bash
 npm test               # focused unit and artifact tests
+npm run eval:neutral   # run 10 live neutral-expansion eval trials
+npm run eval:micro     # run the ten-family live micro-eval suite
+npm run eval:fixtures  # regenerate tracked replay prefixes from source runs
 npm run verify:sample  # replay recorded actions and verify tick/hash/outcome
 npm run build          # type-check and production Vite build
 npm run sample         # spend live API credits to create a new sample
@@ -58,6 +61,22 @@ The raw-UI comparison protocols and run instructions are documented in
 the model boundary while limiting the model itself to stock-renderer screenshots
 and primitive controls. `npm run baseline:run` remains an alias for the original
 `visual-controls-v1` condition.
+
+The `openfront-micro-v1` suite covers neutral and saturated expansion,
+post-expansion recovery, target selection, restraint, one- and two-front
+defense, retreat, naval reachability, and construction recovery. Each task
+rebuilds a pinned checkpoint, verifies state/observation/menu/tile hashes, sends
+the production-shaped two-slot decision, and grades authoritative engine state
+after its fixed horizon. Tracked replay prefixes retain their source artifact
+path and SHA-256; the original ignored run archives are not needed to execute
+the suite.
+
+Live reports are written atomically under `data/evals/`. Run one family with
+`npm run eval:micro -- --family incoming-attack-response`, select several with a
+comma-separated value, change the per-family development count with
+`--trials 20`, or choose a report destination with `--output path/to/report.json`.
+Live evals require `OPENROUTER_API_KEY` and spend API credits. The default model
+is `openai/gpt-5.6-luna`; `OPENROUTER_MODEL` overrides it.
 
 ## Fixed benchmark preset
 
