@@ -398,7 +398,8 @@ svg {
   text-decoration-thickness: 2px;
 }
 .writeup h2,
-.writeup h3 {
+.writeup h3,
+.writeup h4 {
   color: var(--ink);
   text-wrap: balance;
 }
@@ -418,6 +419,14 @@ svg {
   font-weight: 690;
   letter-spacing: -0.04em;
   line-height: 1.15;
+  scroll-margin-top: 95px;
+}
+.writeup h4 {
+  margin: 42px 0 16px;
+  font-size: clamp(18px, 2.2vw, 23px);
+  font-weight: 690;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
   scroll-margin-top: 95px;
 }
 .writeup ul,

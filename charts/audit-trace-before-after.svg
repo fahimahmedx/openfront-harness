@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="930" viewBox="0 0 1200 930" role="img" aria-labelledby="title description">
+  <title id="title">The trace made bad model decisions diagnosable</title>
+  <desc id="description">Two before-and-after flows show how the winPercent field led GLM to interpret a victory threshold as a probability, and how hold while rebuilding led DeepSeek to wait near full troop capacity. Recorded traces revealed both problems and guided clearer, strategy-neutral inputs.</desc>
+  <rect width="1200" height="930" fill="#FFFFFF"/>
+  <style>
+    text { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #172033; }
+    .title { font-size: 34px; font-weight: 750; letter-spacing: -0.7px; }
+    .subtitle { font-size: 17px; fill: #64748B; }
+    .case { font-size: 20px; font-weight: 750; }
+    .eyebrow { font-size: 13px; font-weight: 800; letter-spacing: 1.1px; }
+    .card-title { font-size: 18px; font-weight: 750; }
+    .body { font-size: 15px; fill: #475569; }
+    .code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 15px; font-weight: 650; }
+    .arrow-label { font-size: 13px; font-weight: 700; fill: #64748B; }
+    .result { font-size: 14px; font-weight: 700; }
+    .footer { font-size: 15px; fill: #64748B; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <text class="title" x="78" y="62">The trace made bad model decisions diagnosable</text>
+  <text class="subtitle" x="78" y="96">In both cases the model returned legal actions; the recorded input and strategy exposed why those actions were poor.</text>
+
+  <text class="case" x="78" y="154">Case 1 · An ambiguous state field</text>
+
+  <rect x="78" y="178" width="292" height="238" rx="18" fill="#FFF4F4" stroke="#F2B8B8"/>
+  <text class="eyebrow" x="102" y="210" style="fill:#B4233A">BEFORE · OBSERVATION</text>
+  <rect x="102" y="230" width="244" height="48" rx="9" fill="#FFFFFF" stroke="#F2B8B8"/>
+  <text class="code" x="122" y="260">"winPercent": 80</text>
+  <text class="body" x="102" y="315">The name did not say whether 80</text>
+  <text class="body" x="102" y="339">was a threshold, current progress,</text>
+  <text class="body" x="102" y="363">or a predicted chance of winning.</text>
+
+  <line x1="382" y1="297" x2="435" y2="297" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+  <text class="arrow-label" x="408" y="281" text-anchor="middle">TRACE</text>
+
+  <rect x="448" y="178" width="304" height="238" rx="18" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text class="eyebrow" x="472" y="210" style="fill:#526176">RECORDED INTERPRETATION</text>
+  <text class="card-title" x="472" y="250">“80% probability of winning”</text>
+  <text class="body" x="472" y="285">GLM used that interpretation to</text>
+  <text class="body" x="472" y="309">justify holding even while it was</text>
+  <text class="body" x="472" y="333">well below 80% and behind on land.</text>
+  <text class="result" x="472" y="371" style="fill:#B4233A">Issue: GLM thought it was winning</text>
+  <text class="result" x="472" y="393" style="fill:#B4233A">and lost</text>
+
+  <line x1="764" y1="297" x2="817" y2="297" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+  <text class="arrow-label" x="790" y="281" text-anchor="middle">FIX</text>
+
+  <rect x="830" y="178" width="292" height="238" rx="18" fill="#F0FBF8" stroke="#9DD8CF"/>
+  <text class="eyebrow" x="854" y="210" style="fill:#087B6E">AFTER · OBSERVATION</text>
+  <rect x="854" y="230" width="244" height="67" rx="9" fill="#FFFFFF" stroke="#9DD8CF"/>
+  <text class="code" x="871" y="258">"instantVictory</text>
+  <text class="code" x="871" y="281">TerritoryPercent": 80</text>
+  <text class="body" x="854" y="329">The field now names the metric</text>
+  <text class="body" x="854" y="353">and the victory condition.</text>
+  <text class="result" x="854" y="389" style="fill:#087B6E">Next run: GLM won</text>
+
+  <line x1="78" y1="464" x2="1122" y2="464" stroke="#E2E8F0" stroke-width="2"/>
+
+  <text class="case" x="78" y="514">Case 2 · A strategy-biased instruction omitted a mechanic</text>
+
+  <rect x="78" y="538" width="292" height="278" rx="18" fill="#FFF4F4" stroke="#F2B8B8"/>
+  <text class="eyebrow" x="102" y="570" style="fill:#B4233A">BEFORE · PROMPT</text>
+  <rect x="102" y="590" width="244" height="48" rx="9" fill="#FFFFFF" stroke="#F2B8B8"/>
+  <text class="code" x="122" y="620">“Hold while rebuilding”</text>
+  <text class="body" x="102" y="675">The prompt prescribed an action</text>
+  <text class="body" x="102" y="699">but omitted that troop growth</text>
+  <text class="body" x="102" y="723">approaches zero near capacity.</text>
+
+  <line x1="382" y1="668" x2="435" y2="668" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+  <text class="arrow-label" x="408" y="652" text-anchor="middle">TRACE</text>
+
+  <rect x="448" y="538" width="304" height="278" rx="18" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text class="eyebrow" x="472" y="570" style="fill:#526176">RECORDED BEHAVIOR</text>
+  <text class="card-title" x="472" y="610">No move in 58 of 61 decisions</text>
+  <text class="body" x="472" y="647">DeepSeek repeatedly said it was</text>
+  <text class="body" x="472" y="671">rebuilding while troop growth had</text>
+  <text class="body" x="472" y="695">nearly stopped and expansion was</text>
+  <text class="body" x="472" y="719">still legal.</text>
+  <text class="result" x="472" y="757" style="fill:#B4233A">Issue: DeepSeek did not expand</text>
+  <text class="result" x="472" y="779" style="fill:#B4233A">and lost</text>
+
+  <line x1="764" y1="668" x2="817" y2="668" stroke="#94A3B8" stroke-width="3" marker-end="url(#arrow)"/>
+  <text class="arrow-label" x="790" y="652" text-anchor="middle">FIX</text>
+
+  <rect x="830" y="538" width="292" height="278" rx="18" fill="#F0FBF8" stroke="#9DD8CF"/>
+  <text class="eyebrow" x="854" y="570" style="fill:#087B6E">AFTER · CONTRACT</text>
+  <text class="card-title" x="854" y="606">Expose mechanics,</text>
+  <text class="card-title" x="854" y="629">not strategy</text>
+  <text class="body" x="854" y="661">Report troop-capacity percentage</text>
+  <text class="body" x="854" y="685">and current growth rate; explain</text>
+  <text class="body" x="854" y="709">that growth stops near capacity.</text>
+  <text class="body" x="854" y="743">Remove the instruction to hold.</text>
+  <text class="result" x="854" y="775" style="fill:#087B6E">Next run: DeepSeek expanded</text>
+  <text class="result" x="854" y="797" style="fill:#087B6E">and won</text>
+
+  <rect x="78" y="844" width="1044" height="52" rx="14" fill="#F0F7FF" stroke="#B9D5F5"/>
+  <text class="footer" x="600" y="876" text-anchor="middle">Auditability connected each bad outcome to a specific model-facing input instead of leaving the cause as guesswork.</text>
+</svg>

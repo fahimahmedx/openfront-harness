@@ -333,6 +333,10 @@ const writeupMedia: Record<string, string> = {
   "gpt-5.6-territory-over-time.svg": "charts/gpt-5.6-territory-over-time.svg",
   "gpt-5.6-territory-races.svg": "charts/gpt-5.6-territory-races.svg",
   "model-action-mix.svg": "charts/model-action-mix.svg",
+  "provider-schema-compliance.png": "charts/provider-schema-compliance.png",
+  "audit-trace-before-after.png": "charts/audit-trace-before-after.png",
+  "unpinned-provider-output-variance.png":
+    "charts/unpinned-provider-output-variance.png",
 };
 
 app.get("/media/writeup/:asset", (req, res) => {

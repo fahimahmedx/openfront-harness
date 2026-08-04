@@ -112,7 +112,7 @@ Reliability is difficult because an LLM produces probabilistic responses, while 
 This raises the question: **How do you test a harness when the LLM is nondeterministic?** For this harness, I broke that question into three parts:
 
 1. **Action reliability:** Did every accepted decision resolve to a legal game action?
-2. **Operational reliability:** Did each run stay within its model latency and cost limits, and fail safely when the model provider fails?
+2. **Operational reliability:** Did the harness stay reliable when providers handled the same model differently?
 3. **Evaluation reliability:** Could I inspect and replay the run to distinguish bad model decisions from harness failures? Furthermore, is the agent playing the game in a way that makes sense wins? 
 
 The harness enforces these properties rather than relying on prompting alone. The next section describes the mechanisms that make this possible.
@@ -131,11 +131,17 @@ A move also has to be safe in combination with the other move. The legal-action 
 
 If a response is malformed or selects an invalid ID, the harness retries once and includes the specific validation error so the model can correct itself. If the retry also fails, it submits two holds rather than guessing what the model intended. OpenFront remains the final authority after submission: an action that was legal when offered can still fail as the simulation changes, so the harness records whether each action actually started, failed, completed, or was destroyed and feeds recent outcomes into the next observation. This separates a legal model decision from a successful game outcome while ensuring that invalid model output never crosses the action boundary.
 
-### Operational reliability: staying inside latency and cost budgets
+### Operational reliability: controlling provider variability
 
-The most important operational lesson from this project was that a model name is not an API contract. OpenRouter can expose the same model through several providers, but each route can have different latency, pricing, defaults, and feature support. If the harness allowed OpenRouter to select a route automatically, two nominally identical runs could use materially different backends.
+#### Pinning the model's provider on OpenRouter
 
-I therefore pin both the model and provider, disable provider fallbacks, explicitly set reasoning to `none`, and record which provider actually served every decision. Each request has a ten-second timeout and one retry. A run also has a $1 inference ceiling, a ten-minute wall-clock limit, and a five-consecutive-failure abort. If both attempts for a decision fail, the harness submits two holds rather than letting an unavailable provider stall the simulation or letting malformed output cross the action boundary.
+The most important operational lesson from this project was that one model (ex. DeepSeek V4 Flash) between two different provider are not actually the same model. OpenRouter can expose the same model through several providers, but each provider can have different latency, pricing, defaults, and feature support. If the harness allowed OpenRouter to choose a provider automatically, the same request could land on a provider that ignored the strict schema, enabled unexpected reasoning, or timed out—turning an otherwise valid decision into an error.
+
+I saw this issue in early DeepSeek V4 Flash tests where I had not pinned a provider or set reasoning explicitly. Some providers returned the expected action response in ~50 output tokens. Others generated 2,049 tokens and hit the output-length limit. The longer responses were caused by provider routes that enabled reasoning by default. When a response ended due to the output limit before the model outputted the action fields, the harness could not recover the move the model intended to make. It rejected the incomplete response, logged a model error, and safely held both action slots as a fallback.
+
+![OpenRouter activity showing the same DeepSeek model producing short action responses through some providers and length-limited responses through others](charts/unpinned-provider-output-variance.png)
+
+I therefore pin both the model and provider, disable provider fallbacks, explicitly set reasoning to `none`, and record which provider actually served every decision. Each request has a ten-second timeout and one retry. A run also has a $1 inference ceiling, and a limit of 20 game-minutes.
 
 The final evaluation shows what those controls looked like in practice. These are client-observed measurements pooled from the three runs for each model; cost is the mean total inference cost per run.
 
@@ -145,19 +151,22 @@ The final evaluation shows what those controls looked like in practice. These ar
 | GLM-5.2 / Baidu | 336 | 2.80 s / 3.37 s | 59.4 | $0.0762 | 2 / 0 |
 | DeepSeek V4 Flash / StreamLake | 343 | 2.89 s / 3.87 s | 50.6 | $0.0229 | 1 / 0 |
 
-Across the nine runs, none of the 940 decisions had a timeout, transport failure, or JSON Schema violation. The three retries in the table came from a separate semantic rule that prevents proactive attacks against two opponents in one turn; each model corrected the choice on its next attempt. This distinction matters operationally because the artifacts make it possible to tell provider failures from model decisions that passed the provider's schema but violated a game-specific invariant.
+Across the nine runs, none of the 940 decisions had a timeout, transport failure, or JSON Schema violation. The three retries in the table came from a separate semantic rule that prevents proactive attacks against two opponents in one turn, and each model corrected the choice on its next attempt. This showcases the harness's reliability.
 
-Setting reasoning explicitly was necessary because provider defaults were inconsistent. In early tests of DeepSeek routes, omitting the option caused some providers to enable reasoning and emit more than 1,000 completion tokens, often running into the timeout. Other routes returned the roughly 50-token response the harness expected. In the final nine runs, reasoning was explicitly disabled and the three model-provider pairs averaged between 50.6 and 59.4 completion tokens per decision. A provider default was no longer allowed to silently change the latency and cost profile of a run.
+With reasoning explicitly disabled, the final model-provider pairs averaged between 50.6 and 59.4 completion tokens per decision.
 
-Pricing varied by route too. At the time I captured the provider listings, OpenRouter showed 36% discounts for DeepSeek through Baidu and StreamLake, while some GLM routes showed discounts as high as 72%. That makes provider selection a real cost optimization, especially for an agent that may make hundreds of calls in one task. But the cheapest route is not useful if it cannot honor the interface the harness depends on, and discounts can change independently of the model.
 
-Strict structured output exposed the most surprising inconsistency. The harness sends a JSON Schema with `strict: true`; the two action fields contain the exact legal IDs for that decision. Some DeepSeek routes did not advertise this feature at all. Baidu did advertise support, accepted the request, and was initially chosen for the DeepSeek evaluation, but its responses showed that accepting the parameter was not the same as enforcing it.
+#### Testing advertised schema enforcement
 
-Across three DeepSeek V4 Flash runs through Baidu, 45 of 327 decision attempts violated the requested schema: 43 strategy strings exceeded the schema's 160-character limit, and two responses selected action IDs outside the slot-specific enums. Forty-one decisions required a retry, and four exhausted both attempts and safely fell back to holds. There were no rate limits or transport failures; the route returned successful HTTP responses containing data that a strict-schema provider should not have produced.
+The harness uses strict structured output so every response has a predictable shape and the model's two action fields can contain only the legal IDs offered for that decision. This is meant to prevent malformed responses before they reach the harness. DeepSeek's first-party provider did not advertise support for strict JSON Schema through OpenRouter, so I had to choose a third-party provider that did. Baidu advertised support and accepted the requests, but the provider did not reliably enforce the schema.
 
-I then changed only the pinned DeepSeek provider to StreamLake. Across the three StreamLake runs used in the results, all 343 decisions conformed to the JSON Schema and none needed a provider-related fallback. That does not prove StreamLake will always enforce the schema, but it does show that the repeated Baidu failures were not inherent to the DeepSeek model or the harness request. Baidu's GLM route was also clean across 336 decisions, making the capability specific to the model-provider combination rather than to Baidu as a whole.
+Across three DeepSeek V4 Flash runs with Baidu as the provider, 45 of 368 response attempts violated the schema: 43 contained an overlong strategy string and two selected action IDs outside the allowed enums. Forty-one decisions were retried, and four still failed and safely fell back to holds.
 
-The resulting rule is to treat provider capability listings as discovery metadata, not as a reliability guarantee. A production harness should test the exact model-provider route, pin it, set every consequential option explicitly, record the resolved route and usage, and validate the response locally even when the provider claims strict enforcement. Provider diversity creates useful competition on price and performance, but it also creates another interface boundary that the harness has to distrust.
+I then changed only the provider to StreamLake which fixed this issue. All 344 response attempts conformed to the schema. Interestingly enough, GLM-5.2 through Baidu did not have the same schema failure, suggesting the problem was specific to using DeepSeek through Baidu, rather than DeepSeek, Baidu, or the harness itself.
+
+![Strict JSON Schema conformance for DeepSeek V4 Flash through Baidu and StreamLake, with GLM-5.2 through Baidu as a route-specific comparison](charts/provider-schema-compliance.png)
+
+The lesson is to treat advertised provider capabilities as claims to verify. Test and pin the exact model and provider, set options explicitly, record the provider used, and validate every response.
 
 ### Evaluation reliability: making every run auditable
  
@@ -169,12 +178,14 @@ An early version of the observation JSON called the immediate territory threshol
  
 In another run with DeepSeek V4 Flash, an older version of the instruction prompt told the model to "hold while rebuilding", but did not explain that troop growth approaches zero near full capacity. The model made no moves for 58 of its 61 decisions, stopped gaining meaningful troops, and was eventually conquered by another nation. This failure did not trigger a harness error because every hold was valid. The trace showed the problem, where the model repeatedly chose to hold because it believed doing so would rebuild its troops, even near full capacity. I removed the "hold while rebuilding" instruction and made the underlying troop-growth mechanic explicit. More specifically, the observation now reports the agent's troop-capacity percentage and current growth rate, and the prompt explains that holding near 100% capacity will not rebuild the army further. As a result, the next DeepSeek run, the agent expanded aggressively and reached first place!
 From this, I learned the importance of not having biases in a prompt, and the importance of exposing more relevant information to the model for it to use when making a decision.
+
+![Two audit-trace case studies showing how ambiguous model inputs were diagnosed and fixed](charts/audit-trace-before-after.png?v=2)
  
 From having to manually judge multiple runs, I learned that while the harness should prevent invalid actions, but it should not encode an entire winning strategy. Telling the model what to do in the prompt may backfire and have the model behave unexpectedly. As a result, I kept the harness neutral and would only expose game state and game mechanics, rather than biasing the prompts with what the model should or shouldn't do.
 
 ---
 
-**Note that doesn't belong to the reliability framework above:** The user interface presented a different challenge from the harness itself. GPT-5.6 was useful for quickly scaffolding most of the interface, but when creating a frontpage and overlay for this project, it introduced unnecessary design elements and jargon. GPT-5.6 doesn't seem to be good at a sales-oriented presentation, so manual judgment was needed.
+**Note that doesn't belong to the reliability framework above:** The user interface presented a different challenge from the harness itself. GPT-5.6 was useful for quickly scaffolding most of the interface, but when creating a frontpage and overlay for this project, it introduced unnecessary design elements and jargon. GPT-5.6 doesn't seem to be good at a user or sales-oriented presentation, so manual judgment was needed.
 
 ## Results
 
