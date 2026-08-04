@@ -94,6 +94,12 @@ describe("neutral expansion eval", () => {
         "expand:neutral:100",
         "hold:2",
       ]);
+      expect(result.replay.info.num_turns).toBe(result.outcome.finalTick);
+      expect(
+        result.replay.turns.some((turn) =>
+          turn.intents.some((intent) => intent.type === "attack"),
+        ),
+      ).toBe(true);
     }
     expect(summarizeNeutralExpansionTrials(trials)).toMatchObject({
       validTrials: 5,

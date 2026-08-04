@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { replacer } from "../../OpenFrontIO/src/core/Util";
 import { OpenRouterAgent } from "../OpenRouterAgent";
 import {
   MicroEvalFamilyId,
@@ -267,7 +268,7 @@ const output = path.resolve(
 );
 await fs.mkdir(path.dirname(output), { recursive: true });
 const temporary = `${output}.tmp-${process.pid}`;
-await fs.writeFile(temporary, JSON.stringify(report, null, 2));
+await fs.writeFile(temporary, JSON.stringify(report, replacer, 2));
 await fs.rename(temporary, output);
 
 console.log(

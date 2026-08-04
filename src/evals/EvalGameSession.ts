@@ -1,20 +1,32 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { Player, PlayerType } from "../../OpenFrontIO/src/core/game/Game";
+import { Player, PlayerType, Team } from "../../OpenFrontIO/src/core/game/Game";
 import { GameMap } from "../../OpenFrontIO/src/core/game/GameMap";
 import {
   ErrorUpdate,
   GameUpdateType,
   GameUpdateViewData,
   HashUpdate,
+  WinUpdate,
 } from "../../OpenFrontIO/src/core/game/GameUpdates";
 import {
   createGameRunner,
   GameRunner,
 } from "../../OpenFrontIO/src/core/GameRunner";
-import { Intent, Turn } from "../../OpenFrontIO/src/core/Schemas";
+import {
+  GameRecord,
+  GameRecordSchema,
+  GameStartInfo,
+  Intent,
+  Turn,
+  Winner,
+} from "../../OpenFrontIO/src/core/Schemas";
 import { NodeGameMapLoader } from "../NodeGameMapLoader";
-import { createScenarioStartInfo, SCENARIO } from "../Scenario";
+import {
+  createScenarioStartInfo,
+  OPENFRONT_COMMIT,
+  SCENARIO,
+} from "../Scenario";
 
 const PROJECT_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -42,6 +54,13 @@ function restoreMap(snapshot: MapSnapshot): void {
   });
 }
 
+function winnerValue(winner: Player | Team | null): Winner {
+  if (winner === null) return undefined;
+  if (typeof winner === "string") return ["team", winner];
+  const clientID = winner.clientID();
+  return clientID === null ? ["nation", winner.name()] : ["player", clientID];
+}
+
 /**
  * A small deterministic runner for one eval trial.
  *
@@ -58,11 +77,13 @@ export class EvalGameSession {
   private readonly mapSnapshots: MapSnapshot[];
   private fatalError: string | null = null;
   private latestHash: number | null = null;
+  private winUpdate: WinUpdate | null = null;
   private closed = false;
 
   private constructor(
     runner: GameRunner,
     mapSnapshots: MapSnapshot[],
+    private readonly gameStart: GameStartInfo,
     private readonly callbackState: {
       session: EvalGameSession | null;
       pendingUpdates: Array<GameUpdateViewData | ErrorUpdate>;
@@ -81,8 +102,9 @@ export class EvalGameSession {
       session: EvalGameSession | null;
       pendingUpdates: Array<GameUpdateViewData | ErrorUpdate>;
     } = { session: null, pendingUpdates: [] };
+    const gameStart = createScenarioStartInfo(playerModelName);
     const runner = await createGameRunner(
-      createScenarioStartInfo(playerModelName),
+      gameStart,
       SCENARIO.clientID,
       new NodeGameMapLoader(mapsDir),
       (update) => {
@@ -96,6 +118,7 @@ export class EvalGameSession {
     const session = new EvalGameSession(
       runner,
       [snapshotMap(runner.game.map()), snapshotMap(runner.game.miniMap())],
+      gameStart,
       callbackState,
     );
     callbackState.session = session;
@@ -136,6 +159,35 @@ export class EvalGameSession {
         this.fatalError ?? `OpenFront rejected eval turn ${turn.turnNumber}`,
       );
     }
+  }
+
+  createReplayRecord(startedAt: Date = new Date(0)): GameRecord {
+    this.assertOpen();
+    const simulatedSeconds = this.game.elapsedGameSeconds();
+    const winner = this.game.getWinner();
+    return GameRecordSchema.parse({
+      info: {
+        ...this.gameStart,
+        players: this.gameStart.players.map((record) => ({
+          ...record,
+          persistentID: null,
+          stats: this.game.stats().stats()[record.clientID],
+        })),
+        start: startedAt.getTime(),
+        end: startedAt.getTime() + simulatedSeconds * 1000,
+        duration: Math.floor(simulatedSeconds),
+        num_turns: this.turns.length,
+        winner: this.winUpdate?.winner ?? winnerValue(winner),
+        lobbyFillTime: 0,
+      },
+      version: "v0.0.2",
+      gitCommit: OPENFRONT_COMMIT,
+      subdomain: "harness-eval",
+      domain: "openfront-harness",
+      turns: this.turns.filter(
+        (turn) => turn.intents.length > 0 || turn.hash !== undefined,
+      ),
+    });
   }
 
   advance(ticks: number): void {
@@ -193,7 +245,13 @@ export class EvalGameSession {
       const hashes = update.updates[GameUpdateType.Hash] as HashUpdate[];
       if (hashes.length > 0) {
         this.latestHash = hashes[hashes.length - 1].hash;
+        const currentTurn = this.turns[this.turns.length - 1];
+        if (currentTurn && currentTurn.turnNumber % 100 === 0) {
+          currentTurn.hash = this.latestHash;
+        }
       }
+      const wins = update.updates[GameUpdateType.Win] as WinUpdate[];
+      if (wins.length > 0) this.winUpdate = wins[wins.length - 1];
     }
     for (const listener of this.listeners) listener(update);
   }

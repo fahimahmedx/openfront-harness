@@ -459,6 +459,28 @@ classified while adapting a legacy trace that predates stable failure codes;
 and thresholds are specific to these pinned trajectories and must be versioned
 if recalibrated.
 
+## 35. Renderer-compatible eval trials
+
+**Decision:** Record each eval session as a native sparse OpenFront
+`GameRecord`, from initial spawn through checkpoint preparation, the evaluated
+decision, and the complete grading horizon. Keep intent-bearing turns and
+periodic state hashes, embed the record in the eval report, and resolve eval
+trial UUIDs as a fallback through the existing `/api/runs/:runId`, replay, and
+artifact endpoints. Convert the eval trace into one production-shaped decision
+record so the existing replay panel remains synchronized without a second
+viewer implementation. Provide a no-model migration command for older reports;
+it writes only after checkpoint and final-outcome verification.
+
+**Pros:** A grader result can be inspected visually against the authoritative
+engine trajectory; evals reuse the pinned renderer, playback controls, and trace
+panel; sparse turns add little report size; old model calls do not need to be
+repeated; and migration fails closed if replay determinism has drifted.
+
+**Cons:** Replays begin at tick zero, so late-game fixtures take time to reach
+the evaluated decision unless the viewer seeks forward; eval reports are larger;
+the server scans eval reports by trial UUID on fallback requests; and a replay
+visualizes the recorded trajectory but does not replace deterministic grading.
+
 ## Known benchmark limitations
 
 - A fixed engine seed does not make a hosted model deterministic. Sampling, model weights, and provider routing can change generated decisions.

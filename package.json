@@ -12,6 +12,7 @@
     "eval:neutral": "tsx --tsconfig OpenFrontIO/tsconfig.json src/evals/RunNeutralExpansionEval.ts",
     "eval:micro": "tsx --tsconfig OpenFrontIO/tsconfig.json src/evals/RunMicroEvalSuite.ts",
     "eval:fixtures": "tsx scripts/ExtractMicroEvalFixtures.ts",
+    "eval:add-replays": "tsx --tsconfig OpenFrontIO/tsconfig.json scripts/AddEvalReplays.ts",
     "sample": "tsx --tsconfig OpenFrontIO/tsconfig.json src/GenerateSample.ts",
     "verify:sample": "tsx --tsconfig OpenFrontIO/tsconfig.json src/VerifySample.ts",
     "refresh:sample": "cross-env REFRESH_SAMPLE=true tsx --tsconfig OpenFrontIO/tsconfig.json src/VerifySample.ts",

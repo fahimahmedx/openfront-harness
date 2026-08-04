@@ -13,6 +13,11 @@ import {
   buildAssetUrl,
 } from "../OpenFrontIO/src/core/AssetUrls";
 import { replacer } from "../OpenFrontIO/src/core/Util";
+import {
+  EvalReplayStore,
+  evalTrialDecision,
+  evalTrialSummary,
+} from "./EvalReplayStore";
 import { HarnessRunner } from "./HarnessRunner";
 import { DailyRateLimiter } from "./RateLimiter";
 import { artifactSummary, RunStore } from "./RunStore";
@@ -139,6 +144,9 @@ const dataDir = path.resolve(
   process.env.RUN_DATA_DIR ?? path.join(projectRoot, "data/runs"),
 );
 const localDataRoot = path.join(projectRoot, "data");
+const evalDataRoot = path.resolve(
+  process.env.EVAL_DATA_DIR ?? path.join(localDataRoot, "evals"),
+);
 const artifactRoot =
   dataDir === localDataRoot || dataDir.startsWith(`${localDataRoot}${path.sep}`)
     ? localDataRoot
@@ -214,6 +222,7 @@ if (!process.env.RATE_LIMIT_SALT) {
 }
 
 const store = new RunStore(dataDir, bundledRunFiles, artifactRoot);
+const evalStore = new EvalReplayStore(evalDataRoot);
 const limiter = new DailyRateLimiter(
   path.join(dataDir, "rate-limits.json"),
   rateSalt,
@@ -357,9 +366,18 @@ app.get("/api/runs/:runId", async (req, res, next) => {
     const progress = store.getProgress(req.params.runId);
     if (progress) return res.json({ run: progress });
     const artifact = await store.getArtifact(req.params.runId);
-    if (!artifact) {
-      const baseline = await getVisualBaselineArtifact(req.params.runId);
-      if (!baseline) return res.status(404).json({ error: "Run not found" });
+    if (artifact) {
+      return res.json({
+        run: {
+          ...artifactSummary(artifact),
+          usage: artifact.usage,
+          outcome: artifact.outcome,
+          decisions: artifact.decisions,
+        },
+      });
+    }
+    const baseline = await getVisualBaselineArtifact(req.params.runId);
+    if (baseline) {
       return res.json({
         run: {
           ...visualBaselineSummary(baseline),
@@ -368,12 +386,18 @@ app.get("/api/runs/:runId", async (req, res, next) => {
         },
       });
     }
+    const evalTrial = await evalStore.getTrial(req.params.runId);
+    if (!evalTrial) return res.status(404).json({ error: "Run not found" });
     return res.json({
       run: {
-        ...artifactSummary(artifact),
-        usage: artifact.usage,
-        outcome: artifact.outcome,
-        decisions: artifact.decisions,
+        ...evalTrialSummary(evalTrial),
+        usage: {
+          promptTokens: evalTrial.trace.promptTokens,
+          completionTokens: evalTrial.trace.completionTokens,
+          costUsd: evalTrial.trace.costUsd,
+        },
+        outcome: evalTrial.outcome,
+        decisions: [evalTrialDecision(evalTrial)],
       },
     });
   } catch (error) {
@@ -384,8 +408,12 @@ app.get("/api/runs/:runId", async (req, res, next) => {
 app.get("/api/runs/:runId/replay", async (req, res, next) => {
   try {
     const artifact = await store.getArtifact(req.params.runId);
-    if (!artifact) {
-      const baseline = await getVisualBaselineArtifact(req.params.runId);
+    if (artifact) {
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      return res.json(JSON.parse(JSON.stringify(artifact.replay, replacer)));
+    }
+    const baseline = await getVisualBaselineArtifact(req.params.runId);
+    if (baseline) {
       if (!baseline?.replay) {
         return res.status(404).json({ error: "Run not found" });
       }
@@ -405,8 +433,10 @@ app.get("/api/runs/:runId/replay", async (req, res, next) => {
         ),
       );
     }
+    const evalTrial = await evalStore.getTrial(req.params.runId);
+    if (!evalTrial) return res.status(404).json({ error: "Run not found" });
     res.setHeader("Cache-Control", "public, max-age=3600");
-    return res.json(JSON.parse(JSON.stringify(artifact.replay, replacer)));
+    return res.json(JSON.parse(JSON.stringify(evalTrial.replay, replacer)));
   } catch (error) {
     next(error);
   }
@@ -418,11 +448,14 @@ app.get("/api/runs/:runId/artifact", async (req, res, next) => {
     const baseline = artifact
       ? null
       : await getVisualBaselineArtifact(req.params.runId);
-    const downloadable = artifact ?? baseline;
+    const evalTrial = artifact || baseline
+      ? null
+      : await evalStore.getTrial(req.params.runId);
+    const downloadable = artifact ?? baseline ?? evalTrial;
     if (!downloadable) return res.status(404).json({ error: "Run not found" });
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${downloadable.runId}.json"`,
+      `attachment; filename="${req.params.runId}.json"`,
     );
     return res.json(JSON.parse(JSON.stringify(downloadable, replacer)));
   } catch (error) {

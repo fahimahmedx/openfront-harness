@@ -226,6 +226,9 @@ and audit the grade:
 - checkpoint, periodic, and final state hashes; and
 - each assertion's observed value, threshold, pass/fail result, and overall
   task grade.
+- a renderer-compatible OpenFront game record containing the preparation,
+  evaluated decision, rollout horizon, intent-bearing turns, and periodic
+  hashes.
 
 The trace need not persist private chain-of-thought or raw rejected model text.
 Existing privacy and artifact-retention rules continue to apply.

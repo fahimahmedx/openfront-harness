@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Player, UnitType } from "../../OpenFrontIO/src/core/game/Game";
-import { Intent } from "../../OpenFrontIO/src/core/Schemas";
+import { GameRecord, Intent } from "../../OpenFrontIO/src/core/Schemas";
 import {
   actionOutcomes,
   beginActionTracking,
@@ -263,6 +263,7 @@ export type MicroEvalTrial = {
     taskPass: boolean;
     taskScore: 0 | 100;
   };
+  replay: GameRecord;
 };
 
 type TaskDefinition = {
@@ -1322,6 +1323,7 @@ export async function runMicroEvalTrial(
         taskPass,
         taskScore: taskPass ? 100 : 0,
       },
+      replay: session.createReplayRecord(startedAt),
     };
   } finally {
     session.close();

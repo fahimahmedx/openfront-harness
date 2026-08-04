@@ -46,6 +46,7 @@ npm test               # focused unit and artifact tests
 npm run eval:neutral   # run 10 live neutral-expansion eval trials
 npm run eval:micro     # run the ten-family live micro-eval suite
 npm run eval:fixtures  # regenerate tracked replay prefixes from source runs
+npm run eval:add-replays -- path/to/report.json # upgrade a legacy eval report
 npm run verify:sample  # replay recorded actions and verify tick/hash/outcome
 npm run build          # type-check and production Vite build
 npm run sample         # spend live API credits to create a new sample
@@ -77,6 +78,14 @@ comma-separated value, change the per-family development count with
 `--trials 20`, or choose a report destination with `--output path/to/report.json`.
 Live evals require `OPENROUTER_API_KEY` and spend API credits. The default model
 is `openai/gpt-5.6-luna`; `OPENROUTER_MODEL` overrides it.
+
+Every new eval trial embeds a sparse renderer-compatible OpenFront replay. With
+the server running, open `/replay/<trial-runId>` to watch the complete setup and
+grading horizon with the eval decision synchronized in the trace panel. Trial
+UUIDs are the `trials[].runId` values in the JSON report. Reports created before
+replay capture was added can be upgraded deterministically with
+`npm run eval:add-replays -- path/to/report.json`; this makes no model request
+and refuses to write if the reconstructed checkpoint or final outcome differs.
 
 ## Fixed benchmark preset
 

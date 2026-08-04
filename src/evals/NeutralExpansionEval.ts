@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Player } from "../../OpenFrontIO/src/core/game/Game";
-import { Intent } from "../../OpenFrontIO/src/core/Schemas";
+import { GameRecord, Intent } from "../../OpenFrontIO/src/core/Schemas";
 import {
   actionOutcomes,
   beginActionTracking,
@@ -126,6 +126,7 @@ export type NeutralExpansionTrial = {
     taskPass: boolean;
     taskScore: 0 | 100;
   };
+  replay: GameRecord;
 };
 
 export type NeutralExpansionSummary = {
@@ -542,6 +543,7 @@ export async function runNeutralExpansionTrial(
         taskPass: passed,
         taskScore: passed ? 100 : 0,
       },
+      replay: session.createReplayRecord(startedAt),
     };
   } finally {
     session.close();
