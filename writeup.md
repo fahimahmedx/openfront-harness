@@ -2,6 +2,8 @@
 
 Written by Fahim Ahmed
 
+August 5, 2026
+
 <CLIP OF ATTACK-2-CLIPPED.mov HERE>
 
 Harnesses enable LLMs to do more than produce text. They turn it into a system that can observe an environment, choose actions, use tools, and work toward a goal over time.
