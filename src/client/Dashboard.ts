@@ -25,7 +25,6 @@ type BaselineRunSummary = Omit<RunSummary, "replayUrl"> & {
 };
 
 const featuredReplayUrl = "/replay/9f73a404-ae98-430f-be5b-ea22fb1755a6";
-const sourceLink = document.querySelector<HTMLAnchorElement>("#source-link")!;
 const refreshButton =
   document.querySelector<HTMLButtonElement>("#refresh-button")!;
 const recentRuns = document.querySelector<HTMLElement>("#recent-runs")!;
@@ -214,8 +213,6 @@ async function loadScenario(): Promise<void> {
   currentScenarioId = String(scenario.id);
 
   if (data.sourceUrl) {
-    sourceLink.href = data.sourceUrl;
-    sourceLink.classList.remove("hidden");
   }
 
   renderRuns();
