@@ -13,6 +13,8 @@ async function startHarnessReplay() {
     if (!response.ok) {
       throw new Error(`Replay request failed: ${response.status}`);
     }
+    const isVisualBaseline =
+      response.headers.get("X-Harness-Replay-Kind") === "visual-controls";
     const gameRecord = GameRecordSchema.parse(await response.json());
 
     // Main.ts registers its join listener during initialization. Waiting for
@@ -21,8 +23,10 @@ async function startHarnessReplay() {
     await customElements.whenDefined("join-lobby-modal");
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    const panel = installHarnessReplayPanel(runId);
-    installHarnessReplayControls(gameRecord.info.num_turns, panel);
+    const controlsContainer = isVisualBaseline
+      ? document.body
+      : installHarnessReplayPanel(runId);
+    installHarnessReplayControls(gameRecord.info.num_turns, controlsContainer);
     document.dispatchEvent(
       new CustomEvent("join-lobby", {
         detail: {

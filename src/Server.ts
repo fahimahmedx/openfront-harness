@@ -6,6 +6,8 @@ import fs from "fs/promises";
 import { marked } from "marked";
 import path from "path";
 import { fileURLToPath } from "url";
+import { promisify } from "util";
+import { gunzip } from "zlib";
 import {
   AssetManifest,
   buildAssetUrl,
@@ -20,6 +22,7 @@ import {
   publicScenario,
   SCENARIO,
 } from "./Scenario";
+import { VisualBaselineArtifactSchema } from "./VisualBaselineTypes";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
@@ -27,6 +30,28 @@ dotenv.config({
   path: path.join(projectRoot, ".env"),
 });
 const staticDir = path.join(projectRoot, "static");
+const baselineDataDir = path.resolve(
+  process.env.BASELINE_DATA_DIR ?? path.join(projectRoot, "data/baseline"),
+);
+const gunzipAsync = promisify(gunzip);
+const runIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+async function getVisualBaselineArtifact(runId: string) {
+  if (!runIdPattern.test(runId)) return null;
+  try {
+    const compressed = await fs.readFile(
+      path.join(baselineDataDir, runId, "artifact.json.gz"),
+    );
+    return VisualBaselineArtifactSchema.parse(
+      JSON.parse((await gunzipAsync(compressed)).toString("utf8")),
+    );
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.warn(`Ignoring unreadable visual baseline ${runId}`, error);
+    }
+    return null;
+  }
+}
 const dataDir = path.resolve(
   process.env.RUN_DATA_DIR ?? path.join(projectRoot, "data/runs"),
 );
@@ -256,7 +281,27 @@ app.get("/api/runs/:runId", async (req, res, next) => {
 app.get("/api/runs/:runId/replay", async (req, res, next) => {
   try {
     const artifact = await store.getArtifact(req.params.runId);
-    if (!artifact) return res.status(404).json({ error: "Run not found" });
+    if (!artifact) {
+      const baseline = await getVisualBaselineArtifact(req.params.runId);
+      if (!baseline?.replay) {
+        return res.status(404).json({ error: "Run not found" });
+      }
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      res.setHeader("X-Harness-Replay-Kind", "visual-controls");
+      return res.json(
+        JSON.parse(
+          JSON.stringify(
+            {
+              ...baseline.replay,
+              gitCommit: baseline.scenario.openfront.commit,
+              subdomain: "baseline",
+              domain: "openfront-harness",
+            },
+            replacer,
+          ),
+        ),
+      );
+    }
     res.setHeader("Cache-Control", "public, max-age=3600");
     return res.json(JSON.parse(JSON.stringify(artifact.replay, replacer)));
   } catch (error) {
