@@ -210,7 +210,7 @@
         <div class="section-heading compact-heading">
           <div>
             <p class="eyebrow">THE WORK</p>
-            <h2>One agent. One real game. A complete audit trail.</h2>
+            <h2>How the harness works.</h2>
           </div>
           <p>
             The model plays the game through the harness. The harness observes
@@ -262,6 +262,17 @@
           <details id="run-archive" class="run-archive">
             <summary>View all recorded runs</summary>
             <div id="archive-runs" class="run-list"></div>
+          </details>
+
+          <details id="baseline-archive" class="run-archive baseline-archive">
+            <summary>View runs without the harness</summary>
+            <p class="archive-note">
+              Stock OpenFront renderer runs using screenshots and primitive
+              controls, without structured observations or a legal-action menu.
+            </p>
+            <div id="baseline-runs" class="run-list" aria-live="polite">
+              <div class="loading">Loading visual baseline runs…</div>
+            </div>
           </details>
         </div>
       </section>

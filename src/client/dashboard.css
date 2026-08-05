@@ -682,7 +682,8 @@ h1 {
 }
 
 .status.failed,
-.status.interrupted {
+.status.interrupted,
+.status.terminated {
   color: #ee9b68;
 }
 
@@ -759,6 +760,24 @@ h1 {
 
 .run-archive[open] summary {
   margin-bottom: 12px;
+}
+
+.baseline-archive {
+  margin-top: 14px;
+}
+
+.archive-note {
+  max-width: 680px;
+  margin: 0 0 12px;
+  color: var(--panel-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.replay-unavailable {
+  color: #71857c;
+  font-size: 10px;
+  font-weight: 650;
 }
 
 .loading {

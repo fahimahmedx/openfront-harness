@@ -56,6 +56,7 @@ COPY videos ./videos
 COPY data/deepseek-v4-flash ./resources/harness/deepseek-v4-flash
 COPY data/glm-5.2 ./resources/harness/glm-5.2
 COPY data/gpt-5.6-luna ./resources/harness/gpt-5.6-luna
+COPY data/baseline ./data/baseline
 COPY README.md design-decision.md writeup.md ./
 COPY --from=build /app/static ./static
 RUN mkdir -p /data

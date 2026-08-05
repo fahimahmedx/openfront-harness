@@ -101,6 +101,7 @@ Run files are written atomically. A small pending JSON checkpoint is updated aft
 | `GET /api/health`            | Railway health check and generation availability |
 | `GET /api/scenario`          | Immutable preset, public quota, active run       |
 | `GET /api/runs`              | Replay summaries, including the bundled sample   |
+| `GET /api/baseline/runs`     | Stock-UI visual baseline summaries               |
 | `POST /api/runs`             | Launch one bounded match                         |
 | `GET /api/runs/:id`          | Progress or completed decision trace             |
 | `GET /api/runs/:id/replay`   | OpenFront replay record                          |

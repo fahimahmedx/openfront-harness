@@ -16,6 +16,14 @@ type RunSummary = {
   replayUrl: string;
 };
 
+type BaselineRunSummary = Omit<RunSummary, "replayUrl"> & {
+  interface: "visual-controls-v1" | "visual-naive-v1";
+  commandCount: number;
+  replayUrl: string | null;
+  artifactUrl: string;
+  pausedByModel: boolean;
+};
+
 const featuredReplayUrl = "/replay/9f73a404-ae98-430f-be5b-ea22fb1755a6";
 const sourceLink = document.querySelector<HTMLAnchorElement>("#source-link")!;
 const refreshButton =
@@ -23,6 +31,9 @@ const refreshButton =
 const recentRuns = document.querySelector<HTMLElement>("#recent-runs")!;
 const archiveRuns = document.querySelector<HTMLElement>("#archive-runs")!;
 const runArchive = document.querySelector<HTMLDetailsElement>("#run-archive")!;
+const baselineArchive =
+  document.querySelector<HTMLDetailsElement>("#baseline-archive")!;
+const baselineRuns = document.querySelector<HTMLElement>("#baseline-runs")!;
 const proofOutcome = document.querySelector<HTMLElement>("#proof-outcome")!;
 const proofDecisions = document.querySelector<HTMLElement>("#proof-decisions")!;
 const proofTime = document.querySelector<HTMLElement>("#proof-time")!;
@@ -34,6 +45,7 @@ const heroRunId =
 
 let currentScenarioId: string | null = null;
 let cachedRuns: RunSummary[] = [];
+let cachedBaselineRuns: BaselineRunSummary[] = [];
 
 const autoplayVideos = document.querySelectorAll<HTMLVideoElement>(
   ".hero-demo video, .action-reel video",
@@ -78,7 +90,9 @@ function scenarioLabel(scenarioId: string): string {
     .join(" ");
 }
 
-function outcomeLabel(run: RunSummary): string {
+function outcomeLabel(
+  run: Pick<RunSummary, "llmWon" | "finalPlacement" | "winner">,
+): string {
   return run.llmWon
     ? "LLM victory"
     : `${ordinal(run.finalPlacement)} place · ${run.winner} won`;
@@ -120,6 +134,37 @@ function runRow(run: RunSummary, featured = false): string {
   </article>`;
 }
 
+function baselineInterfaceLabel(run: BaselineRunSummary): string {
+  return run.interface === "visual-controls-v1"
+    ? "Controls manual"
+    : "No game instructions";
+}
+
+function baselineOutcomeLabel(run: BaselineRunSummary): string {
+  if (run.pausedByModel) return "GPT-5.6 paused the game";
+  return `${ordinal(run.finalPlacement)} place · ${run.winner} won`;
+}
+
+function baselineRunRow(run: BaselineRunSummary): string {
+  return `<article class="run-row baseline-run-row">
+    <div class="run-identity">
+      <span class="status">${escapeHtml(baselineInterfaceLabel(run))} · ${escapeHtml(scenarioLabel(run.scenarioId))}</span>
+      <h4>${escapeHtml(baselineOutcomeLabel(run))}</h4>
+      <p>${escapeHtml(run.model)}${run.provider ? ` via ${escapeHtml(run.provider)}` : ""}</p>
+    </div>
+    <div class="run-stats">
+      <span><b>${escapeHtml(run.decisionCount)}</b> decisions</span>
+      <span><b>${escapeHtml(run.commandCount)}</b> commands</span>
+      <span><b>$${run.costUsd.toFixed(3)}</b> inference</span>
+    </div>
+    <time datetime="${escapeHtml(run.startedAt)}">${new Date(run.startedAt).toLocaleDateString()}</time>
+    <div class="run-actions">
+      ${run.replayUrl ? `<a href="${escapeHtml(run.replayUrl)}">Watch replay <span aria-hidden="true">↗</span></a>` : '<span class="replay-unavailable">Replay unavailable</span>'}
+      <a href="${escapeHtml(run.artifactUrl)}">Artifact</a>
+    </div>
+  </article>`;
+}
+
 function renderRuns(): void {
   if (!cachedRuns.length) {
     recentRuns.innerHTML =
@@ -150,6 +195,17 @@ function renderRuns(): void {
   runArchive.hidden = archived.length === 0;
 }
 
+function renderBaselineRuns(): void {
+  if (!cachedBaselineRuns.length) {
+    baselineRuns.innerHTML =
+      '<div class="loading">No visual baseline runs are available.</div>';
+    baselineArchive.hidden = true;
+    return;
+  }
+  baselineArchive.hidden = false;
+  baselineRuns.innerHTML = cachedBaselineRuns.map(baselineRunRow).join("");
+}
+
 async function loadScenario(): Promise<void> {
   const response = await fetch("/api/scenario");
   if (!response.ok) throw new Error("Scenario request failed");
@@ -178,6 +234,14 @@ async function loadRuns(): Promise<void> {
   }
 }
 
+async function loadBaselineRuns(): Promise<void> {
+  const response = await fetch("/api/baseline/runs");
+  if (!response.ok) throw new Error("Baseline runs request failed");
+  const data = await response.json();
+  cachedBaselineRuns = data.runs as BaselineRunSummary[];
+  renderBaselineRuns();
+}
+
 refreshButton.addEventListener("click", () => {
   void loadRuns().catch((error) => {
     console.error(error);
@@ -194,4 +258,10 @@ void loadRuns().catch((error) => {
   console.error(error);
   recentRuns.innerHTML =
     '<div class="loading error">Recorded runs are temporarily unavailable.</div>';
+});
+
+void loadBaselineRuns().catch((error) => {
+  console.error(error);
+  baselineRuns.innerHTML =
+    '<div class="loading error">Visual baseline runs are temporarily unavailable.</div>';
 });

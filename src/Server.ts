@@ -22,7 +22,10 @@ import {
   publicScenario,
   SCENARIO,
 } from "./Scenario";
-import { VisualBaselineArtifactSchema } from "./VisualBaselineTypes";
+import {
+  VisualBaselineArtifact,
+  VisualBaselineArtifactSchema,
+} from "./VisualBaselineTypes";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
@@ -34,7 +37,8 @@ const baselineDataDir = path.resolve(
   process.env.BASELINE_DATA_DIR ?? path.join(projectRoot, "data/baseline"),
 );
 const gunzipAsync = promisify(gunzip);
-const runIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const runIdPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 async function getVisualBaselineArtifact(runId: string) {
   if (!runIdPattern.test(runId)) return null;
@@ -51,6 +55,75 @@ async function getVisualBaselineArtifact(runId: string) {
     }
     return null;
   }
+}
+
+function visualBaselineSummary(artifact: VisualBaselineArtifact) {
+  const winner = artifact.outcome.winner;
+  const lastDecision = artifact.decisions[artifact.decisions.length - 1];
+  const modelPausedGame =
+    artifact.status === "terminated" &&
+    artifact.termination?.reason === "client-progress-timeout" &&
+    lastDecision?.acceptedIntents.some(
+      (intent) =>
+        typeof intent === "object" &&
+        intent !== null &&
+        "type" in intent &&
+        intent.type === "toggle_pause" &&
+        "paused" in intent &&
+        intent.paused === true,
+    );
+  const territoryLeader = artifact.outcome.finalPlayers.reduce<
+    (typeof artifact.outcome.finalPlayers)[number] | undefined
+  >(
+    (leader, player) =>
+      !leader || player.tiles > leader.tiles ? player : leader,
+    undefined,
+  );
+  const winnerName =
+    Array.isArray(winner) && typeof winner[1] === "string"
+      ? winner[1]
+      : (territoryLeader?.name ?? "Undeclared");
+  return {
+    runId: artifact.runId,
+    scenarioId: artifact.scenario.id,
+    status: artifact.status,
+    startedAt: artifact.startedAt,
+    completedAt: artifact.completedAt,
+    interface: artifact.interface,
+    model: artifact.model.resolved,
+    provider: artifact.model.provider,
+    winner: winnerName,
+    llmWon: artifact.outcome.llmWon,
+    finalPlacement: artifact.outcome.finalPlacement,
+    ticks: artifact.outcome.terminalTick,
+    decisionCount: artifact.decisions.length,
+    commandCount: artifact.decisions.reduce(
+      (total, decision) => total + decision.commands.length,
+      0,
+    ),
+    costUsd: artifact.usage.costUsd,
+    replayUrl: artifact.replay ? `/replay/${artifact.runId}` : null,
+    artifactUrl: `/api/runs/${artifact.runId}/artifact`,
+    pausedByModel: Boolean(modelPausedGame),
+  };
+}
+
+async function listVisualBaselineArtifacts() {
+  let entries;
+  try {
+    entries = await fs.readdir(baselineDataDir, { withFileTypes: true });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw error;
+  }
+  const artifacts = await Promise.all(
+    entries
+      .filter((entry) => entry.isDirectory() && runIdPattern.test(entry.name))
+      .map((entry) => getVisualBaselineArtifact(entry.name)),
+  );
+  return artifacts
+    .filter((artifact): artifact is VisualBaselineArtifact => artifact !== null)
+    .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
 }
 const dataDir = path.resolve(
   process.env.RUN_DATA_DIR ?? path.join(projectRoot, "data/runs"),
@@ -198,6 +271,15 @@ app.get("/api/runs", async (_req, res, next) => {
   }
 });
 
+app.get("/api/baseline/runs", async (_req, res, next) => {
+  try {
+    const artifacts = await listVisualBaselineArtifacts();
+    res.json({ runs: artifacts.map(visualBaselineSummary) });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/runs", async (req, res, next) => {
   let ownsLaunchLock = false;
   try {
@@ -264,7 +346,17 @@ app.get("/api/runs/:runId", async (req, res, next) => {
     const progress = store.getProgress(req.params.runId);
     if (progress) return res.json({ run: progress });
     const artifact = await store.getArtifact(req.params.runId);
-    if (!artifact) return res.status(404).json({ error: "Run not found" });
+    if (!artifact) {
+      const baseline = await getVisualBaselineArtifact(req.params.runId);
+      if (!baseline) return res.status(404).json({ error: "Run not found" });
+      return res.json({
+        run: {
+          ...visualBaselineSummary(baseline),
+          decisions: [],
+          baseline: true,
+        },
+      });
+    }
     return res.json({
       run: {
         ...artifactSummary(artifact),
@@ -312,12 +404,16 @@ app.get("/api/runs/:runId/replay", async (req, res, next) => {
 app.get("/api/runs/:runId/artifact", async (req, res, next) => {
   try {
     const artifact = await store.getArtifact(req.params.runId);
-    if (!artifact) return res.status(404).json({ error: "Run not found" });
+    const baseline = artifact
+      ? null
+      : await getVisualBaselineArtifact(req.params.runId);
+    const downloadable = artifact ?? baseline;
+    if (!downloadable) return res.status(404).json({ error: "Run not found" });
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${artifact.runId}.json"`,
+      `attachment; filename="${downloadable.runId}.json"`,
     );
-    return res.json(JSON.parse(JSON.stringify(artifact, replacer)));
+    return res.json(JSON.parse(JSON.stringify(downloadable, replacer)));
   } catch (error) {
     next(error);
   }
