@@ -356,6 +356,13 @@ function prepareDocumentMarkdown(markdown: string, isWriteup: boolean): string {
       </figure>`,
     )
     .replace(
+      "<BENCHMARK CHART HERE>",
+      `<figure class="result-chart result-chart-standalone">
+          <img src="/media/writeup/gpt-5.6-harness-win-rate.svg" alt="GPT-5.6 Luna won zero of five trials with visual browser control, zero of five with visual browser control plus a game manual, and five of five with the harness">
+          <figcaption>Observed win rate across five completed trials per interface in the fixed Japan scenario.</figcaption>
+        </figure>`,
+    )
+    .replace(
       "<OPENFRONT GAMEPLAY CLIP HERE>",
       `<figure class="gameplay-media">
         <video autoplay muted loop playsinline preload="metadata" aria-label="Recorded OpenFront gameplay showing the agent attacking Hokkaido">
@@ -397,6 +404,7 @@ const writeupMedia: Record<string, string> = {
   "attack-1-clipped.mp4": "videos/attack-1-clipped.mp4",
   "gpt-5.6-territory-over-time.svg": "charts/gpt-5.6-territory-over-time.svg",
   "gpt-5.6-territory-races.svg": "charts/gpt-5.6-territory-races.svg",
+  "gpt-5.6-harness-win-rate.svg": "charts/gpt-5.6-harness-win-rate.svg",
   "model-action-mix.svg": "charts/model-action-mix.svg",
   "provider-schema-compliance.png": "charts/provider-schema-compliance.png",
   "audit-trace-before-after.png": "charts/audit-trace-before-after.png",

@@ -369,14 +369,34 @@ svg {
   box-shadow: 0 0 0 5px rgba(97, 226, 167, 0.15);
 }
 
-.writeup > .hero-media + p {
-  max-width: 800px;
-  margin: clamp(43px, 6vw, 68px) 0 0;
-  color: var(--ink);
-  font-size: clamp(21px, 2.3vw, 29px);
-  font-weight: 480;
-  letter-spacing: -0.025em;
-  line-height: 1.45;
+.result-chart {
+  margin: 0;
+  border-top: 1px solid rgba(238, 247, 242, 0.18);
+  background: #fff;
+}
+.result-chart img {
+  display: block;
+  width: 100%;
+}
+.result-chart figcaption {
+  border-top: 1px solid #d9ded8;
+  padding: 14px 19px 16px;
+  background: #f7f6f1;
+  color: #5f6c65;
+  font:
+    650 10px/1.5 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+.result-chart-standalone {
+  margin: 34px 0 0;
+  overflow: hidden;
+  border: 1px solid #263c31;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
 }
 .writeup p,
 .writeup li {
@@ -498,6 +518,39 @@ svg {
     monospace;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.eval-conditions {
+  margin: 34px 0;
+  border: 1px solid var(--line);
+  background: var(--raised);
+}
+.eval-condition {
+  display: grid;
+  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
+  gap: 28px;
+  padding: 22px 24px;
+}
+.eval-condition + .eval-condition {
+  border-top: 1px solid var(--line);
+}
+.eval-condition-header {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  background: var(--paper-2);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+}
+.writeup .eval-condition h3 {
+  margin: 0;
+  align-self: start;
+  font-size: 16px;
+  line-height: 1.55;
+}
+.writeup .eval-condition p {
+  margin: 0;
 }
 
 .table-scroll {
@@ -789,12 +842,20 @@ svg {
   .gameplay-media {
     width: 100%;
   }
+  .eval-condition {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 18px;
+  }
+  .eval-condition-header {
+    display: none;
+  }
   .hero-media figcaption span:last-child,
   .visual-meta {
     display: none;
   }
-  .writeup > .hero-media + p {
-    font-size: 20px;
+  .result-chart figcaption {
+    font-size: 9px;
   }
   .writeup h2 {
     margin-top: 90px;

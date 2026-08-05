@@ -6,6 +6,12 @@ August 5, 2026
 
 <CLIP OF ATTACK-2-CLIPPED.mov HERE>
 
+### **GPT-5.6 failed playing OpenFront across 5 trials. Using my harness, it was able to win all 5 times.**
+
+***Special thanks to [Ibrahim Ahmed](http://ibrahimahmed.ca/) ([X](https://x.com/zero_goliath)) for his incredible support throughout this project.***
+
+
+
 Harnesses enable LLMs to do more than produce text. They turn it into a system that can observe an environment, choose actions, use tools, and work toward a goal over time.
 
 In the real world, harnesses need to be reliable. An unreliable harness turns a model mistake (or even what the model thinks is a correct decision) into an incorrect action. The main danger is that the harness connects probabilistic reasoning to deterministic systems such as databases, payment APIs, production infrastructure, robots, and customer accounts.
@@ -13,7 +19,11 @@ For example, if the model says “refund the latest $10 duplicate charge” but 
 
 The central engineering problem around bringing harnesses to production environments is "How do you make the harness reliable?".
 
-To learn how to build a reliable harness, I built an agent harness around [OpenFront](https://openfront.io/), an open-source real-time strategy game. In this harness, an LLM plays a complete match against three built-in nations. Instead of giving the model authority to issue arbitrary game commands, I built a system that controls what the model can observe, limits it to legal and resource-safe actions, places limits on runtime and model costs, and records the game and model's thinking for auditability.
+To learn how to build a reliable harness, I built an agent harness around [OpenFront](https://openfront.io/), an open-source real-time strategy game, and created an eval task where the agent has to win a complete match against three built-in nations on the Japan map. Instead of giving the model authority to issue arbitrary game commands, I built a system that controls what the model can observe, limits it to legal and resource-safe actions, places limits on runtime and model costs, and records the game and model's thinking for auditability.
+
+In addition, I benchmarked GPT-5.6 Luna without that interface where it failed the eval, and then reran the same model with the harness, where it won.
+
+<BENCHMARK CHART HERE>
 
 
 ## OpenFront in 60 seconds
@@ -22,7 +32,7 @@ To learn how to build a reliable harness, I built an agent harness around [OpenF
 
 <OPENFRONT GAMEPLAY CLIP HERE>
 
-In the match used by this harness, one player competes against three built-in nations on Japan. The game progresses in simulation ticks. In each tick, troops grow, attacks advance, nations respond, buildings finish, and borders change. A player wins immediately by capturing 80% of territory on the map. If time expires first, the surviving player with the most territory wins.
+In the eval, one player competes against three built-in nations on Japan. The game progresses in simulation ticks. In each tick, troops grow, attacks advance, nations respond, buildings finish, and borders change. A player wins immediately by capturing 80% of territory on the map. If time expires first, the surviving player with the most territory wins.
 
 ## How the harness works
 
@@ -172,13 +182,14 @@ The lesson is to treat advertised provider capabilities as claims to verify. Tes
 
 ### Evaluation reliability: making every run auditable
  
-One of my key design decisions was to make every run auditable. At each decision point, the harness records what the model observed, which actions it could take, what it chose, and why. This let me watch the agent play, inspect unexpected decisions or error flags, and use the trace to determine whether a problem came from the model or from the harness. To judge replays concretely, I checked two things: whether the agent was making moves a real player would plausibly make, and how many of its turns produced an error. The first was a judgment call from watching the replay, the second was a direct count from the trace.
+One of my key design decisions was to make every run auditable. At each decision point, the harness records what the model observed, which actions it could take, what it chose, and why. I then added a UI that lets me watch the agent play, inspect unexpected decisions or error flags, and use the trace to determine whether a problem came from the model or from the harness.
  
-That auditability is also what let me diagnose two of the more interesting failures I ran into, rather than just seeing an agent lose and guessing why.
+From this auditability, I was able to diagnose two interesting failures I ran into.
  
-An early version of the observation JSON called the immediate territory threshold `winPercent`. In one evaluation, GLM-5.2 interpreted a value of `80` as an 80% probability of winning and used it to justify holding off from any action, even though it controlled far less than 80% of the map. Because the decision trace showed exactly what the model had seen and how it reasoned from that value, I could pin the failure to the field name rather than the model's judgment. To fix this, I renamed the field to `instantVictoryTerritoryPercent`, and GLM-5.2 won in its next run. From this, I learned that even a small ambiguity in the wording of a state variable could cause the model to behave incorrectly.
+1. An early version of the observation JSON called the immediate territory threshold `winPercent`. In one evaluation, GLM-5.2 interpreted a value of `80` as an 80% probability of winning and used it to justify holding off from any action, even though it controlled far less than 80% of the map. Because the decision trace showed exactly what the model had seen and how it reasoned from that value, I could pin the failure to the field name rather than the model's judgment. To fix this, I renamed the field to `instantVictoryTerritoryPercent`, and GLM-5.2 won in its next run. From this, I learned that even a small ambiguity in the wording of a state variable could cause the model to behave incorrectly.
  
-In another run with DeepSeek V4 Flash, an older version of the instruction prompt told the model to "hold while rebuilding", but did not explain that troop growth approaches zero near full capacity. The model made no moves for 58 of its 61 decisions, stopped gaining meaningful troops, and was eventually conquered by another nation. This failure did not trigger a harness error because every hold was valid. The trace showed the problem, where the model repeatedly chose to hold because it believed doing so would rebuild its troops, even near full capacity. I removed the "hold while rebuilding" instruction and made the underlying troop-growth mechanic explicit. More specifically, the observation now reports the agent's troop-capacity percentage and current growth rate, and the prompt explains that holding near 100% capacity will not rebuild the army further. As a result, the next DeepSeek run, the agent expanded aggressively and reached first place!
+2. In another run with DeepSeek V4 Flash, an older version of the instruction prompt told the model to "hold while rebuilding", but did not explain that troop growth approaches zero near full capacity. The model made no moves for 58 of its 61 decisions, stopped gaining meaningful troops, and was eventually conquered by another nation. This failure did not trigger a harness error because every hold was valid. The trace showed the problem, where the model repeatedly chose to hold because it believed doing so would rebuild its troops, even near full capacity. I removed the "hold while rebuilding" instruction and made the underlying troop-growth mechanic explicit. More specifically, the observation now reports the agent's troop-capacity percentage and current growth rate, and the prompt explains that holding near 100% capacity will not rebuild the army further. As a result, the next DeepSeek run, the agent expanded aggressively and reached first place!
+
 From this, I learned the importance of not having biases in a prompt, and the importance of exposing more relevant information to the model for it to use when making a decision.
 
 ![Two audit-trace case studies showing how ambiguous model inputs were diagnosed and fixed](charts/audit-trace-before-after.png?v=2)
@@ -189,9 +200,58 @@ From having to manually judge multiple runs, I learned that while the harness sh
 
 **Note that doesn't belong to the reliability framework above:** The user interface presented a different challenge from the harness itself. GPT-5.6 was useful for quickly scaffolding most of the interface, but when creating a frontpage and overlay for this project, it introduced unnecessary design elements and jargon. GPT-5.6 doesn't seem to be good at a user or sales-oriented presentation, so manual judgment was needed.
 
+## Evaluating the models
+
+The eval task was to win a fixed four-player match on the Japan map. GPT-5.6 Luna always spawned in Kanto and played against the same three medium-difficulty built-in nations with the same engine seed. A trial succeeded if the model captured 80% of Japan for an immediate victory or, when the 20-minute timer expired, was still alive and controlled more territory than every opponent. I ran five trials per interface under the same decision timing.
+
+To measure what GPT-5.6 Luna could do on its own, I let the model play OpenFront on its own using browser screenshots and primitive browser inputs.
+There were two versions of this baseline: one with a control manual given as input, and one without (where the model would have to discover the game's controls).
+
+Both of these gave me a baseline against which to compare my harness against.
+
+
+<div class="eval-conditions">
+  <div class="eval-condition eval-condition-header" aria-hidden="true">
+    <span>Interface</span>
+    <span>Description</span>
+  </div>
+  <div class="eval-condition">
+    <h3>Visual Browser Control</h3>
+    <p>The model received the current 1280×720 screenshot and the goal of winning. It could control the browser using mouse, keyboard, scroll, wait, and done commands, but received no OpenFront rules or control instructions.</p>
+  </div>
+  <div class="eval-condition">
+    <h3>Visual Browser Control + Game Manual</h3>
+    <p>The model received the same screenshots, goal, and browser controls, plus a game manual explaining OpenFront's public rules, controls, and keybindings.</p>
+  </div>
+  <div class="eval-condition">
+    <h3>OpenFront Harness</h3>
+    <p>The model received a compact summary of the game state, recent action results, safe troop budgets, and a list of currently legal actions. It could choose up to two actions, which the harness validated and translated into exact game commands.</p>
+  </div>
+</div>
+
+The two visual interfaces still use a thin evaluator to reproduce and score the scenario. Unlike the trials for the OpenFront Harness, the Visual Browser also stopped simulated time while the model was thinking, due to having several sequential model calls. This is another benefit of the OpenFront Harness, only requiring one model call for a decision.
+
+Nonetheless, the evaluator for the Visual Browser interfaces did not give the model DOM data, OCR, normalized game state, legal actions, coordinate hints, or semantic feedback from the game. Furthermore, the public game manual was the only intended difference between the two visual baselines.
+
+The results of the evaluation task will be in the next section.
+
 ## Results
 
-I ran three evaluations each of DeepSeek V4 Flash, GLM-5.2, and GPT-5.6 Luna. Every run used the same Japan map, spawn point, three medium difficulty opponent bots with the same seed, one decision every 100 ticks, and a 20-minute limit. Model reasoning was disabled for all the runs. I pinned the provider as well as the model, with StreamLake for DeepSeek, Baidu for GLM, and OpenAI for GPT, all through OpenRouter.
+### The harness enabled GPT-5.6 Luna to consistently win
+
+The primary eval metric was whether the model won the match. Across five completed trials per condition, the observed win rate increased by 100 percentage points: 0/5 with Visual Browser Control, 0/5 with Visual Browser Control + Game Manual, and 5/5 with the Harness.
+
+| Interface | Trials | Wins | Observed win rate (95% Wilson interval) |
+| --- | ---: | ---: | ---: |
+| Visual Browser Control | 5 | 0 | 0% (0–43.4%) |
+| Visual Browser Control + Game Manual | 5 | 0 | 0% (0–43.4%) |
+| Harness | 5 | 5 | 100% (56.6–100%) |
+
+The wide confidence intervals are important: five trials per condition cannot establish a precise population win rate. The comparison is evidence for this fixed model, provider, map, spawn, opponent lineup, and seed—not a claim that every model or OpenFront scenario improves by 100 percentage points. Still, the failure mode was consistent. Supplying the game manual did not close the gap; the useful change was the full interface bundle of normalized observations, state-dependent legal actions, resource constraints, validation, and semantic feedback.
+
+### Performance inside the structured harness
+
+I also ran three harness evaluations each of DeepSeek V4 Flash, GLM-5.2, and GPT-5.6 Luna. Every run used the same Japan map, spawn point, three medium-difficulty opponent bots with the same seed, one decision every 100 ticks, and a 20-minute limit. Model reasoning was disabled for all the runs. I pinned the provider as well as the model, with StreamLake for DeepSeek, Baidu for GLM, and OpenAI for GPT, all through OpenRouter.
 
 | Model and provider | Wins | How the wins ended | Mean final territory | Mean decisions | Mean prompt / completion tokens | Median decision latency | Mean inference cost |
 | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: |
@@ -217,12 +277,12 @@ Deepseek's passiveness was not accidental. In fact, it cleverly recognized that 
 
 The models showed different play styles. GPT attacked most often, GLM was less aggressive, and DeepSeek mostly held. Despite those differences, the harness kept execution safe. Every final action was legal and stayed within its troop budget. Three responses initially attempted conflicting attacks, but the validator rejected them and the models corrected themselves on retry. No invalid command reached the game.
 
-These results are only apply to this test setup in this harness. Each model was tested three times under a single game setup, and the harness limited which actions were available. The models also used different providers, so the results (especially latency and cost) should not be treated as universal model rankings.
+These results apply only to this test setup and harness. Each model was tested three times under a single game setup, and the harness limited which actions were available. The models also used different providers, so the results—especially latency and cost—should not be treated as universal model rankings.
 
 
 ## What I would build next
 
-The harness currently makes it possible to inspect how an LLM plays the game. The next step would be to turn it into a public benchmark for evaluating agent performance.
+The fixed Japan eval makes it possible to compare how an LLM plays with and without the harness. The next step would be to expand it into a public benchmark for evaluating agent performance more broadly.
 
 This would require testing models across different maps, seeds, spawn locations, opponent lineups, and difficulty levels. I would also define a scoring system that considers wins, placement, territory, and consistency across runs.
 
