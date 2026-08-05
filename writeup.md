@@ -274,8 +274,6 @@ DeepSeek's passiveness was not accidental. It recognized that it did not need to
 
 The models showed different play styles. GPT attacked most often, GLM was less aggressive, and DeepSeek mostly held. Despite those differences, the harness kept execution safe. Every final action was legal and stayed within its troop budget. Eleven responses initially selected conflicting action combinations, but the validator rejected them and the models corrected themselves on retry. No invalid command reached the game.
 
-These results apply only to this test setup and harness. Each model was tested five times under a single game setup, and the harness limited which actions were available. The models also used different providers, so the results—especially latency and cost—should not be treated as universal model rankings.
-
 
 ## What I would build next
 
