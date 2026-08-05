@@ -345,6 +345,30 @@ choice; models may spend scarce commands exploring controls; comparing
 interface bundle rather than structured observations alone; adding a second
 visual condition increases the run budget needed for useful intervals.
 
+## 35. Canonicalize primitive key aliases and retry execution rejection
+
+**Decision:** Treat capitalization and common aliases of standard browser key
+names as primitive-transport syntax, canonicalizing values such as `escape`,
+`esc`, and `ESCAPE` to Playwright's `Escape`. Canonicalize modifiers, physical
+letter/digit codes, arrow keys, navigation keys, and function keys similarly
+without changing ordinary single-character input. If Playwright still rejects a
+keypress, return that public syntax error to the model only when one call remains
+in the existing two-call validation budget. Do not retry other input execution
+errors, which might have produced partial UI effects.
+
+**Pros:** A schema-accepted lowercase key no longer aborts a match; the
+implemented behavior matches the documented one-retry policy; both visual
+divisions receive identical generic keyboard handling; canonicalization does not
+reveal a game keybinding or evaluator state; limiting execution retry to
+keypresses avoids duplicating potentially partial clicks and drags.
+
+**Cons:** Alias normalization is an evaluator-owned convenience and slightly
+reduces the cost of grounding browser key syntax; arbitrary invalid key names can
+still consume the one retry; a rejected key selected after an earlier malformed
+response has no remaining retry; historical `visual-controls-v1` artifacts that
+failed on lowercase `escape` remain evidence of the earlier implementation and
+must not be silently reclassified.
+
 ## Known benchmark limitations
 
 - A fixed engine seed does not make a hosted model deterministic. Sampling, model weights, and provider routing can change generated decisions.

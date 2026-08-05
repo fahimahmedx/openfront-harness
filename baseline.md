@@ -96,6 +96,13 @@ main runner's lifecycle without making terminal-state collection depend on
 display throughput. The inference wall-clock limit no longer applies once model
 calls stop.
 
+Common browser key names are canonicalized case-insensitively at the primitive
+transport boundary (`escape` and `esc`, for example, become `Escape`). If a
+keypress is still rejected by the browser, that rejection is returned to the
+model within the same two-call validation budget instead of terminating the run
+without the promised retry. This corrects command syntax only; it does not
+repair a misclick, select a useful key, or provide game feedback.
+
 ## What every visual model receives
 
 Every request contains:

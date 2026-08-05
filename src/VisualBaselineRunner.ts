@@ -362,17 +362,49 @@ export async function runVisualBaseline(
         const fileName = `decision-${String(decision.decision).padStart(3, "0")}-command-${commandIndex}.png`;
         const screenshotPath = path.join(screenshotDir, fileName);
         await fs.writeFile(screenshotPath, screenshot);
-        let result: VisualAgentResult;
-        try {
-          result = await agent.decide(screenshot, recentPublicNotes);
-        } catch (cause) {
-          if (cause instanceof VisualAgentError) addUsage(usage, cause.usage);
-          throw cause;
+        let result: VisualAgentResult | undefined;
+        let remainingModelCalls = 2;
+        let executionValidationError: string | undefined;
+        const commandUsage: VisualBaselineUsage = {
+          promptTokens: 0,
+          completionTokens: 0,
+          costUsd: 0,
+          modelCalls: 0,
+        };
+        let commandLatencyMs = 0;
+        while (remainingModelCalls > 0) {
+          try {
+            result = await agent.decide(screenshot, recentPublicNotes, {
+              initialValidationError: executionValidationError,
+              maxModelCalls: remainingModelCalls,
+            });
+          } catch (cause) {
+            if (cause instanceof VisualAgentError) addUsage(usage, cause.usage);
+            throw cause;
+          }
+          addUsage(usage, result.usage);
+          addUsage(commandUsage, result.usage);
+          commandLatencyMs += result.latencyMs;
+          remainingModelCalls -= result.usage.modelCalls;
+          resolvedModel = result.resolvedModel;
+          resolvedProvider = result.provider;
+          try {
+            await executeCommand(page, result.command);
+            break;
+          } catch (cause) {
+            if (
+              result.command.command !== "keypress" ||
+              remainingModelCalls <= 0
+            ) {
+              throw cause;
+            }
+            executionValidationError = `The keypress could not be executed: ${cause instanceof Error ? cause.message : String(cause)}. Use a valid browser key name.`;
+            result = undefined;
+          }
         }
-        addUsage(usage, result.usage);
-        resolvedModel = result.resolvedModel;
-        resolvedProvider = result.provider;
-        await executeCommand(page, result.command);
+        if (!result) {
+          throw new Error("Visual keypress failed its execution retry");
+        }
         status = await baselineStatus(page);
         decision.commands.push({
           commandIndex,
@@ -381,8 +413,8 @@ export async function runVisualBaseline(
             .update(screenshot)
             .digest("hex"),
           selected: result.command,
-          latencyMs: result.latencyMs,
-          usage: result.usage,
+          latencyMs: commandLatencyMs,
+          usage: commandUsage,
           intentsAfterCommand: status.intents.length,
         });
         recentPublicNotes.push(result.command.note);

@@ -249,8 +249,12 @@ export class VisualControlsAgent {
   async decide(
     screenshotPng: Buffer,
     recentPublicNotes: string[],
+    options: {
+      initialValidationError?: string;
+      maxModelCalls?: number;
+    } = {},
   ): Promise<VisualAgentResult> {
-    let validationError: string | undefined;
+    let validationError = options.initialValidationError;
     let totalLatencyMs = 0;
     const usage: VisualBaselineUsage = {
       promptTokens: 0,
@@ -258,7 +262,8 @@ export class VisualControlsAgent {
       costUsd: 0,
       modelCalls: 0,
     };
-    for (let attempt = 0; attempt < 2; attempt++) {
+    const maxModelCalls = options.maxModelCalls ?? 2;
+    for (let attempt = 0; attempt < maxModelCalls; attempt++) {
       const started = performance.now();
       const response = await fetch(OPENROUTER_URL, {
         method: "POST",
@@ -357,7 +362,7 @@ export class VisualControlsAgent {
       }
     }
     throw new VisualAgentError(
-      `Visual command failed validation twice: ${validationError}`,
+      `Visual command failed validation after ${maxModelCalls} model call${maxModelCalls === 1 ? "" : "s"}: ${validationError}`,
       usage,
     );
   }

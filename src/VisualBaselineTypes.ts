@@ -35,6 +35,50 @@ const PointFields = {
     .max(VISUAL_BASELINE.viewport.height - 1),
 };
 
+const NamedKeyAliases: Record<string, string> = {
+  alt: "Alt",
+  arrowdown: "ArrowDown",
+  arrowleft: "ArrowLeft",
+  arrowright: "ArrowRight",
+  arrowup: "ArrowUp",
+  backspace: "Backspace",
+  cmd: "Meta",
+  command: "Meta",
+  control: "Control",
+  ctrl: "Control",
+  delete: "Delete",
+  end: "End",
+  enter: "Enter",
+  esc: "Escape",
+  escape: "Escape",
+  home: "Home",
+  insert: "Insert",
+  meta: "Meta",
+  pagedown: "PageDown",
+  pageup: "PageUp",
+  return: "Enter",
+  shift: "Shift",
+  space: "Space",
+  spacebar: "Space",
+  tab: "Tab",
+};
+
+function normalizeKeyToken(token: string) {
+  const trimmed = token.trim();
+  const lower = trimmed.toLowerCase();
+  const alias = NamedKeyAliases[lower];
+  if (alias) return alias;
+  if (/^key[a-z]$/i.test(trimmed))
+    return `Key${trimmed.slice(-1).toUpperCase()}`;
+  if (/^digit[0-9]$/i.test(trimmed)) return `Digit${trimmed.slice(-1)}`;
+  if (/^f(?:[1-9]|1[0-2])$/i.test(trimmed)) return trimmed.toUpperCase();
+  return trimmed;
+}
+
+export function normalizeVisualKey(key: string) {
+  return key.split("+").map(normalizeKeyToken).join("+");
+}
+
 export const VisualCommandSchema = z.discriminatedUnion("command", [
   z.object({
     command: z.literal("move"),
@@ -62,7 +106,7 @@ export const VisualCommandSchema = z.discriminatedUnion("command", [
   }),
   z.object({
     command: z.literal("keypress"),
-    key: z.string().trim().min(1).max(40),
+    key: z.string().trim().min(1).max(40).transform(normalizeVisualKey),
     note: z.string().trim().max(160),
   }),
   z.object({

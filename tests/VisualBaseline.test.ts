@@ -14,6 +14,7 @@ import {
   VISUAL_NAIVE_INTERFACE,
   VisualBaselineArtifactSchema,
   VisualCommandSchema,
+  normalizeVisualKey,
 } from "../src/VisualBaselineTypes";
 
 function wire(overrides: Record<string, unknown>) {
@@ -93,10 +94,21 @@ describe("visual-controls baseline", () => {
       }),
     ).toMatchObject({ command: "keypress", key: "KeyC" });
     expect(
+      parseVisualCommand(wire({ command: "keypress", key: "escape" })),
+    ).toMatchObject({ command: "keypress", key: "Escape" });
+    expect(
       parseVisualCommand(
         `${wire({ command: "done" })}\nThe command is complete.`,
       ),
     ).toMatchObject({ command: "done" });
+  });
+
+  it("canonicalizes generic browser key aliases without changing characters", () => {
+    expect(normalizeVisualKey("escape")).toBe("Escape");
+    expect(normalizeVisualKey("ESC")).toBe("Escape");
+    expect(normalizeVisualKey("ctrl+keyc")).toBe("Control+KeyC");
+    expect(normalizeVisualKey("shift+f10")).toBe("Shift+F10");
+    expect(normalizeVisualKey("t")).toBe("t");
   });
 
   it("keeps the controls prompt visual and free of hidden action menus", () => {
