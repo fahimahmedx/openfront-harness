@@ -33,6 +33,16 @@ dotenv.config({
   path: path.join(projectRoot, ".env"),
 });
 const staticDir = path.join(projectRoot, "static");
+const publicBaseUrl = (
+  process.env.PUBLIC_BASE_URL ??
+  (process.env.RAILWAY_PUBLIC_DOMAIN
+    ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+    : "http://localhost:3000")
+).replace(/\/+$/, "");
+const linkPreviewPath = path.join(
+  projectRoot,
+  "resources/social/openfront-harness-link-preview.png",
+);
 const baselineDataDir = path.resolve(
   process.env.BASELINE_DATA_DIR ?? path.join(projectRoot, "data/baseline"),
 );
@@ -172,6 +182,7 @@ function renderShell(fileName: "replay.html" | "harness.html") {
       backgroundImageUrl: asset("images/background.webp"),
       desktopLogoImageUrl: asset("images/OpenFront.png"),
       mobileLogoImageUrl: asset("images/OF.png"),
+      publicBaseUrl,
     });
   })().catch((error) => {
     htmlCache.delete(fileName);
@@ -509,6 +520,11 @@ app.get("/assets/writeup.js", (_req, res) => {
   res
     .type("text/javascript")
     .sendFile(path.join(projectRoot, "src/client/Writeup.js"));
+});
+
+app.get("/openfront-harness-link-preview.png", (_req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.type("png").sendFile(linkPreviewPath);
 });
 
 const writeupMedia: Record<string, string> = {
