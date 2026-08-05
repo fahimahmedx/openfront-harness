@@ -15,6 +15,7 @@
     "baseline:run": "tsx --tsconfig OpenFrontIO/tsconfig.json src/VisualBaselineRunner.ts",
     "baseline:run:controls": "cross-env BASELINE_INTERFACE=visual-controls-v1 tsx --tsconfig OpenFrontIO/tsconfig.json src/VisualBaselineRunner.ts",
     "baseline:run:naive": "cross-env BASELINE_INTERFACE=visual-naive-v1 tsx --tsconfig OpenFrontIO/tsconfig.json src/VisualBaselineRunner.ts",
+    "export:x-article": "node scripts/export-x-package.mjs",
     "format": "prettier --ignore-unknown --write ."
   },
   "dependencies": {
