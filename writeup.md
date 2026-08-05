@@ -8,10 +8,6 @@ August 5, 2026
 
 ### **GPT-5.6 failed playing OpenFront across 5 trials. Using my harness, it was able to win all 5 times.**
 
-***Special thanks to [Ibrahim Ahmed](http://ibrahimahmed.ca/) ([X](https://x.com/zero_goliath)) for his incredible support throughout this project.***
-
-
-
 Harnesses enable LLMs to do more than produce text. They turn it into a system that can observe an environment, choose actions, use tools, and work toward a goal over time.
 
 In the real world, harnesses need to be reliable. An unreliable harness turns a model mistake (or even what the model thinks is a correct decision) into an incorrect action. The main danger is that the harness connects probabilistic reasoning to deterministic systems such as databases, payment APIs, production infrastructure, robots, and customer accounts.
@@ -25,6 +21,7 @@ In addition, I benchmarked GPT-5.6 Luna without that interface where it failed t
 
 <BENCHMARK CHART HERE>
 
+***Special thanks to [Ibrahim Ahmed](http://ibrahimahmed.ca/) ([X](https://x.com/zero_goliath)) for providing valuable feedback on this project.***
 
 ## OpenFront in 60 seconds
 
@@ -155,17 +152,17 @@ I saw this issue in early DeepSeek V4 Flash tests where I had not pinned a provi
 
 I therefore pin both the model and provider, disable provider fallbacks, explicitly set reasoning to `none`, and record which provider actually served every decision. Each request has a ten-second timeout and one retry. A run also has a $1 inference ceiling, and a limit of 20 game-minutes.
 
-The final evaluation shows what those controls looked like in practice. These are client-observed measurements pooled from the three runs for each model; cost is the mean total inference cost per run.
+The final evaluation shows what those controls looked like in practice. These are client-observed measurements pooled from the five runs for each model; cost is the mean total inference cost per run.
 
 | Model and pinned provider | Decisions | Median / p95 latency | Completion tokens per decision | Mean cost per run | Retries / fallbacks |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| GPT-5.6 Luna / OpenAI | 261 | 1.02 s / 1.49 s | 55.5 | $0.0315 | 0 / 0 |
-| GLM-5.2 / Baidu | 336 | 2.80 s / 3.37 s | 59.4 | $0.0762 | 2 / 0 |
-| DeepSeek V4 Flash / StreamLake | 343 | 2.89 s / 3.87 s | 50.6 | $0.0229 | 1 / 0 |
+| GPT-5.6 Luna / OpenAI | 501 | 1.06 s / 2.03 s | 54.6 | $0.0360 | 2 / 0 |
+| GLM-5.2 / Baidu | 531 | 2.75 s / 3.41 s | 58.8 | $0.0859 | 8 / 0 |
+| DeepSeek V4 Flash / StreamLake | 583 | 2.70 s / 3.99 s | 49.8 | $0.0227 | 13 / 11 |
 
-Across the nine runs, none of the 940 decisions had a timeout, transport failure, or JSON Schema violation. The three retries in the table came from a separate semantic rule that prevents proactive attacks against two opponents in one turn, and each model corrected the choice on its next attempt. This showcases the harness's reliability.
+Across the 15 runs, none of the 1,615 decisions had a timeout or JSON Schema violation. The validator rejected 11 conflicting action combinations, and each model corrected its choice on retry. StreamLake also returned 23 upstream rate-limit errors across 12 DeepSeek decisions: one recovered on retry, while 11 exhausted the retry and safely fell back to holds. No invalid command reached the game.
 
-With reasoning explicitly disabled, the final model-provider pairs averaged between 50.6 and 59.4 completion tokens per decision.
+With reasoning explicitly disabled, the final model-provider pairs averaged between 49.8 and 58.8 completion tokens per decision.
 
 
 #### Testing advertised schema enforcement
@@ -251,33 +248,33 @@ The wide confidence intervals are important: five trials per condition cannot es
 
 ### Performance inside the structured harness
 
-I also ran three harness evaluations each of DeepSeek V4 Flash, GLM-5.2, and GPT-5.6 Luna. Every run used the same Japan map, spawn point, three medium-difficulty opponent bots with the same seed, one decision every 100 ticks, and a 20-minute limit. Model reasoning was disabled for all the runs. I pinned the provider as well as the model, with StreamLake for DeepSeek, Baidu for GLM, and OpenAI for GPT, all through OpenRouter.
+I ran five harness evaluations each of DeepSeek V4 Flash, GLM-5.2, and GPT-5.6 Luna. Every run used the same Japan map, spawn point, three medium-difficulty opponent bots with the same seed, one decision every 100 ticks, and a 20-minute limit. Model reasoning was disabled for all the runs. I pinned the provider as well as the model, with StreamLake for DeepSeek, Baidu for GLM, and OpenAI for GPT, all through OpenRouter.
 
 | Model and provider | Wins | How the wins ended | Mean final territory | Mean decisions | Mean prompt / completion tokens | Median decision latency | Mean inference cost |
 | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: |
-| GPT-5.6 Luna / OpenAI | 3/3 | 3 at 80% | 81.1% | 87.0 | 229,773 / 4,829 | 1.02 s | $0.0315 |
-| GLM-5.2 / Baidu | 3/3 | 1 at 80%, 2 on timer | 68.9% | 112.0 | 277,792 / 6,653 | 2.80 s | $0.0762 |
-| DeepSeek V4 Flash / StreamLake | 2/3 | 2 timer wins, 1 loss | 29.9% | 114.3 | 289,736 / 5,785 | 2.89 s | $0.0229 |
+| GPT-5.6 Luna / OpenAI | 5/5 | 3 at 80%, 2 on timer | 76.2% | 100.2 | 264,842 / 5,470 | 1.06 s | $0.0360 |
+| GLM-5.2 / Baidu | 5/5 | 2 at 80%, 3 on timer | 69.0% | 106.2 | 261,251 / 6,245 | 2.75 s | $0.0859 |
+| DeepSeek V4 Flash / StreamLake | 2/5 | 2 timer wins, 3 losses | 33.3% | 116.6 | 289,194 / 5,812 | 2.70 s | $0.0227 |
 
-GPT produced the strongest and most consistent results in this small sample. It captured 80% of territory to win instantly in all three runs. GLM also won every run, but only one captured 80% of territory. The other two wins came from leading when the timer expired. DeepSeek's two wins were timer wins with 32.2% and 40.1% of the territory captured, while its remaining run ended in second place with 17.5%. It's important to distingush between these two types of wins, as the win rate hides a meaningful difference between conquering the map and surviving with a plurality of territory. If the game was longer, would the model's win still have occured?
+GPT and GLM produced the strongest and most consistent results in this small sample, each winning all five runs. GPT won three matches by crossing 80% territory and two by leading when the timer expired; GLM had two immediate victories and three timer victories. DeepSeek's two wins were timer wins with 32.2% and 40.1% of the territory captured. Its three losses ended in second place with 17.5%, 42.7%, and 34.0%. It is important to distinguish the two types of wins: win rate alone hides a meaningful difference between conquering the map and surviving with a plurality of territory.
 
 ![GPT-5.6 Luna territory controlled over time in run 5c3016b7](charts/gpt-5.6-territory-over-time.svg)
 
 The shape of the win is easier to see in the decision trace. In the representative run above, GPT expanded rapidly for the first three minutes, consolidated around 30% of the map, then converted a series of later attacks into an 82.4% victory at 13:25.
 
-![Three separate territory races between GPT-5.6 Luna and the built-in nations](charts/gpt-5.6-territory-races.svg)
+![Five separate territory races between GPT-5.6 Luna and the built-in nations](charts/gpt-5.6-territory-races.svg)
 
-Separating the three matches also shows that there was no single path to victory. GPT sometimes removed opponents early and sometimes let them survive deep into the match, but it ultimately established a territory lead and crossed the same 80% threshold in every run.
+Separating the five matches shows that there was no single path to victory. GPT sometimes removed opponents early and sometimes let them survive through the timer, but it established a winning territory lead in every run.
 
-The decision traces show different play styles behind those outcomes. Counting attack, boat, and counter actions together, GPT used a combat action in 228 of 522 action slots (43.7%), compared with 221 of 672 for GLM (32.9%) and 21 of 686 for DeepSeek (3.1%). DeepSeek selected a hold in 76.2% of its slots and made no combat move at all in one of its two wins.
+The decision traces show different play styles behind those outcomes. Counting attack, boat, and counter actions together, GPT used a combat action in 342 of 1,002 action slots (34.1%), compared with 289 of 1,062 for GLM (27.2%) and 34 of 1,166 for DeepSeek (2.9%). DeepSeek selected a hold in 76.8% of its slots and made no combat move at all in one of its two wins.
 
-Deepseek's passiveness was not accidental. In fact, it cleverly recognized that it did not need to conquer 80% of the map to win. If it was still alive and held the most territory when time expired, it would win. Once it established a lead, its recorded strategies repeatedly said that holding would preserve the lead while the other three bot nations fought one another. In the 40.1% win, it explicitly reasoned that holding preserved its troops "for timer victory." This turned inaction into a strategy where it would avoid the downside of further combat, protect a plurality of the map, and run out the clock. It worked in two of the three runs, however, in the last run it backfired when Hokkaido overtook it, rejected DeepSeek's alliance renewal, and attacked the weaker DeepSeek.
+DeepSeek's passiveness was not accidental. It recognized that it did not need to conquer 80% of the map to win: if it was still alive and held the most territory when time expired, it would win. Once it established a lead, its recorded strategies repeatedly said that holding would preserve the lead while the other three bot nations fought one another. In the 40.1% win, it explicitly reasoned that holding preserved its troops "for timer victory." This turned inaction into a strategy that avoided the downside of further combat, protected a plurality of the map, and ran out the clock. It worked in two of five runs; in the other three, Hokkaido finished ahead and DeepSeek placed second.
 
 ![Comparison of how GPT-5.6 Luna, GLM-5.2, and DeepSeek V4 Flash used their action slots](charts/model-action-mix.svg)
 
-The models showed different play styles. GPT attacked most often, GLM was less aggressive, and DeepSeek mostly held. Despite those differences, the harness kept execution safe. Every final action was legal and stayed within its troop budget. Three responses initially attempted conflicting attacks, but the validator rejected them and the models corrected themselves on retry. No invalid command reached the game.
+The models showed different play styles. GPT attacked most often, GLM was less aggressive, and DeepSeek mostly held. Despite those differences, the harness kept execution safe. Every final action was legal and stayed within its troop budget. Eleven responses initially selected conflicting action combinations, but the validator rejected them and the models corrected themselves on retry. No invalid command reached the game.
 
-These results apply only to this test setup and harness. Each model was tested three times under a single game setup, and the harness limited which actions were available. The models also used different providers, so the results—especially latency and cost—should not be treated as universal model rankings.
+These results apply only to this test setup and harness. Each model was tested five times under a single game setup, and the harness limited which actions were available. The models also used different providers, so the results—especially latency and cost—should not be treated as universal model rankings.
 
 
 ## What I would build next

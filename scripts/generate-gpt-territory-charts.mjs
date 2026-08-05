@@ -10,6 +10,8 @@ const runFiles = [
   "8463f549-e335-4114-b39f-a6c87755bd9f.json.gz",
   "5c3016b7-10bf-4583-af24-b27b8de4e378.json.gz",
   "cdf646fa-5edb-4cee-94a1-2ed7e8fc88af.json.gz",
+  "3aac9fc1-d8cd-41d1-987d-0d4cce4f804f.json.gz",
+  "b0462398-8031-4e4a-ba91-81e340d11c06.json.gz",
 ];
 
 const colors = {
@@ -170,18 +172,18 @@ function territoryOverTime(run) {
 
 function territoryRaceSmallMultiples(runs) {
   const width = 1200;
-  const height = 1140;
+  const height = 190 + runs.length * 316;
   const plotLeft = 112;
   const plotRight = 54;
   const plotWidth = width - plotLeft - plotRight;
   const panelTop = 190;
   const panelHeight = 238;
   const panelGap = 78;
-  const xMax = 18;
+  const xMax = 20.5;
   const yMax = 85;
   const xScale = (value) => plotLeft + (value / xMax) * plotWidth;
   const yTicks = [0, 20, 40, 60, 80];
-  const xTicks = [0, 5, 10, 15, 18];
+  const xTicks = [0, 5, 10, 15, 20];
 
   const legendEntries = [
     ["GPT-5.6 Luna", colors.gpt],
@@ -243,9 +245,9 @@ function territoryRaceSmallMultiples(runs) {
     height,
     title: "GPT-5.6 Luna territory races",
     description:
-      "Three separate panels chart GPT-5.6 Luna and the built-in nations' territory shares during each evaluated match.",
+      "Five separate panels chart GPT-5.6 Luna and the built-in nations' territory shares during each evaluated match.",
     body: `
-      <text class="title" x="${plotLeft}" y="55">Three separate races to 80%</text>
+      <text class="title" x="${plotLeft}" y="55">Five paths through the Japan eval</text>
       <text class="subtitle" x="${plotLeft}" y="87">Each panel shows one GPT-5.6 Luna match against the built-in nations</text>
       ${legend}
       ${panels}
@@ -278,6 +280,8 @@ function modelActionMix() {
       files: [
         "data/glm-5.2/4f42ae97-f1d9-4b43-ae38-01314ef3fb74.json.gz",
         "data/glm-5.2/4f6cf74d-68b3-4ea7-bd32-619636f116be.json.gz",
+        "data/glm-5.2/817d7009-8ce5-4f4d-bf34-a336fa86695c.json.gz",
+        "data/glm-5.2/90c57d50-3ee6-4a5d-984e-b5c279d5a9e6.json.gz",
         "data/glm-5.2/f7e8e361-047d-43ab-a53c-1055af01117c.json.gz",
       ],
     },
@@ -285,8 +289,10 @@ function modelActionMix() {
       label: "DeepSeek V4 Flash",
       files: [
         "data/deepseek-v4-flash/1bc4116a-e7ca-4765-9697-46e3ee5967e9.json.gz",
+        "data/deepseek-v4-flash/22c50f53-2626-4c51-b8c6-ec8180226886.json.gz",
         "data/deepseek-v4-flash/29c19e21-9bce-49c0-9196-c6be662d376e.json.gz",
         "data/deepseek-v4-flash/8d43865f-2dd0-4cd8-9576-64e6ecd48a2c.json.gz",
+        "data/deepseek-v4-flash/bdb2c0c4-2d54-4216-9555-f0238a85e5cc.json.gz",
       ],
     },
   ];
@@ -357,7 +363,7 @@ function modelActionMix() {
       "One hundred percent stacked bars compare combat, hold, expansion, and other actions selected by GPT-5.6 Luna, GLM-5.2, and DeepSeek V4 Flash.",
     body: `
       <text class="title" x="${barLeft}" y="58">Three models, three different play styles</text>
-      <text class="subtitle" x="${barLeft}" y="91">Share of accepted action slots across three runs per model</text>
+      <text class="subtitle" x="${barLeft}" y="91">Share of accepted action slots across five runs per model</text>
       ${legend}
       ${rows}
       <text class="axis" x="${width - barRight}" y="570" text-anchor="end">Combat includes attack, boat, and counter actions</text>`,
