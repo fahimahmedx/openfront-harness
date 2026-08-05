@@ -1,9 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  Player,
-  Team,
-} from "../OpenFrontIO/src/core/game/Game";
+import { Player, Team } from "../OpenFrontIO/src/core/game/Game";
 import {
   GameUpdateType,
   WinUpdate,
@@ -18,11 +15,7 @@ import {
 } from "../OpenFrontIO/src/core/Schemas";
 import { createPartialGameRecord } from "../OpenFrontIO/src/core/Util";
 import { NodeGameMapLoader } from "./NodeGameMapLoader";
-import {
-  createScenarioStartInfo,
-  modelPlayerName,
-  SCENARIO,
-} from "./Scenario";
+import { createScenarioStartInfo, modelPlayerName, SCENARIO } from "./Scenario";
 import {
   BaselinePlayerSnapshot,
   BaselineScoreSnapshot,
@@ -46,7 +39,8 @@ export async function reconstructVisualBaselineTurns(
   mapsDir = path.join(projectRoot, "OpenFrontIO/resources/maps"),
 ): Promise<Turn[]> {
   const lastDecision = decisions[decisions.length - 1];
-  if (!lastDecision) throw new Error("Cannot reconstruct an empty decision stream");
+  if (!lastDecision)
+    throw new Error("Cannot reconstruct an empty decision stream");
   const turnCount = lastDecision.tick + SCENARIO.decisionIntervalTicks;
   const turns: Turn[] = Array.from({ length: turnCount }, (_, turnNumber) => ({
     turnNumber,
@@ -66,7 +60,9 @@ export async function reconstructVisualBaselineTurns(
   });
   for (const decision of decisions) {
     if (decision.tick < 0 || decision.tick >= turns.length) {
-      throw new Error(`Visual baseline decision tick ${decision.tick} is invalid`);
+      throw new Error(
+        `Visual baseline decision tick ${decision.tick} is invalid`,
+      );
     }
     turns[decision.tick].intents.push(
       ...decision.acceptedIntents.map((intent) => ({
@@ -94,6 +90,7 @@ export async function continueVisualBaselineInCore(
   requestedModel: string,
   startedAt: Date,
   mapsDir = path.join(projectRoot, "OpenFrontIO/resources/maps"),
+  allowAliveAtDecisionCeiling = false,
 ): Promise<VisualBaselineCoreContinuation> {
   const capturedTurns = captured.map((turn) => TurnSchema.parse(turn));
   capturedTurns.forEach((turn, index) => {
@@ -148,9 +145,15 @@ export async function continueVisualBaselineInCore(
   for (const turn of capturedTurns) execute(turn);
 
   const handoffPlayer = game.playerByClientID(SCENARIO.clientID);
-  if (handoffPlayer?.isAlive() !== false) {
+  if (
+    handoffPlayer?.isAlive() !== false &&
+    !(
+      allowAliveAtDecisionCeiling &&
+      game.ticks() >= SCENARIO.maxDecisionCount * SCENARIO.decisionIntervalTicks
+    )
+  ) {
     throw new Error(
-      "Visual baseline core handoff was requested before the LLM player was eliminated",
+      "Visual baseline core handoff requires elimination or the final decision ceiling",
     );
   }
 

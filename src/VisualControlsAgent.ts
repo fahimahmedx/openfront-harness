@@ -3,8 +3,10 @@ import { z } from "zod";
 import {
   VISUAL_BASELINE,
   VISUAL_BASELINE_INTERFACE,
+  VISUAL_NAIVE_INTERFACE,
   VisualCommand,
   VisualCommandSchema,
+  type VisualBaselineInterface,
   VisualBaselineUsage,
 } from "./VisualBaselineTypes";
 
@@ -30,6 +32,34 @@ export const VISUAL_CONTROLS_PROMPT = [
 export const VISUAL_CONTROLS_PROMPT_SHA256 = createHash("sha256")
   .update(VISUAL_CONTROLS_PROMPT)
   .digest("hex");
+
+export const VISUAL_NAIVE_PROMPT = [
+  "You control the human player in OpenFront through the visible game screen.",
+  "Your goal is to win this four-player free-for-all on Japan.",
+  "You receive screenshots only. Never assume access to hidden state, DOM data, tile coordinates, or legal-action lists.",
+  "The evaluator has already fixed the spawn and stops simulated time while you interact. Do not try to alter simulation timing.",
+  `At most ${VISUAL_BASELINE.maxGameIntentsPerDecision} gameplay intents are accepted at each decision. UI navigation commands do not consume an intent until the client emits a game action.`,
+  "Choose exactly one primitive command: move, click, drag, scroll, keypress, wait, or done. Coordinates use the 1280x720 screenshot: x increases rightward and y downward.",
+  "Use done when no further interaction is useful at this decision. note is a concise public tactical annotation, not private reasoning.",
+].join("\n");
+
+export const VISUAL_NAIVE_PROMPT_SHA256 = createHash("sha256")
+  .update(VISUAL_NAIVE_PROMPT)
+  .digest("hex");
+
+export function visualInterfacePrompt(interfaceName: VisualBaselineInterface) {
+  return interfaceName === VISUAL_NAIVE_INTERFACE
+    ? VISUAL_NAIVE_PROMPT
+    : VISUAL_CONTROLS_PROMPT;
+}
+
+export function visualInterfacePromptSha256(
+  interfaceName: VisualBaselineInterface,
+) {
+  return interfaceName === VISUAL_NAIVE_INTERFACE
+    ? VISUAL_NAIVE_PROMPT_SHA256
+    : VISUAL_CONTROLS_PROMPT_SHA256;
+}
 
 const WireCommandSchema = z.object({
   command: z.enum(VISUAL_BASELINE.commandSet),
@@ -205,13 +235,16 @@ function firstJsonObject(content: string): string {
 }
 
 export class VisualControlsAgent {
-  readonly promptVersion = VISUAL_BASELINE_INTERFACE;
+  readonly promptVersion: VisualBaselineInterface;
 
   constructor(
     private readonly apiKey: string,
     readonly requestedModel: string,
     readonly requestedProvider?: string,
-  ) {}
+    readonly interfaceName: VisualBaselineInterface = VISUAL_BASELINE_INTERFACE,
+  ) {
+    this.promptVersion = interfaceName;
+  }
 
   async decide(
     screenshotPng: Buffer,
@@ -235,7 +268,7 @@ export class VisualControlsAgent {
           "Content-Type": "application/json",
           "HTTP-Referer":
             process.env.PUBLIC_BASE_URL ?? "http://localhost:3000",
-          "X-Title": "OpenFront visual-controls baseline",
+          "X-Title": `OpenFront ${this.interfaceName} baseline`,
         },
         body: JSON.stringify({
           model: this.requestedModel,
@@ -248,13 +281,16 @@ export class VisualControlsAgent {
             {
               role: "user",
               content: [
-                { type: "text", text: VISUAL_CONTROLS_PROMPT },
+                {
+                  type: "text",
+                  text: visualInterfacePrompt(this.interfaceName),
+                },
                 {
                   type: "text",
                   text:
                     recentPublicNotes.length === 0
                       ? "No earlier public notes are available."
-                      : `Recent public notes: ${JSON.stringify(recentPublicNotes.slice(-3))}`,
+                      : `Recent public notes: ${JSON.stringify(recentPublicNotes.slice(-VISUAL_BASELINE.recentPublicNoteCount))}`,
                 },
                 ...(validationError
                   ? [

@@ -16,10 +16,10 @@ import {
 } from "./Scenario";
 import { continueVisualBaselineInCore } from "./VisualBaselineCoreContinuation";
 import {
-  VISUAL_CONTROLS_PROMPT_SHA256,
   VisualAgentError,
   type VisualAgentResult,
   VisualControlsAgent,
+  visualInterfacePromptSha256,
 } from "./VisualControlsAgent";
 import {
   BaselinePlayerSnapshot,
@@ -27,6 +27,8 @@ import {
   BrowserBaselineStatus,
   VISUAL_BASELINE,
   VISUAL_BASELINE_INTERFACE,
+  type VisualBaselineInterface,
+  VisualBaselineInterfaceSchema,
   VisualBaselineArtifact,
   VisualBaselineArtifactSchema,
   VisualBaselineDecision,
@@ -218,7 +220,17 @@ async function atomicWrite(target: string, body: Uint8Array) {
   await fs.rename(temp, target);
 }
 
-export async function runVisualBaseline(): Promise<VisualBaselineArtifact> {
+export function selectedVisualBaselineInterface(
+  value = process.env.BASELINE_INTERFACE,
+): VisualBaselineInterface {
+  return VisualBaselineInterfaceSchema.parse(
+    value ?? VISUAL_BASELINE_INTERFACE,
+  );
+}
+
+export async function runVisualBaseline(
+  interfaceName = selectedVisualBaselineInterface(),
+): Promise<VisualBaselineArtifact> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error("OPENROUTER_API_KEY is required");
   const requestedModel =
@@ -237,6 +249,7 @@ export async function runVisualBaseline(): Promise<VisualBaselineArtifact> {
     apiKey,
     requestedModel,
     requestedProvider,
+    interfaceName,
   );
   const usage: VisualBaselineUsage = {
     promptTokens: 0,
@@ -318,10 +331,7 @@ export async function runVisualBaseline(): Promise<VisualBaselineArtifact> {
           gatedAt: null,
           nextGateTick: Number.MAX_SAFE_INTEGER,
           latestSnapshot: continuation.snapshot,
-          winnerJson: JSON.stringify(
-            { winner: continuation.winner },
-            replacer,
-          ),
+          winnerJson: JSON.stringify({ winner: continuation.winner }, replacer),
           replayJson: JSON.stringify(continuation.replay, replacer),
           finished: true,
         };
@@ -391,6 +401,26 @@ export async function runVisualBaseline(): Promise<VisualBaselineArtifact> {
       await page.evaluate(() => window.openfrontVisualBaseline?.release());
       status = await waitForGateOrFinish(page);
     }
+    if (!status.finished && decisions.length === SCENARIO.maxDecisionCount) {
+      const continuation = await continueVisualBaselineInCore(
+        await capturedTurns(page),
+        requestedModel,
+        startedAt,
+        undefined,
+        true,
+      );
+      status = {
+        ...status,
+        gatedAt: null,
+        nextGateTick: Number.MAX_SAFE_INTEGER,
+        latestSnapshot: continuation.snapshot,
+        winnerJson: JSON.stringify({ winner: continuation.winner }, replacer),
+        replayJson: JSON.stringify(continuation.replay, replacer),
+        finished: true,
+      };
+      finalStatus = status;
+      completedByCoreContinuation = true;
+    }
     if (!status.finished) {
       throw new Error(
         "Visual baseline reached the maximum decision count without a winner",
@@ -444,8 +474,8 @@ export async function runVisualBaseline(): Promise<VisualBaselineArtifact> {
   }
   const scenario = publicScenario(requestedModel);
   const artifact: VisualBaselineArtifact = {
-    schemaVersion: 1,
-    interface: VISUAL_BASELINE_INTERFACE,
+    schemaVersion: 2,
+    interface: interfaceName,
     runId,
     status: error ? "failed" : "completed",
     startedAt: startedAt.toISOString(),
@@ -466,7 +496,7 @@ export async function runVisualBaseline(): Promise<VisualBaselineArtifact> {
       resolved: resolvedModel,
       provider: resolvedProvider,
       reasoningEffort: "none",
-      promptVersion: VISUAL_BASELINE_INTERFACE,
+      promptVersion: interfaceName,
     },
     protocol: {
       viewport: VISUAL_BASELINE.viewport,
@@ -475,7 +505,8 @@ export async function runVisualBaseline(): Promise<VisualBaselineArtifact> {
         VISUAL_BASELINE.maxPrimitiveCommandsPerDecision,
       maxGameIntentsPerDecision: VISUAL_BASELINE.maxGameIntentsPerDecision,
       minScreenshotBytes: VISUAL_BASELINE.minScreenshotBytes,
-      controlsPromptSha256: VISUAL_CONTROLS_PROMPT_SHA256,
+      interfacePromptSha256: visualInterfacePromptSha256(interfaceName),
+      recentPublicNoteCount: VISUAL_BASELINE.recentPublicNoteCount,
     },
     decisions,
     usage,
@@ -505,7 +536,7 @@ export async function runVisualBaseline(): Promise<VisualBaselineArtifact> {
   const body = await gzipAsync(JSON.stringify(parsed, replacer));
   await atomicWrite(path.join(runDir, "artifact.json.gz"), body);
   console.log(
-    `${parsed.status}: ${runId} | winner=${JSON.stringify(parsed.outcome.winner)} | placement=${parsed.outcome.finalPlacement} | cost=$${parsed.usage.costUsd.toFixed(6)}`,
+    `${parsed.status}: ${runId} | interface=${parsed.interface} | winner=${JSON.stringify(parsed.outcome.winner)} | placement=${parsed.outcome.finalPlacement} | cost=$${parsed.usage.costUsd.toFixed(6)}`,
   );
   return parsed;
 }

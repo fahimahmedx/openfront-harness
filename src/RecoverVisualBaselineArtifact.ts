@@ -35,9 +35,15 @@ async function recover(runId: string): Promise<VisualBaselineArtifact> {
   const source = VisualBaselineArtifactSchema.parse(
     JSON.parse((await gunzipAsync(await fs.readFile(artifactPath))).toString()),
   );
-  if (source.status !== "failed" || !source.error?.includes("Timeout 300000ms")) {
+  const reachedDecisionCeiling = source.error?.includes(
+    "maximum decision count without a winner",
+  );
+  if (
+    source.status !== "failed" ||
+    (!source.error?.includes("Timeout 300000ms") && !reachedDecisionCeiling)
+  ) {
     throw new Error(
-      "Recovery only accepts a post-elimination five-minute timeout artifact",
+      "Recovery only accepts a post-elimination timeout or final-decision artifact",
     );
   }
   const turns = await reconstructVisualBaselineTurns(
@@ -48,6 +54,8 @@ async function recover(runId: string): Promise<VisualBaselineArtifact> {
     turns,
     source.model.requested,
     new Date(source.startedAt),
+    undefined,
+    reachedDecisionCeiling,
   );
   const self = continuation.snapshot.players.find(
     (player) => player.clientID === SCENARIO.clientID,

@@ -47,15 +47,17 @@ npm run verify:sample  # replay recorded actions and verify tick/hash/outcome
 npm run build          # type-check and production Vite build
 npm run sample         # spend live API credits to create a new sample
 npm run refresh:sample # rebuild sample from its recorded trace, no API call
-npm run baseline:run   # run the screenshot-and-controls baseline (server required)
+npm run baseline:run:controls # run the screenshot baseline with the public manual
+npm run baseline:run:naive    # run the screenshot baseline without game instructions
 ```
 
 `npm run sample` uses the same hard $1 run cap as the public app. `verify:sample` is the stronger determinism check: it feeds the saved decisions back through OpenFront and requires the final winner, tick, and state hash to match.
 
-The raw-UI comparison protocol and run instructions are documented in
-[baseline.md](baseline.md). It keeps deterministic setup and scoring outside the
-model boundary while limiting the model itself to stock-renderer screenshots and
-primitive controls.
+The raw-UI comparison protocols and run instructions are documented in
+[baseline.md](baseline.md). They keep deterministic setup and scoring outside
+the model boundary while limiting the model itself to stock-renderer screenshots
+and primitive controls. `npm run baseline:run` remains an alias for the original
+`visual-controls-v1` condition.
 
 ## Fixed benchmark preset
 

@@ -316,6 +316,35 @@ The new lifecycle trace recorded 232 completed and eight destroyed action slots,
 
 **Cons:** It measures the full interface bundle rather than isolating normalized observations; image-capable models and text-only models cannot share the division; primitive UI operation often needs more model calls and tokens than semantic action selection; fixed viewport and controls documentation are benchmark-owned choices; hosted multimodal behavior remains nondeterministic; score-only instrumentation must be carefully kept out of requests.
 
+## 34. Naive visual division as a manual ablation
+
+**Decision:** Add `visual-naive-v1` beside `visual-controls-v1`. Both divisions
+use the identical stock renderer, primitive command schema, three-note memory,
+two-intent budget, fixed scenario, evaluator lifecycle, validation policy, and
+scoring. At elimination or the final decision ceiling, deterministic core
+continuation collects the winner without another model call. The naive prompt retains only the objective and generic interaction
+contract; it removes the territory and timer rules, attack behavior, menus,
+attack-ratio guidance, camera controls, build/diplomacy mechanics, and
+keybindings. Select the division explicitly with `BASELINE_INTERFACE`, keep the
+existing controls condition as the default, and record the interface plus exact
+prompt hash in schema-version-2 visual artifacts. Existing schema-version-1
+controls artifacts remain readable.
+
+**Pros:** Separates the benefit of a public game manual from the benefit of the
+structured harness; supports an end-to-end comparison against a model dropped
+into the visible game with only a computer-use contract; changes one intended
+independent variable between visual conditions; preserves model-authored memory
+so the naive condition is not accidentally a memoryless policy; makes mixed run
+directories auditable by interface and prompt hash.
+
+**Cons:** A pretrained model may already know OpenFront, so the condition cannot
+prove that behavior was learned during the run; the required primitive-command
+contract is still a thin harness; three notes are a benchmark-owned memory
+choice; models may spend scarce commands exploring controls; comparing
+`agent-v12` directly with the naive division measures the full instruction and
+interface bundle rather than structured observations alone; adding a second
+visual condition increases the run budget needed for useful intervals.
+
 ## Known benchmark limitations
 
 - A fixed engine seed does not make a hosted model deterministic. Sampling, model weights, and provider routing can change generated decisions.

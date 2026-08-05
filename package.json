@@ -13,6 +13,8 @@
     "verify:sample": "tsx --tsconfig OpenFrontIO/tsconfig.json src/VerifySample.ts",
     "refresh:sample": "cross-env REFRESH_SAMPLE=true tsx --tsconfig OpenFrontIO/tsconfig.json src/VerifySample.ts",
     "baseline:run": "tsx --tsconfig OpenFrontIO/tsconfig.json src/VisualBaselineRunner.ts",
+    "baseline:run:controls": "cross-env BASELINE_INTERFACE=visual-controls-v1 tsx --tsconfig OpenFrontIO/tsconfig.json src/VisualBaselineRunner.ts",
+    "baseline:run:naive": "cross-env BASELINE_INTERFACE=visual-naive-v1 tsx --tsconfig OpenFrontIO/tsconfig.json src/VisualBaselineRunner.ts",
     "format": "prettier --ignore-unknown --write ."
   },
   "dependencies": {

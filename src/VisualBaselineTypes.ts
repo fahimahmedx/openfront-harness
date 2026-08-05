@@ -1,6 +1,14 @@
 import { z } from "zod";
 
 export const VISUAL_BASELINE_INTERFACE = "visual-controls-v1" as const;
+export const VISUAL_NAIVE_INTERFACE = "visual-naive-v1" as const;
+export const VisualBaselineInterfaceSchema = z.enum([
+  VISUAL_BASELINE_INTERFACE,
+  VISUAL_NAIVE_INTERFACE,
+]);
+export type VisualBaselineInterface = z.infer<
+  typeof VisualBaselineInterfaceSchema
+>;
 
 export const VISUAL_BASELINE = {
   viewport: { width: 1280, height: 720 },
@@ -9,6 +17,7 @@ export const VISUAL_BASELINE = {
   minScreenshotBytes: 20_000,
   maxPrimitiveCommandsPerDecision: 8,
   maxGameIntentsPerDecision: 2,
+  recentPublicNoteCount: 3,
   maxWaitMs: 2_000,
   commandSet: ["move", "click", "drag", "scroll", "keypress", "wait", "done"],
 } as const;
@@ -147,9 +156,7 @@ export type VisualBaselineDecision = z.infer<
   typeof VisualBaselineDecisionSchema
 >;
 
-export const VisualBaselineArtifactSchema = z.object({
-  schemaVersion: z.literal(1),
-  interface: z.literal(VISUAL_BASELINE_INTERFACE),
+const VisualBaselineArtifactCommonShape = {
   runId: z.string().uuid(),
   status: z.enum(["completed", "failed"]),
   startedAt: z.string().datetime(),
@@ -165,21 +172,6 @@ export const VisualBaselineArtifactSchema = z.object({
     maxSimulatedMinutes: z.number(),
     openfront: z.object({ version: z.string(), commit: z.string() }),
   }),
-  model: z.object({
-    requested: z.string(),
-    resolved: z.string(),
-    provider: z.string().nullable(),
-    reasoningEffort: z.literal("none"),
-    promptVersion: z.literal(VISUAL_BASELINE_INTERFACE),
-  }),
-  protocol: z.object({
-    viewport: z.object({ width: z.number(), height: z.number() }),
-    firstDecisionTick: z.number(),
-    maxPrimitiveCommandsPerDecision: z.number(),
-    maxGameIntentsPerDecision: z.number(),
-    minScreenshotBytes: z.number(),
-    controlsPromptSha256: z.string().length(64),
-  }),
   decisions: z.array(VisualBaselineDecisionSchema),
   usage: VisualBaselineUsageSchema,
   outcome: z.object({
@@ -193,7 +185,65 @@ export const VisualBaselineArtifactSchema = z.object({
   }),
   replay: z.unknown().nullable(),
   error: z.string().optional(),
+} as const;
+
+const VisualBaselineProtocolShape = {
+  viewport: z.object({ width: z.number(), height: z.number() }),
+  firstDecisionTick: z.number(),
+  maxPrimitiveCommandsPerDecision: z.number(),
+  maxGameIntentsPerDecision: z.number(),
+  minScreenshotBytes: z.number(),
+} as const;
+
+const VisualBaselineArtifactV1Schema = z.object({
+  schemaVersion: z.literal(1),
+  ...VisualBaselineArtifactCommonShape,
+  interface: z.literal(VISUAL_BASELINE_INTERFACE),
+  model: z.object({
+    requested: z.string(),
+    resolved: z.string(),
+    provider: z.string().nullable(),
+    reasoningEffort: z.literal("none"),
+    promptVersion: z.literal(VISUAL_BASELINE_INTERFACE),
+  }),
+  protocol: z.object({
+    ...VisualBaselineProtocolShape,
+    controlsPromptSha256: z.string().length(64),
+  }),
 });
+
+const VisualBaselineArtifactV2Schema = z
+  .object({
+    schemaVersion: z.literal(2),
+    ...VisualBaselineArtifactCommonShape,
+    interface: VisualBaselineInterfaceSchema,
+    model: z.object({
+      requested: z.string(),
+      resolved: z.string(),
+      provider: z.string().nullable(),
+      reasoningEffort: z.literal("none"),
+      promptVersion: VisualBaselineInterfaceSchema,
+    }),
+    protocol: z.object({
+      ...VisualBaselineProtocolShape,
+      interfacePromptSha256: z.string().length(64),
+      recentPublicNoteCount: z.literal(VISUAL_BASELINE.recentPublicNoteCount),
+    }),
+  })
+  .superRefine((artifact, context) => {
+    if (artifact.model.promptVersion !== artifact.interface) {
+      context.addIssue({
+        code: "custom",
+        path: ["model", "promptVersion"],
+        message: "promptVersion must match the visual interface",
+      });
+    }
+  });
+
+export const VisualBaselineArtifactSchema = z.union([
+  VisualBaselineArtifactV1Schema,
+  VisualBaselineArtifactV2Schema,
+]);
 
 export type VisualBaselineArtifact = z.infer<
   typeof VisualBaselineArtifactSchema
