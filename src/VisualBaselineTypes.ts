@@ -202,7 +202,6 @@ export type VisualBaselineDecision = z.infer<
 
 const VisualBaselineArtifactCommonShape = {
   runId: z.string().uuid(),
-  status: z.enum(["completed", "failed"]),
   startedAt: z.string().datetime(),
   completedAt: z.string().datetime(),
   scenario: z.object({
@@ -228,8 +227,21 @@ const VisualBaselineArtifactCommonShape = {
     finalPlayers: z.array(z.custom<BaselinePlayerSnapshot>()),
   }),
   replay: z.unknown().nullable(),
-  error: z.string().optional(),
 } as const;
+
+export const VisualBaselineTerminationSchema = z.object({
+  reason: z.enum([
+    "wall-clock-limit",
+    "model-cost-limit",
+    "client-progress-timeout",
+    "model-command-invalid",
+  ]),
+  classification: z.literal("model-failure"),
+  detail: z.string(),
+});
+export type VisualBaselineTermination = z.infer<
+  typeof VisualBaselineTerminationSchema
+>;
 
 const VisualBaselineProtocolShape = {
   viewport: z.object({ width: z.number(), height: z.number() }),
@@ -242,6 +254,8 @@ const VisualBaselineProtocolShape = {
 const VisualBaselineArtifactV1Schema = z.object({
   schemaVersion: z.literal(1),
   ...VisualBaselineArtifactCommonShape,
+  status: z.enum(["completed", "failed"]),
+  error: z.string().optional(),
   interface: z.literal(VISUAL_BASELINE_INTERFACE),
   model: z.object({
     requested: z.string(),
@@ -260,6 +274,8 @@ const VisualBaselineArtifactV2Schema = z
   .object({
     schemaVersion: z.literal(2),
     ...VisualBaselineArtifactCommonShape,
+    status: z.enum(["completed", "failed"]),
+    error: z.string().optional(),
     interface: VisualBaselineInterfaceSchema,
     model: z.object({
       requested: z.string(),
@@ -284,9 +300,79 @@ const VisualBaselineArtifactV2Schema = z
     }
   });
 
+const VisualBaselineArtifactV3Schema = z
+  .object({
+    schemaVersion: z.literal(3),
+    ...VisualBaselineArtifactCommonShape,
+    status: z.enum(["completed", "terminated", "failed"]),
+    termination: VisualBaselineTerminationSchema.optional(),
+    error: z.string().optional(),
+    interface: VisualBaselineInterfaceSchema,
+    model: z.object({
+      requested: z.string(),
+      resolved: z.string(),
+      provider: z.string().nullable(),
+      reasoningEffort: z.literal("none"),
+      promptVersion: VisualBaselineInterfaceSchema,
+    }),
+    protocol: z.object({
+      ...VisualBaselineProtocolShape,
+      interfacePromptSha256: z.string().length(64),
+      recentPublicNoteCount: z.literal(VISUAL_BASELINE.recentPublicNoteCount),
+    }),
+    outcome: VisualBaselineArtifactCommonShape.outcome.extend({
+      isTerminal: z.boolean(),
+    }),
+  })
+  .superRefine((artifact, context) => {
+    if (artifact.model.promptVersion !== artifact.interface) {
+      context.addIssue({
+        code: "custom",
+        path: ["model", "promptVersion"],
+        message: "promptVersion must match the visual interface",
+      });
+    }
+    if (artifact.status === "terminated" && !artifact.termination) {
+      context.addIssue({
+        code: "custom",
+        path: ["termination"],
+        message: "terminated artifacts require termination metadata",
+      });
+    }
+    if (artifact.status !== "terminated" && artifact.termination) {
+      context.addIssue({
+        code: "custom",
+        path: ["termination"],
+        message: "only terminated artifacts may include termination metadata",
+      });
+    }
+    if (artifact.status === "failed" && !artifact.error) {
+      context.addIssue({
+        code: "custom",
+        path: ["error"],
+        message: "failed artifacts require an evaluator error",
+      });
+    }
+    if (artifact.status !== "failed" && artifact.error) {
+      context.addIssue({
+        code: "custom",
+        path: ["error"],
+        message: "only failed artifacts may include an evaluator error",
+      });
+    }
+    if (artifact.outcome.isTerminal !== (artifact.status === "completed")) {
+      context.addIssue({
+        code: "custom",
+        path: ["outcome", "isTerminal"],
+        message: "only completed artifacts have terminal outcomes",
+      });
+    }
+  });
+
 export const VisualBaselineArtifactSchema = z.union([
   VisualBaselineArtifactV1Schema,
   VisualBaselineArtifactV2Schema,
+  VisualBaselineArtifactV3Schema,
 ]);
 
 export type VisualBaselineArtifact = z.infer<

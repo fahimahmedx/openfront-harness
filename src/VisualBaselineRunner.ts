@@ -32,6 +32,7 @@ import {
   VisualBaselineArtifact,
   VisualBaselineArtifactSchema,
   VisualBaselineDecision,
+  type VisualBaselineTermination,
   VisualBaselineUsage,
   VisualCommand,
 } from "./VisualBaselineTypes";
@@ -228,6 +229,31 @@ export function selectedVisualBaselineInterface(
   );
 }
 
+export function classifyVisualModelTermination(
+  cause: unknown,
+  modelPausedClient: boolean,
+): VisualBaselineTermination | null {
+  const detail = cause instanceof Error ? cause.message : String(cause);
+  let reason: VisualBaselineTermination["reason"] | null = null;
+  if (detail === "Visual baseline exceeded the wall-clock safety limit") {
+    reason = "wall-clock-limit";
+  } else if (detail === "Visual baseline reached the $1 model-cost limit") {
+    reason = "model-cost-limit";
+  } else if (
+    modelPausedClient &&
+    detail.includes("page.waitForFunction: Timeout 60000ms exceeded")
+  ) {
+    reason = "client-progress-timeout";
+  } else if (
+    cause instanceof VisualAgentError ||
+    detail.includes("Visual keypress failed its execution retry") ||
+    detail.startsWith("keyboard.press:")
+  ) {
+    reason = "model-command-invalid";
+  }
+  return reason ? { reason, classification: "model-failure", detail } : null;
+}
+
 export async function runVisualBaseline(
   interfaceName = selectedVisualBaselineInterface(),
 ): Promise<VisualBaselineArtifact> {
@@ -264,6 +290,7 @@ export async function runVisualBaseline(
   let finalStatus: BrowserBaselineStatus | null = null;
   let completedByCoreContinuation = false;
   let error: string | undefined;
+  let termination: VisualBaselineTermination | undefined;
   const browser = await chromium.launch(launchOptions());
   try {
     const baseUrl = (
@@ -469,17 +496,34 @@ export async function runVisualBaseline(
     if (finalStatus?.error) throw new Error(finalStatus.error);
     await context.close();
   } catch (cause) {
-    error = cause instanceof Error ? cause.message : String(cause);
-    console.error(error);
+    const lastIntents = decisions[decisions.length - 1]?.acceptedIntents ?? [];
+    const modelPausedClient = lastIntents.some(
+      (intent) =>
+        typeof intent === "object" &&
+        intent !== null &&
+        "type" in intent &&
+        intent.type === "toggle_pause" &&
+        "paused" in intent &&
+        intent.paused === true,
+    );
+    termination =
+      classifyVisualModelTermination(cause, modelPausedClient) ?? undefined;
+    error = termination
+      ? undefined
+      : cause instanceof Error
+        ? cause.message
+        : String(cause);
+    console.error(termination?.detail ?? error);
   } finally {
     await browser.close();
   }
 
-  const finalSnapshot = finalStatus?.latestSnapshot ?? {
-    tick: decisions[decisions.length - 1]?.tick ?? 0,
-    landTiles: 1,
-    players: [],
-  };
+  const finalSnapshot = finalStatus?.latestSnapshot ??
+    decisions[decisions.length - 1]?.scoreOnlySnapshot ?? {
+      tick: 0,
+      landTiles: 1,
+      players: [],
+    };
   const self = finalSnapshot.players.find(
     (player) => player.clientID === SCENARIO.clientID,
   );
@@ -504,12 +548,13 @@ export async function runVisualBaseline(
       error ??= `Could not parse visual baseline replay: ${cause instanceof Error ? cause.message : String(cause)}`;
     }
   }
+  if (error) termination = undefined;
   const scenario = publicScenario(requestedModel);
   const artifact: VisualBaselineArtifact = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     interface: interfaceName,
     runId,
-    status: error ? "failed" : "completed",
+    status: error ? "failed" : termination ? "terminated" : "completed",
     startedAt: startedAt.toISOString(),
     completedAt: new Date().toISOString(),
     scenario: {
@@ -560,8 +605,10 @@ export async function runVisualBaseline(
         SCENARIO.clientID,
       ),
       finalPlayers: finalSnapshot.players,
+      isTerminal: !error && !termination,
     },
     replay,
+    ...(termination ? { termination } : {}),
     ...(error ? { error } : {}),
   };
   const parsed = VisualBaselineArtifactSchema.parse(artifact);
@@ -575,6 +622,6 @@ export async function runVisualBaseline(
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   void runVisualBaseline().then((artifact) => {
-    process.exitCode = artifact.status === "completed" ? 0 : 1;
+    process.exitCode = artifact.status === "failed" ? 1 : 0;
   });
 }

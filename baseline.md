@@ -56,9 +56,23 @@ Each run is stored under `data/baseline/<run-id>/`. `artifact.json.gz` contains
 the selected interface and prompt version, exact interface-prompt SHA-256,
 protocol, model/provider identity, decisions, accepted native intents, usage,
 outcome, score-only state, and stock single-player replay. Schema-version-2
-artifacts support both divisions; existing schema-version-1 controls artifacts
-remain readable. The `screenshots/` directory contains the exact PNG supplied
-for every model call, and every PNG has a SHA-256 digest in the artifact.
+artifacts introduced both divisions. New runs use schema version 3, while
+schema-version-1 and schema-version-2 artifacts remain readable. The
+`screenshots/` directory contains the exact PNG supplied for every model call,
+and every PNG has a SHA-256 digest in the artifact.
+
+Schema-version-3 artifacts distinguish evaluator execution from model outcome:
+
+- `completed` means OpenFront declared a winner and the artifact contains a
+  terminal outcome;
+- `terminated` means the evaluator recorded the attempt successfully, but the
+  model exhausted a fixed budget, stalled the client, or exhausted command
+  validation. Its `termination.classification` is `model-failure`, its reason is
+  explicit, and `outcome.isTerminal` is false;
+- `failed` is reserved for evaluator or infrastructure errors.
+
+For a terminated attempt, the outcome fields describe the last recorded score
+observation rather than a declared game result, and no replay is available.
 
 ## Fixed protocol
 
@@ -192,8 +206,9 @@ Win rate is the primary metric. Also report placement, final territory, the
 time-normalized territory area under the curve, survival/elimination tick,
 terminal tick, accepted intents, primitive commands, model calls, tokens, cost,
 and latency. Misclicks, no-op decisions, malformed commands after the one retry,
-and cost-limit failures remain part of the baseline result. Only predetermined
-infrastructure failures should be rerun.
+model-caused stalls, and fixed-budget terminations remain model failures within
+the baseline result; they are not failed evaluator runs. Only predetermined
+evaluator or infrastructure failures should be rerun.
 
 Use at least 30 completed attempts per condition for a directional comparison
 and publish a 95% Wilson interval for win rate. `agent-v12` supplies a filtered

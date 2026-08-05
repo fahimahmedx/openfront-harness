@@ -6,6 +6,7 @@ import {
   visualInterfacePrompt,
 } from "../src/VisualControlsAgent";
 import {
+  classifyVisualModelTermination,
   selectedVisualBaselineInterface,
   territoryAreaUnderCurve,
 } from "../src/VisualBaselineRunner";
@@ -209,6 +210,110 @@ describe("visual-controls baseline", () => {
         },
       }),
     ).toThrow("promptVersion must match");
+  });
+
+  it("records model-attributed cutoffs as terminated, not failed", () => {
+    const artifact = VisualBaselineArtifactSchema.parse({
+      schemaVersion: 3,
+      interface: VISUAL_NAIVE_INTERFACE,
+      ...artifactCommon(),
+      status: "terminated",
+      termination: {
+        reason: "wall-clock-limit",
+        classification: "model-failure",
+        detail: "Visual baseline exceeded the wall-clock safety limit",
+      },
+      model: {
+        requested: "model",
+        resolved: "model",
+        provider: "provider",
+        reasoningEffort: "none",
+        promptVersion: VISUAL_NAIVE_INTERFACE,
+      },
+      protocol: {
+        viewport: { width: 1280, height: 720 },
+        firstDecisionTick: 3,
+        maxPrimitiveCommandsPerDecision: 8,
+        maxGameIntentsPerDecision: 2,
+        minScreenshotBytes: 20_000,
+        interfacePromptSha256: "c".repeat(64),
+        recentPublicNoteCount: 3,
+      },
+      outcome: { ...artifactCommon().outcome, isTerminal: false },
+    });
+
+    expect(artifact.schemaVersion).toBe(3);
+    if (artifact.schemaVersion !== 3) throw new Error("Expected schema v3");
+    expect(artifact.status).toBe("terminated");
+    expect(artifact.termination).toMatchObject({
+      reason: "wall-clock-limit",
+      classification: "model-failure",
+    });
+    expect(artifact.outcome.isTerminal).toBe(false);
+  });
+
+  it("reserves failed v3 artifacts for evaluator errors", () => {
+    const common = {
+      schemaVersion: 3,
+      interface: VISUAL_BASELINE_INTERFACE,
+      ...artifactCommon(),
+      model: {
+        requested: "model",
+        resolved: "model",
+        provider: "provider",
+        reasoningEffort: "none",
+        promptVersion: VISUAL_BASELINE_INTERFACE,
+      },
+      protocol: {
+        viewport: { width: 1280, height: 720 },
+        firstDecisionTick: 3,
+        maxPrimitiveCommandsPerDecision: 8,
+        maxGameIntentsPerDecision: 2,
+        minScreenshotBytes: 20_000,
+        interfacePromptSha256: "d".repeat(64),
+        recentPublicNoteCount: 3,
+      },
+      outcome: { ...artifactCommon().outcome, isTerminal: false },
+    };
+    expect(() =>
+      VisualBaselineArtifactSchema.parse({
+        ...common,
+        status: "terminated",
+      }),
+    ).toThrow("terminated artifacts require termination metadata");
+    expect(() =>
+      VisualBaselineArtifactSchema.parse({
+        ...common,
+        status: "failed",
+      }),
+    ).toThrow("failed artifacts require an evaluator error");
+  });
+
+  it("classifies fixed-budget and model-caused stalls as model failures", () => {
+    expect(
+      classifyVisualModelTermination(
+        new Error("Visual baseline exceeded the wall-clock safety limit"),
+        true,
+      ),
+    ).toMatchObject({
+      reason: "wall-clock-limit",
+      classification: "model-failure",
+    });
+    expect(
+      classifyVisualModelTermination(
+        new Error("page.waitForFunction: Timeout 60000ms exceeded."),
+        true,
+      ),
+    ).toMatchObject({
+      reason: "client-progress-timeout",
+      classification: "model-failure",
+    });
+    expect(
+      classifyVisualModelTermination(
+        new Error("page.waitForFunction: Timeout 60000ms exceeded."),
+        false,
+      ),
+    ).toBeNull();
   });
 
   it("computes time-normalized territory area under the curve", () => {

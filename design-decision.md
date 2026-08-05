@@ -369,6 +369,25 @@ response has no remaining retry; historical `visual-controls-v1` artifacts that
 failed on lowercase `escape` remain evidence of the earlier implementation and
 must not be silently reclassified.
 
+## 36. Separate model termination from evaluator failure
+
+**Decision:** Visual artifact schema version 3 gives run lifecycle and failure
+attribution separate fields. A successfully recorded attempt that reaches the
+wall-clock or model-cost ceiling, stalls the client through model interaction,
+or exhausts command validation has `status: "terminated"` and
+`termination.classification: "model-failure"`. `status: "failed"` is reserved
+for evaluator and infrastructure errors. Terminated outcomes are explicitly
+nonterminal and report the last recorded score observation; schema versions 1
+and 2 remain readable.
+
+**Pros:** A model failure no longer implies that the evaluator failed to run;
+attempt counts remain honest; fixed-budget losses stay in the evaluated sample;
+and infrastructure errors remain separately eligible for rerun.
+
+**Cons:** Consumers must understand three lifecycle states and avoid treating a
+terminated observation as a terminal placement; older schema-version-2
+artifacts need an explicit migration before they carry the new attribution.
+
 ## Known benchmark limitations
 
 - A fixed engine seed does not make a hosted model deterministic. Sampling, model weights, and provider routing can change generated decisions.
