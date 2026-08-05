@@ -211,3 +211,148 @@ export function adaptLeaderboardCurrentTroops(code: string): string {
     "current-troops leaderboard rendered value",
   );
 }
+
+export function adaptVisualBaselineLocalServer(code: string): string {
+  let adapted = replaceExactlyOnce(
+    code,
+    `      const isSeeking = this.replaySeekTarget !== null;
+      const turnIntervalMs =`,
+    `      const visualBaseline = window.openfrontVisualBaseline;
+      if (visualBaseline?.active && visualBaseline.shouldGate(this.turns.length)) {
+        return;
+      }
+
+      const isSeeking = this.replaySeekTarget !== null;
+      const turnIntervalMs =`,
+    "visual baseline LocalServer gate",
+  );
+  adapted = replaceExactlyOnce(
+    adapted,
+    `      const turnIntervalMs =
+        isSeeking
+          ? 0
+          : ClientEnv.turnIntervalMs() * this.replaySpeedMultiplier;`,
+    `      const turnIntervalMs =
+        isSeeking || visualBaseline?.active
+          ? 0
+          : ClientEnv.turnIntervalMs() * this.replaySpeedMultiplier;`,
+    "visual baseline LocalServer accelerated interval",
+  );
+  adapted = replaceExactlyOnce(
+    adapted,
+    `      const allowReplayBacklog =
+        (isSeeking ||
+          this.replaySpeedMultiplier === ReplaySpeedMultiplier.fastest) &&
+        this.lobbyConfig.gameRecord !== undefined;`,
+    `      const allowReplayBacklog =
+        visualBaseline?.isFastForwarding() ||
+        ((isSeeking ||
+          this.replaySpeedMultiplier === ReplaySpeedMultiplier.fastest) &&
+          this.lobbyConfig.gameRecord !== undefined);`,
+    "visual baseline LocalServer backlog",
+  );
+  adapted = replaceExactlyOnce(
+    adapted,
+    `    this.turns.push(pastTurn);
+    this.intents = [];`,
+    `    this.turns.push(pastTurn);
+    window.openfrontVisualBaseline?.onTurn(pastTurn);
+    this.intents = [];`,
+    "visual baseline LocalServer turn capture",
+  );
+  adapted = replaceExactlyOnce(
+    adapted,
+    `  onMessage(clientMsg: ClientMessage) {
+    if (clientMsg.type === "rejoin") {`,
+    `  onMessage(clientMsg: ClientMessage) {
+    const visualBaseline = window.openfrontVisualBaseline;
+    if (
+      visualBaseline?.active &&
+      clientMsg.type === "intent" &&
+      !visualBaseline.acceptIntent(clientMsg.intent)
+    ) {
+      return;
+    }
+    if (clientMsg.type === "rejoin") {`,
+    "visual baseline LocalServer intent boundary",
+  );
+  adapted = replaceExactlyOnce(
+    adapted,
+    `    if (clientMsg.type === "winner") {
+      this.winner = clientMsg;
+      this.allPlayersStats = clientMsg.allPlayersStats;
+    }`,
+    `    if (clientMsg.type === "winner") {
+      this.winner = clientMsg;
+      this.allPlayersStats = clientMsg.allPlayersStats;
+      if (visualBaseline?.active) {
+        visualBaseline.onWinner(JSON.stringify(clientMsg, replacer));
+        this.endGame();
+      }
+    }`,
+    "visual baseline LocalServer winner",
+  );
+  return replaceExactlyOnce(
+    adapted,
+    `    const jsonString = JSON.stringify(result.data, replacer);
+
+    compress(jsonString)`,
+    `    const jsonString = JSON.stringify(result.data, replacer);
+    window.openfrontVisualBaseline?.onReplay(jsonString);
+
+    compress(jsonString)`,
+    "visual baseline LocalServer replay",
+  );
+}
+
+export function adaptVisualBaselineClientGameRunner(code: string): string {
+  let adapted = replaceExactlyOnce(
+    code,
+    `      this.gameView.update(gu);
+      this.webglBuilder?.update(this.gameView);
+      this.renderer.tick();`,
+    `      this.gameView.update(gu);
+      window.openfrontVisualBaseline?.onUpdate({
+        tick: gu.tick,
+        landTiles: this.gameView.numLandTiles(),
+        players: this.gameView.players().map((player) => ({
+          id: player.id(),
+          clientID: player.clientID(),
+          name: player.name(),
+          alive: player.isAlive(),
+          tiles: player.numTilesOwned(),
+          troops: player.state.troops,
+          gold: player.state.gold,
+        })),
+      });
+      if (!window.openfrontVisualBaseline?.isFastForwarding()) {
+        this.webglBuilder?.update(this.gameView);
+        this.renderer.tick();
+      }`,
+    "visual baseline score-only snapshot",
+  );
+  return replaceExactlyOnce(
+    adapted,
+    `      if (message.type === "start") {
+        console.log("starting game! in client game runner");
+
+        if (this.gameView.config().isRandomSpawn()) {`,
+    `      if (message.type === "start") {
+        console.log("starting game! in client game runner");
+
+        const visualBaseline = window.openfrontVisualBaseline;
+        if (visualBaseline?.active && !this.gameView.myPlayer()?.hasSpawned()) {
+          this.eventBus.emit(
+            new SendSpawnIntentEvent(
+              this.gameView.ref(
+                visualBaseline.spawn.x,
+                visualBaseline.spawn.y,
+              ),
+            ),
+          );
+        }
+
+        if (this.gameView.config().isRandomSpawn()) {`,
+    "visual baseline fixed spawn",
+  );
+}

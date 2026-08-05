@@ -14,7 +14,12 @@ import { replacer } from "../OpenFrontIO/src/core/Util";
 import { HarnessRunner } from "./HarnessRunner";
 import { DailyRateLimiter } from "./RateLimiter";
 import { artifactSummary, RunStore } from "./RunStore";
-import { OPENFRONT_COMMIT, publicScenario } from "./Scenario";
+import {
+  createScenarioStartInfo,
+  OPENFRONT_COMMIT,
+  publicScenario,
+  SCENARIO,
+} from "./Scenario";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
@@ -111,6 +116,9 @@ let launchPending = false;
 const app = express();
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
+app.post(/\/api\/archive_singleplayer_game$/, (_req, res) => {
+  res.status(204).end();
+});
 app.use(express.json({ limit: "16kb" }));
 app.use((_req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
@@ -138,6 +146,18 @@ app.get("/api/scenario", (_req, res) => {
     sourceUrl: process.env.SOURCE_URL ?? null,
     quota: limiter.status(),
     activeRun: store.activeRun() ?? null,
+  });
+});
+
+app.get("/api/baseline/bootstrap", (req, res) => {
+  const requestedModel =
+    typeof req.query.model === "string" && req.query.model.length <= 160
+      ? req.query.model
+      : undefined;
+  res.setHeader("Cache-Control", "no-store");
+  res.json({
+    gameStartInfo: createScenarioStartInfo(requestedModel),
+    spawn: SCENARIO.spawn,
   });
 });
 
@@ -391,6 +411,9 @@ app.get("/docs/:document", async (req, res) => {
 });
 
 app.get(["/replay.html", "/replay/:runId"], (_req, res, next) => {
+  void sendShell(res, next, "replay.html");
+});
+app.get(["/baseline", "/baseline.html"], (_req, res, next) => {
   void sendShell(res, next, "replay.html");
 });
 app.get(["/lab", "/lab.html"], (_req, res) => {

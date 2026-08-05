@@ -15,6 +15,8 @@ import {
   adaptLeaderboardCurrentTroops,
   adaptReplaySeekInputHandler,
   adaptReplaySeekLocalServer,
+  adaptVisualBaselineClientGameRunner,
+  adaptVisualBaselineLocalServer,
 } from "./src/OpenFrontAdapters";
 
 const projectRoot = import.meta.dirname;
@@ -34,7 +36,10 @@ function openFrontHarnessAdapter(): Plugin {
         return adaptReplaySeekInputHandler(code);
       }
       if (normalized.endsWith("/OpenFrontIO/src/client/LocalServer.ts")) {
-        return adaptReplaySeekLocalServer(code);
+        return adaptVisualBaselineLocalServer(adaptReplaySeekLocalServer(code));
+      }
+      if (normalized.endsWith("/OpenFrontIO/src/client/ClientGameRunner.ts")) {
+        return adaptVisualBaselineClientGameRunner(code);
       }
       if (
         normalized.endsWith("/OpenFrontIO/src/client/hud/layers/Leaderboard.ts")

@@ -308,6 +308,14 @@ The new lifecycle trace recorded 232 completed and eight destroyed action slots,
 
 **Cons:** A deployed fork must keep corresponding source available; asset and source licenses need continued attention when deployment contents change.
 
+## 33. Visual-controls baseline as a separate benchmark division
+
+**Decision:** Add `visual-controls-v1` as a separate `japan-v5` interface division. A thin evaluator starts the identical fixed scenario, submits the fixed spawn, gates the stock local client at the same 100-tick cadence, and records replay and score state. The model receives only 1280×720 screenshots, a neutral public controls manual, and a generic primitive input schema. The evaluator accepts at most two UI-generated gameplay intents and never exposes its game snapshots to the model. It accelerates simulation between gates, stops inference after elimination, retries one malformed model command, and retains the existing $1 and ten-minute limits. Full details are versioned in `baseline.md`.
+
+**Pros:** Establishes a concrete measurement of the complete structured interface's lift; includes perception, grounding, menu navigation, and misclick costs instead of silently correcting them; preserves the same engine, seed, spawn, opponents, cadence, action count, and replay evidence; does not modify the tracked OpenFront checkout; stores the exact screenshots and prompt hash needed for audit.
+
+**Cons:** It measures the full interface bundle rather than isolating normalized observations; image-capable models and text-only models cannot share the division; primitive UI operation often needs more model calls and tokens than semantic action selection; fixed viewport and controls documentation are benchmark-owned choices; hosted multimodal behavior remains nondeterministic; score-only instrumentation must be carefully kept out of requests.
+
 ## Known benchmark limitations
 
 - A fixed engine seed does not make a hosted model deterministic. Sampling, model weights, and provider routing can change generated decisions.
@@ -315,5 +323,6 @@ The new lifecycle trace recorded 232 completed and eight destroyed action slots,
 - The candidate generator is part of the environment. Improving it can improve every model and therefore requires a scenario version bump.
 - One map, seed, spawn, model run, and opponent set cannot establish general strategy competence.
 - Nation AI and the renderer are pinned implementation dependencies, not immutable external standards.
+- Structured-menu and visual-controls results are separate divisions and must not be pooled into one model ranking.
 
 For a real leaderboard, the next version should accept signed submitted action traces, replay every submission server-side against a content-addressed engine image, publish the scoring formula, add several hidden versioned seeds, and separate model/provider divisions.

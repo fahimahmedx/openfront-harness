@@ -5,6 +5,8 @@ import {
   adaptLeaderboardCurrentTroops,
   adaptReplaySeekInputHandler,
   adaptReplaySeekLocalServer,
+  adaptVisualBaselineClientGameRunner,
+  adaptVisualBaselineLocalServer,
 } from "../src/OpenFrontAdapters";
 
 const openFrontRoot = path.join(import.meta.dirname, "..", "OpenFrontIO");
@@ -48,5 +50,35 @@ describe("OpenFront harness adapters", () => {
     expect(adapted).toContain("compare(a.troops(), b.troops())");
     expect(adapted).toContain("Troops");
     expect(adapted).not.toContain("player.maxTroops");
+  });
+
+  it("adds visual baseline gates and score-only hooks outside pristine source", async () => {
+    const localServer = await fs.readFile(
+      path.join(openFrontRoot, "src/client/LocalServer.ts"),
+      "utf8",
+    );
+    const clientRunner = await fs.readFile(
+      path.join(openFrontRoot, "src/client/ClientGameRunner.ts"),
+      "utf8",
+    );
+
+    expect(localServer).not.toContain("openfrontVisualBaseline");
+    expect(clientRunner).not.toContain("openfrontVisualBaseline");
+
+    const adaptedServer = adaptVisualBaselineLocalServer(
+      adaptReplaySeekLocalServer(localServer),
+    );
+    expect(adaptedServer).toContain("visualBaseline.shouldGate");
+    expect(adaptedServer).toContain("visualBaseline.acceptIntent");
+    expect(adaptedServer).toContain("onTurn(pastTurn)");
+    expect(adaptedServer).toContain("isSeeking || visualBaseline?.active");
+    expect(adaptedServer).toContain("visualBaseline?.isFastForwarding() ||");
+    expect(adaptedServer).toContain("visualBaseline.onWinner");
+
+    const adaptedClient = adaptVisualBaselineClientGameRunner(clientRunner);
+    expect(adaptedClient).toContain("visualBaseline.spawn.x");
+    expect(adaptedClient).toContain("this.gameView.numLandTiles()");
+    expect(adaptedClient).toContain("player.numTilesOwned()");
+    expect(adaptedClient).toContain("isFastForwarding()");
   });
 });

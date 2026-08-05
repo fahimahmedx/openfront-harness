@@ -22,6 +22,7 @@ declare global {
       displayUnits: () => void;
     };
     showPage?: (pageId: string) => void;
+    openfrontVisualBaseline?: import("./VisualBaselineTypes").BrowserBaselineController;
   }
 }
 
