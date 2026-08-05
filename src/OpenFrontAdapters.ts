@@ -39,6 +39,23 @@ export class TogglePauseIntentEvent implements GameEvent {}`;
   );
 }
 
+export function adaptReplayJoinUrl(code: string): string {
+  return replaceExactlyOnce(
+    code,
+    `    // Only update URL immediately for private lobbies, not public ones
+    if (lobby.source !== "public") {
+      this.updateJoinUrlForShare(lobby.gameID);
+    }`,
+    `    // Recorded games keep their stable replay URL. Rewriting a replay to
+    // /game/:id can race with the startup router, which then mistakes the
+    // recording for a private online lobby and shows a spurious join error.
+    if (lobby.source !== "public" && lobby.gameRecord === undefined) {
+      this.updateJoinUrlForShare(lobby.gameID);
+    }`,
+    "replay join URL guard",
+  );
+}
+
 export function adaptReplaySeekLocalServer(code: string): string {
   let adapted = replaceExactlyOnce(
     code,

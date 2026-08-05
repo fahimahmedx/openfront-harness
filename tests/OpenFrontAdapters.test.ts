@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   adaptLeaderboardCurrentTroops,
+  adaptReplayJoinUrl,
   adaptReplaySeekInputHandler,
   adaptReplaySeekLocalServer,
   adaptVisualBaselineClientGameRunner,
@@ -12,6 +13,20 @@ import {
 const openFrontRoot = path.join(import.meta.dirname, "..", "OpenFrontIO");
 
 describe("OpenFront harness adapters", () => {
+  it("keeps recorded games on their replay URL during startup", async () => {
+    const mainPath = path.join(openFrontRoot, "src/client/Main.ts");
+    const main = await fs.readFile(mainPath, "utf8");
+
+    expect(main).toContain('if (lobby.source !== "public")');
+    expect(main).not.toContain("lobby.gameRecord === undefined");
+
+    const adapted = adaptReplayJoinUrl(main);
+    expect(adapted).toContain(
+      'lobby.source !== "public" && lobby.gameRecord === undefined',
+    );
+    expect(adapted).toContain("this.updateJoinUrlForShare(lobby.gameID)");
+  });
+
   it("adds replay seeking to pristine bundled source", async () => {
     const inputHandlerPath = path.join(
       openFrontRoot,

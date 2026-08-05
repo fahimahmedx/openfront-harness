@@ -13,6 +13,7 @@ import {
 } from "./OpenFrontIO/src/server/PublicAssetManifest";
 import {
   adaptLeaderboardCurrentTroops,
+  adaptReplayJoinUrl,
   adaptReplaySeekInputHandler,
   adaptReplaySeekLocalServer,
   adaptVisualBaselineClientGameRunner,
@@ -40,6 +41,9 @@ function openFrontHarnessAdapter(): Plugin {
       }
       if (normalized.endsWith("/OpenFrontIO/src/client/ClientGameRunner.ts")) {
         return adaptVisualBaselineClientGameRunner(code);
+      }
+      if (normalized.endsWith("/OpenFrontIO/src/client/Main.ts")) {
+        return adaptReplayJoinUrl(code);
       }
       if (
         normalized.endsWith("/OpenFrontIO/src/client/hud/layers/Leaderboard.ts")
