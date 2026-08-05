@@ -1,4 +1,4 @@
-# Building a Reliable Agent Harness for OpenFront
+# Building and Evaluating a Reliable Agent Harness for OpenFront
 
 Written by Fahim Ahmed
 
@@ -6,22 +6,16 @@ August 5, 2026
 
 <CLIP OF ATTACK-2-CLIPPED.mov HERE>
 
-### **GPT-5.6 failed playing OpenFront across 5 trials. Using my harness, it was able to win all 5 times.**
+### **GPT-5.6 couldn't win OpenFront. Using my harness, it won all 10 games.**
 
-Harnesses enable LLMs to do more than produce text. They turn it into a system that can observe an environment, choose actions, use tools, and work toward a goal over time.
+Harnesses turn LLM output into actions, connecting probabilistic models to deterministic systems. That connection creates risk, where a small mistake from the model can become an incorrect command with real-world consequences. Reliability is therefore the central engineering problem when building harnesses.
 
-In the real world, harnesses need to be reliable. An unreliable harness turns a model mistake (or even what the model thinks is a correct decision) into an incorrect action. The main danger is that the harness connects probabilistic reasoning to deterministic systems such as databases, payment APIs, production infrastructure, robots, and customer accounts.
-For example, if the model says “refund the latest $10 duplicate charge” but the harness refunds every $10 charge, that could be thousands in financial losses to the company.
-
-The central engineering problem around bringing harnesses to production environments is "How do you make the harness reliable?".
-
-To learn how to build a reliable harness, I built an agent harness around [OpenFront](https://openfront.io/), an open-source real-time strategy game, and created an eval task where the agent has to win a complete match against three built-in nations on the Japan map. Instead of giving the model authority to issue arbitrary game commands, I built a system that controls what the model can observe, limits it to legal and resource-safe actions, places limits on runtime and model costs, and records the game and model's thinking for auditability.
-
-In addition, I benchmarked GPT-5.6 Luna without that interface where it failed the eval, and then reran the same model with the harness, where it won.
+To study that problem, I built an auditable harness for [OpenFront](https://openfront.io/), an open-source real-time strategy game. 
+In a fixed Japan-map evaluation, GPT-5.6 Luna lost all 20 trials across two visual browser interfaces. With the harness limiting it to legal, resource-safe actions, the same model won all 10 out of 10 matches.
 
 <BENCHMARK CHART HERE>
 
-***Special thanks to [Ibrahim Ahmed](http://ibrahimahmed.ca/) ([X](https://x.com/zero_goliath)) for providing valuable feedback on this project.***
+_**Special thanks to [Ibrahim Ahmed](http://ibrahimahmed.ca/) ([X](https://x.com/zero_goliath)) for his thoughtful feedback on this project, and to [@0xgodking](https://x.com/0xgodking) for inspiring me to start exploring agent harnesses.**_
 
 ## OpenFront in 60 seconds
 
@@ -29,7 +23,19 @@ In addition, I benchmarked GPT-5.6 Luna without that interface where it failed t
 
 <OPENFRONT GAMEPLAY CLIP HERE>
 
-In the eval, one player competes against three built-in nations on Japan. The game progresses in simulation ticks. In each tick, troops grow, attacks advance, nations respond, buildings finish, and borders change. A player wins immediately by capturing 80% of territory on the map. If time expires first, the surviving player with the most territory wins.
+The game progresses in simulation ticks. In each tick, troops grow, attacks advance, nations respond, buildings finish, and borders change. A player wins immediately by capturing 80% of territory on the map. If time expires first, the surviving player with the most territory wins.
+
+## Why is reliability hard?
+
+Reliability is difficult because an LLM produces probabilistic responses, while OpenFront requires precise, valid commands. The model could invent a player ID, choose an unreachable target, overspend its troops, or return malformed JSON. Even a valid action can become invalid before execution if the game state changes.
+
+This raises the question: **How do you test a harness when the LLM is nondeterministic?** For this harness, I broke that question into three parts:
+
+1. **Action reliability:** Did every accepted decision resolve to a legal game action?
+2. **Operational reliability:** Did the harness stay reliable when providers handled the same model differently?
+3. **Evaluation reliability:** Could I inspect and replay the run to distinguish bad model decisions from harness failures? Furthermore, is the agent playing the game in a way that makes sense wins?
+
+The harness enforces these properties rather than relying on prompting alone. Before explaining how the harness enforced these properties, the next section will first walks through how the harness works.
 
 ## How the harness works
 
@@ -63,27 +69,32 @@ Every 100 ticks, the harness reads the current OpenFront state and gives the mod
 
 Let's give an example from replay [9f73a404-ae98-430f-be5b-ea22fb1755a6](https://openfront.fahimahmed.ca/replay/9f73a404-ae98-430f-be5b-ea22fb1755a6). At 5:50 into the match, the agent controlled 31.884% of Japan with 290,851 troops. It shared land borders with Kansai and Hokkaido, while Shikoku was reachable across the water.
 
+<figure class="data-figure">
+  <img src="/media/writeup/replay-9f73a404-5m50.png?v=2" loading="lazy" alt="OpenFront replay at 5:50 showing the agent leading Japan and a decision trace with attacks on Kansai and Shikoku">
+  <figcaption>Replay 9f73a404 at 5:50, right after the agent sent out troops to attack Kansai and Shikoku.</figcaption>
+</figure>
+
 ```json
 {
-    "observation": {
-      "elapsedTime": "05:50",
-      "territoryPercent": 31.884,
-      "troops": {
-        "total": 290851,
-        "reserve": 102486,
-        "spendable": 188364,
-        "perActionBudget": 94182
-      },
-      "opponents": [
-        { "name": "Hokkaido", "troops": 93158, "sharedBorder": true },
-        { "name": "Kansai", "troops": 55101, "sharedBorder": true },
-        { "name": "Shikoku", "troops": 66632, "sharedBorder": false }
-      ]
-    }
+  "observation": {
+    "elapsedTime": "05:50",
+    "territoryPercent": 31.884,
+    "troops": {
+      "total": 290851,
+      "reserve": 102486,
+      "spendable": 188364,
+      "perActionBudget": 94182
+    },
+    "opponents": [
+      { "name": "Hokkaido", "troops": 93158, "sharedBorder": true },
+      { "name": "Kansai", "troops": 55101, "sharedBorder": true },
+      { "name": "Shikoku", "troops": 66632, "sharedBorder": false }
+    ]
   }
+}
 ```
 
-From the same state, the harness builds a menu of actions that are legal at that moment. These can include expanding, attacking, launching a boat, retreating, constructing or upgrading a building, changing diplomacy, and holding. Each option has a stable ID and maps to an exact OpenFront game command. 
+From the same state, the harness builds a menu of actions that are legal at that moment. These can include expanding, attacking, launching a boat, retreating, constructing or upgrading a building, changing diplomacy, and holding. Each option has a stable ID and maps to an exact OpenFront game command.
 
 ```json
 "legalActionExcerpt": [
@@ -97,6 +108,7 @@ From the same state, the harness builds a menu of actions that are legal at that
 ```
 
 Both the observation and legal actions from above are fed as input into the model. The model chooses up to two IDs instead of generating raw game commands. In this example, the model chose to attack Kansai by land with 94,182 troops and invade Shikoku by sea with 94,182 troops.
+
 ```json
 {
   "strategy": "Exploit overwhelming reserves: launch decisive attacks on the two weakest rivals while retaining the required 35% troop floor.",
@@ -104,6 +116,7 @@ Both the observation and legal actions from above are fed as input into the mode
   "action2": "boat:d8c1rits:100"
 }
 ```
+
 To prevent hallicunation from the model, the harness only accepts valid moves that it gave to the model as legal actions. It also validates the two actions together, for example preventing two individually valid attack actions from spending more than the troop count available.
 
 Once the harness submits an accepted action, OpenFront’s game engine applies it and determines the outcome according to the game’s rules. At the next desicion point 100 ticks later, the harness observes the new state and includes recent action outcomes, so the model can view the results of a previously submitted attack or building.
@@ -114,25 +127,15 @@ At each decision point, the harness records the state shown to the model, the ac
 
 This cycle repeats until a player wins or the match reaches its time limit.
 
-## Why is reliability hard?
-
-Reliability is difficult because an LLM produces probabilistic responses, while OpenFront requires precise, valid commands. The model could invent a player ID, choose an unreachable target, overspend its troops, or return malformed JSON. Even a valid action can become invalid before execution if the game state changes.
-
-This raises the question: **How do you test a harness when the LLM is nondeterministic?** For this harness, I broke that question into three parts:
-
-1. **Action reliability:** Did every accepted decision resolve to a legal game action?
-2. **Operational reliability:** Did the harness stay reliable when providers handled the same model differently?
-3. **Evaluation reliability:** Could I inspect and replay the run to distinguish bad model decisions from harness failures? Furthermore, is the agent playing the game in a way that makes sense wins? 
-
-The harness enforces these properties rather than relying on prompting alone. The next section describes the mechanisms that make this possible.
-
 ## How I made the harness reliable.
 
-Each of the three dimensions from above is enforced by a different part of the harness, and each surfaced differently once real models started playing.
+Each of the three dimensions mentioned from earlier is enforced by a different part of the harness, and each surfaced differently once real models started playing.
 
 ### Action reliability: keeping every accepted move legal
 
 The model never writes OpenFront commands directly. At each decision point, the harness reads the current game state and generates a deterministic menu of actions that are legal at that moment. Each option has a stable ID and maps to an exact game intent, so the model chooses from bounded capabilities instead of inventing player IDs, troop counts, build locations, or command shapes.
+
+<ACTION RELIABILITY DIAGRAM HERE>
 
 I enforce that boundary twice. The request uses a strict JSON Schema whose `action1` and `action2` enums contain only the IDs available to each slot for that decision. When the response returns, the harness parses it with Zod and checks both selections against the original menu again. This second check matters because structured output is supplied by an external provider; it improves reliability, but it is not a substitute for validation at the point where the harness grants authority.
 
@@ -144,7 +147,7 @@ If a response is malformed or selects an invalid ID, the harness retries once an
 
 #### Pinning the model's provider on OpenRouter
 
-The most important operational lesson from this project was that one model (ex. DeepSeek V4 Flash) between two different provider are not actually the same model. OpenRouter can expose the same model through several providers, but each provider can have different latency, pricing, defaults, and feature support. If the harness allowed OpenRouter to choose a provider automatically, the same request could land on a provider that ignored the strict schema, enabled unexpected reasoning, or timed out—turning an otherwise valid decision into an error.
+The most important operational lesson from this project was that one model (ex. DeepSeek V4 Flash) between two different provider are not actually the same model. OpenRouter can expose the same model through several providers, but each provider can have different latency, pricing, defaults, and feature support. If the harness allowed OpenRouter to choose a provider automatically, the same request could land on a provider that ignored the strict schema, enabled unexpected reasoning, or timed out, turning an otherwise valid decision into an error.
 
 I saw this issue in early DeepSeek V4 Flash tests where I had not pinned a provider or set reasoning explicitly. Some providers returned the expected action response in ~50 output tokens. Others generated 2,049 tokens and hit the output-length limit. The longer responses were caused by provider routes that enabled reasoning by default. When a response ended due to the output limit before the model outputted the action fields, the harness could not recover the move the model intended to make. It rejected the incomplete response, logged a model error, and safely held both action slots as a fallback.
 
@@ -152,18 +155,17 @@ I saw this issue in early DeepSeek V4 Flash tests where I had not pinned a provi
 
 I therefore pin both the model and provider, disable provider fallbacks, explicitly set reasoning to `none`, and record which provider actually served every decision. Each request has a ten-second timeout and one retry. A run also has a $1 inference ceiling, and a limit of 20 game-minutes.
 
-The final evaluation shows what those controls looked like in practice. These are client-observed measurements pooled from the five runs for each model; cost is the mean total inference cost per run.
+The final evaluation shows what those controls looked like in practice. These are client-observed measurements pooled from ten GPT-5.6 Luna runs and five runs each for GLM-5.2 and DeepSeek V4 Flash; cost is the mean total inference cost per run.
 
-| Model and pinned provider | Decisions | Median / p95 latency | Completion tokens per decision | Mean cost per run | Retries / fallbacks |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| GPT-5.6 Luna / OpenAI | 501 | 1.06 s / 2.03 s | 54.6 | $0.0360 | 2 / 0 |
-| GLM-5.2 / Baidu | 531 | 2.75 s / 3.41 s | 58.8 | $0.0859 | 8 / 0 |
-| DeepSeek V4 Flash / StreamLake | 583 | 2.70 s / 3.99 s | 49.8 | $0.0227 | 13 / 11 |
+| Model and pinned provider      | Decisions | Median / p95 latency | Completion tokens per decision | Mean cost per run | Retries / fallbacks |
+| ------------------------------ | --------: | -------------------: | -----------------------------: | ----------------: | ------------------: |
+| GPT-5.6 Luna / OpenAI          |       985 |      1.15 s / 2.93 s |                           54.2 |           $0.0346 |               3 / 0 |
+| GLM-5.2 / Baidu                |       531 |      2.75 s / 3.41 s |                           58.8 |           $0.0859 |               8 / 0 |
+| DeepSeek V4 Flash / StreamLake |       583 |      2.70 s / 3.99 s |                           49.8 |           $0.0227 |             13 / 11 |
 
-Across the 15 runs, none of the 1,615 decisions had a timeout or JSON Schema violation. The validator rejected 11 conflicting action combinations, and each model corrected its choice on retry. StreamLake also returned 23 upstream rate-limit errors across 12 DeepSeek decisions: one recovered on retry, while 11 exhausted the retry and safely fell back to holds. No invalid command reached the game.
+Across the 20 runs, none of the 2,099 decisions had a timeout or JSON Schema violation. The validator rejected 12 conflicting action combinations, and each model corrected its choice on retry. StreamLake also returned 23 upstream rate-limit errors across 12 DeepSeek decisions: one recovered on retry, while 11 exhausted the retry and safely fell back to holds. No invalid command reached the game.
 
 With reasoning explicitly disabled, the final model-provider pairs averaged between 49.8 and 58.8 completion tokens per decision.
-
 
 #### Testing advertised schema enforcement
 
@@ -178,19 +180,19 @@ I then changed only the provider to StreamLake which fixed this issue. All 344 r
 The lesson is to treat advertised provider capabilities as claims to verify. Test and pin the exact model and provider, set options explicitly, record the provider used, and validate every response.
 
 ### Evaluation reliability: making every run auditable
- 
+
 One of my key design decisions was to make every run auditable. At each decision point, the harness records what the model observed, which actions it could take, what it chose, and why. I then added a UI that lets me watch the agent play, inspect unexpected decisions or error flags, and use the trace to determine whether a problem came from the model or from the harness.
- 
+
 From this auditability, I was able to diagnose two interesting failures I ran into.
- 
+
 1. An early version of the observation JSON called the immediate territory threshold `winPercent`. In one evaluation, GLM-5.2 interpreted a value of `80` as an 80% probability of winning and used it to justify holding off from any action, even though it controlled far less than 80% of the map. Because the decision trace showed exactly what the model had seen and how it reasoned from that value, I could pin the failure to the field name rather than the model's judgment. To fix this, I renamed the field to `instantVictoryTerritoryPercent`, and GLM-5.2 won in its next run. From this, I learned that even a small ambiguity in the wording of a state variable could cause the model to behave incorrectly.
- 
+
 2. In another run with DeepSeek V4 Flash, an older version of the instruction prompt told the model to "hold while rebuilding", but did not explain that troop growth approaches zero near full capacity. The model made no moves for 58 of its 61 decisions, stopped gaining meaningful troops, and was eventually conquered by another nation. This failure did not trigger a harness error because every hold was valid. The trace showed the problem, where the model repeatedly chose to hold because it believed doing so would rebuild its troops, even near full capacity. I removed the "hold while rebuilding" instruction and made the underlying troop-growth mechanic explicit. More specifically, the observation now reports the agent's troop-capacity percentage and current growth rate, and the prompt explains that holding near 100% capacity will not rebuild the army further. As a result, the next DeepSeek run, the agent expanded aggressively and reached first place!
 
 From this, I learned the importance of not having biases in a prompt, and the importance of exposing more relevant information to the model for it to use when making a decision.
 
 ![Two audit-trace case studies showing how ambiguous model inputs were diagnosed and fixed](charts/audit-trace-before-after.png?v=2)
- 
+
 From having to manually judge multiple runs, I learned that while the harness should prevent invalid actions, but it should not encode an entire winning strategy. Telling the model what to do in the prompt may backfire and have the model behave unexpectedly. As a result, I kept the harness neutral and would only expose game state and game mechanics, rather than biasing the prompts with what the model should or shouldn't do.
 
 ---
@@ -199,13 +201,12 @@ From having to manually judge multiple runs, I learned that while the harness sh
 
 ## Evaluating the models
 
-The eval task was to win a fixed four-player match on the Japan map. GPT-5.6 Luna always spawned in Kanto and played against the same three medium-difficulty built-in nations with the same engine seed. A trial succeeded if the model captured 80% of Japan for an immediate victory or, when the 20-minute timer expired, was still alive and controlled more territory than every opponent. I ran five trials per interface under the same decision timing.
+The eval task was to win a fixed four-player match on the Japan map. GPT-5.6 Luna always spawned in Kanto and played against the same three medium-difficulty built-in nations with the same engine seed. A trial succeeded if the model captured 80% of Japan for an immediate victory or, when the 20-minute timer expired, was still alive and controlled more territory than every opponent. I ran ten trials per interface under the same decision timing.
 
 To measure what GPT-5.6 Luna could do on its own, I let the model play OpenFront on its own using browser screenshots and primitive browser inputs.
 There were two versions of this baseline: one with a control manual given as input, and one without (where the model would have to discover the game's controls).
 
 Both of these gave me a baseline against which to compare my harness against.
-
 
 <div class="eval-conditions">
   <div class="eval-condition eval-condition-header" aria-hidden="true">
@@ -236,59 +237,54 @@ The results of the evaluation task will be in the next section.
 
 ### The harness enabled GPT-5.6 Luna to consistently win
 
-The primary eval metric was whether the model won the match. Across five completed trials per condition, the observed win rate increased by 100 percentage points: 0/5 with Visual Browser Control, 0/5 with Visual Browser Control + Game Manual, and 5/5 with the Harness.
+The primary eval metric was whether the model won the match. Across ten completed trials per condition, the observed win rate increased by 100 percentage points: 0/10 with Visual Browser Control, 0/10 with Visual Browser Control + Game Manual, and 10/10 with the Harness.
 
-| Interface | Trials | Wins | Observed win rate (95% Wilson interval) |
-| --- | ---: | ---: | ---: |
-| Visual Browser Control | 5 | 0 | 0% (0–43.4%) |
-| Visual Browser Control + Game Manual | 5 | 0 | 0% (0–43.4%) |
-| Harness | 5 | 5 | 100% (56.6–100%) |
+| Interface                            | Trials | Wins | Observed win rate (95% Wilson interval) |
+| ------------------------------------ | -----: | ---: | --------------------------------------: |
+| Visual Browser Control               |     10 |    0 |                            0% (0–27.8%) |
+| Visual Browser Control + Game Manual |     10 |    0 |                            0% (0–27.8%) |
+| Harness                              |     10 |   10 |                        100% (72.2–100%) |
 
-The wide confidence intervals are important: five trials per condition cannot establish a precise population win rate. The comparison is evidence for this fixed model, provider, map, spawn, opponent lineup, and seed—not a claim that every model or OpenFront scenario improves by 100 percentage points. Still, the failure mode was consistent. Supplying the game manual did not close the gap; the useful change was the full interface bundle of normalized observations, state-dependent legal actions, resource constraints, validation, and semantic feedback.
+### Harness performance
 
-### Performance inside the structured harness
+I ran ten harness evaluations of GPT-5.6 Luna and five each of DeepSeek V4 Flash and GLM-5.2. Every run used the same Japan map, spawn point, three medium-difficulty opponent bots with the same seed, one decision every 100 ticks, and a 20-minute limit. Model reasoning was disabled for all the runs. I pinned the provider as well as the model, with StreamLake for DeepSeek, Baidu for GLM, and OpenAI for GPT, all through OpenRouter.
 
-I ran five harness evaluations each of DeepSeek V4 Flash, GLM-5.2, and GPT-5.6 Luna. Every run used the same Japan map, spawn point, three medium-difficulty opponent bots with the same seed, one decision every 100 ticks, and a 20-minute limit. Model reasoning was disabled for all the runs. I pinned the provider as well as the model, with StreamLake for DeepSeek, Baidu for GLM, and OpenAI for GPT, all through OpenRouter.
+| Model and provider             |  Wins | How the wins ended     | Mean final territory | Mean decisions | Mean prompt / completion tokens | Median decision latency | Mean inference cost |
+| ------------------------------ | ----: | ---------------------- | -------------------: | -------------: | ------------------------------: | ----------------------: | ------------------: |
+| GPT-5.6 Luna / OpenAI          | 10/10 | 5 at 80%, 5 on timer   |                75.0% |           98.5 |                 253,496 / 5,335 |                  1.15 s |             $0.0346 |
+| GLM-5.2 / Baidu                |   5/5 | 2 at 80%, 3 on timer   |                69.0% |          106.2 |                 261,251 / 6,245 |                  2.75 s |             $0.0859 |
+| DeepSeek V4 Flash / StreamLake |   2/5 | 2 timer wins, 3 losses |                33.3% |          116.6 |                 289,194 / 5,812 |                  2.70 s |             $0.0227 |
 
-| Model and provider | Wins | How the wins ended | Mean final territory | Mean decisions | Mean prompt / completion tokens | Median decision latency | Mean inference cost |
-| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: |
-| GPT-5.6 Luna / OpenAI | 5/5 | 3 at 80%, 2 on timer | 76.2% | 100.2 | 264,842 / 5,470 | 1.06 s | $0.0360 |
-| GLM-5.2 / Baidu | 5/5 | 2 at 80%, 3 on timer | 69.0% | 106.2 | 261,251 / 6,245 | 2.75 s | $0.0859 |
-| DeepSeek V4 Flash / StreamLake | 2/5 | 2 timer wins, 3 losses | 33.3% | 116.6 | 289,194 / 5,812 | 2.70 s | $0.0227 |
-
-GPT and GLM produced the strongest and most consistent results in this small sample, each winning all five runs. GPT won three matches by crossing 80% territory and two by leading when the timer expired; GLM had two immediate victories and three timer victories. DeepSeek's two wins were timer wins with 32.2% and 40.1% of the territory captured. Its three losses ended in second place with 17.5%, 42.7%, and 34.0%. It is important to distinguish the two types of wins: win rate alone hides a meaningful difference between conquering the map and surviving with a plurality of territory.
+GPT and GLM produced the strongest and most consistent results in this sample: GPT won all ten of its runs, while GLM won all five of its runs. GPT won five matches by crossing 80% territory and five by leading when the timer expired; GLM had two immediate victories and three timer victories. DeepSeek's two wins were timer wins with 32.2% and 40.1% of the territory captured. Its three losses ended in second place with 17.5%, 42.7%, and 34.0%. It is important to distinguish the two types of wins: win rate alone hides a meaningful difference between conquering the map and surviving with the most territory.
 
 ![GPT-5.6 Luna territory controlled over time in run 5c3016b7](charts/gpt-5.6-territory-over-time.svg)
 
 The shape of the win is easier to see in the decision trace. In the representative run above, GPT expanded rapidly for the first three minutes, consolidated around 30% of the map, then converted a series of later attacks into an 82.4% victory at 13:25.
 
-![Five separate territory races between GPT-5.6 Luna and the built-in nations](charts/gpt-5.6-territory-races.svg)
+![Three representative territory races between GPT-5.6 Luna and the built-in nations](charts/gpt-5.6-territory-races.svg)
 
-Separating the five matches shows that there was no single path to victory. GPT sometimes removed opponents early and sometimes let them survive through the timer, but it established a winning territory lead in every run.
+The three representative matches above show different paths to crossing the 80% victory threshold. Across the full ten-run evaluation, GPT crossed that threshold in five matches and led when the timer expired in the other five, establishing a winning territory lead in every run.
 
-The decision traces show different play styles behind those outcomes. Counting attack, boat, and counter actions together, GPT used a combat action in 342 of 1,002 action slots (34.1%), compared with 289 of 1,062 for GLM (27.2%) and 34 of 1,166 for DeepSeek (2.9%). DeepSeek selected a hold in 76.8% of its slots and made no combat move at all in one of its two wins.
+The decision traces show different play styles behind those outcomes. In the balanced five-run subset shown below, counting attack, boat, and counter actions together, GPT used a combat action in 342 of 1,002 action slots (34.1%), compared with 289 of 1,062 for GLM (27.2%) and 34 of 1,166 for DeepSeek (2.9%). DeepSeek selected a hold in 76.8% of its slots and made no combat move at all in one of its two wins. Across all ten GPT runs, it used combat actions in 620 of 1,970 slots (31.5%).
 
 DeepSeek's passiveness was not accidental. It recognized that it did not need to conquer 80% of the map to win: if it was still alive and held the most territory when time expired, it would win. Once it established a lead, its recorded strategies repeatedly said that holding would preserve the lead while the other three bot nations fought one another. In the 40.1% win, it explicitly reasoned that holding preserved its troops "for timer victory." This turned inaction into a strategy that avoided the downside of further combat, protected a plurality of the map, and ran out the clock. It worked in two of five runs; in the other three, Hokkaido finished ahead and DeepSeek placed second.
 
 ![Comparison of how GPT-5.6 Luna, GLM-5.2, and DeepSeek V4 Flash used their action slots](charts/model-action-mix.svg)
 
-The models showed different play styles. GPT attacked most often, GLM was less aggressive, and DeepSeek mostly held. Despite those differences, the harness kept execution safe. Every final action was legal and stayed within its troop budget. Eleven responses initially selected conflicting action combinations, but the validator rejected them and the models corrected themselves on retry. No invalid command reached the game.
+The models showed different play styles. GPT attacked most often, GLM was less aggressive, and DeepSeek mostly held. Despite those differences, the harness kept execution safe. Every final action was legal and stayed within its troop budget. Twelve responses initially selected conflicting action combinations, but the validator rejected them and the models corrected themselves on retry. No invalid command reached the game.
 
+## What I learned from building a harness and evaluating it.
 
-## What I would build next
+First, agent performance reflects the whole system, not just the model. GPT-5.6 Luna failed to win any of the 20 visual browser trials, but the same model won all ten games through the harness. Changing the interface and the information available to the model changed what it could accomplish.
 
-The fixed Japan eval makes it possible to compare how an LLM plays with and without the harness. The next step would be to expand it into a public benchmark for evaluating agent performance more broadly.
+Second, win rate alone is not enough to understand performance. Placement, territory, consistency, and how each match ended revealed meaningful differences between models and their type of wins. Crossing the 80% territory win threshold is different from winning by holding a lead until the timer expired.
 
-This would require testing models across different maps, seeds, spawn locations, opponent lineups, and difficulty levels. I would also define a scoring system that considers wins, placement, territory, and consistency across runs.
+Third, an eval needs replayable evidence. Each result should be traceable from what the model observed, through the decision it made and the action the harness executed, to what happened in the environment. Without that evidence, it is difficult to distinguish a model failure from a harness failure or defend the resulting score.
 
-I would also add multi-agent support so models could compete directly against one another. This would enable agent versus agent matches instead of limiting each evaluation to one agent playing against three bots.
+Fourth, a reliable eval requires a reliable harness. The same model behaved differently depending on which provider served it. Pinning the provider, setting reasoning explicitly, and recording failures helped ensure that the results reflected the agent's performance rather than differences in the infrastructure.
 
-## What I learned
+## Building reliable agent evals
 
-If there's three lessons you should takeaway from this project when it comes to making harnesses reliable, here's what I learned:
+I'm continuing to build evaluations for agents operating in interactive environments. The goal is to measure not only whether an agent succeeds, but how reliably it acts over time with controlled scenarios, comparable runs, and replayable evidence.
 
-First, when a model behaves unexpectedly, avoid biasing the prompt toward a particular solution. Instead, explain the relevant mechanics neutrally and expose enough information for the model to make a better decision. For example, rather than instructing the agent to attack more often, I exposed troop capacity and growth so it could recognize when holding was no longer useful.
-
-Second, observability is essential for reliability. It is difficult to evaluate an agent without being able to inspect what it observed, why it chose an action, what the system executed, and what happened afterward. Logs and replays made it possible to distinguish model mistakes from being a harness issue vs. model failure.
-
-Third, the same model served by different providers are not actually the same. Providers can differ in JSON schema enforcement, reasoning defaults, quantization, and latency. I encountered this with structured output, where some endpoints supported basic JSON mode but not the strict JSON Schema contract required by the harness. Provider defaults also varied, where some providers didn't have reasoning set to off by default, causing increased model generation time.
+If you're building agents and need a custom evaluation, benchmarking study, or pilot, [get in touch](https://www.linkedin.com/in/fahim-a/).

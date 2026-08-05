@@ -438,6 +438,24 @@ function architectureVisual(): string {
   </figure>`;
 }
 
+function actionReliabilityVisual(): string {
+  return `<figure class="reliability-map" aria-labelledby="reliability-caption">
+    <figcaption id="reliability-caption"><span class="visual-kicker">Action boundary</span><span class="visual-meta">Only validated pairs reach the game</span></figcaption>
+    <div class="reliability-stage">
+      <div class="reliability-flow" role="list" aria-label="Action validation flow">
+        <div class="reliability-node" role="listitem"><small>01 · Generate</small><strong>Legal action menu</strong><span>Stable IDs from the current game state</span></div>
+        <div class="reliability-node reliability-selection" role="listitem"><small>02 · Select</small><strong>Model chooses two IDs</strong><div class="action-slots"><span>Action 1</span><span>Action 2</span></div></div>
+        <div class="reliability-node reliability-gate" role="listitem"><small>03 · Validate together</small><strong>Both actions must pass</strong><ul><li>Allowed in its slot</li><li>Within shared budget</li><li>Compatible as a pair</li></ul></div>
+        <div class="reliability-node reliability-accepted" role="listitem"><small>04 · Accept</small><strong>Exact core intents</strong><span>Known commands with bounded authority</span></div>
+        <div class="reliability-node reliability-engine" role="listitem"><small>05 · Execute</small><strong>OpenFront engine</strong><span>Final authority over the outcome</span></div>
+      </div>
+      <div class="reliability-fallback" aria-label="Invalid response fallback">
+        <span class="fallback-source">Fails validation</span><span class="fallback-arrow" aria-hidden="true">→</span><span>Retry once with the error</span><span class="fallback-arrow" aria-hidden="true">→</span><strong>Two holds</strong><small>if the retry also fails</small>
+      </div>
+    </div>
+  </figure>`;
+}
+
 function prepareDocumentMarkdown(markdown: string, isWriteup: boolean): string {
   if (!isWriteup) return markdown;
   return markdown
@@ -454,8 +472,8 @@ function prepareDocumentMarkdown(markdown: string, isWriteup: boolean): string {
     .replace(
       "<BENCHMARK CHART HERE>",
       `<figure class="result-chart result-chart-standalone">
-          <img src="/media/writeup/gpt-5.6-harness-win-rate.svg" alt="GPT-5.6 Luna won zero of five trials with visual browser control, zero of five with visual browser control plus a game manual, and five of five with the harness">
-          <figcaption>Observed win rate across five completed trials per interface in the fixed Japan scenario.</figcaption>
+          <img src="/media/writeup/gpt-5.6-harness-win-rate.svg" alt="GPT-5.6 Luna won zero of ten trials with visual browser control, zero of ten with visual browser control plus a game manual, and ten of ten with the harness">
+          <figcaption>Observed win rate across ten trials per interface in the fixed Japan scenario.</figcaption>
         </figure>`,
     )
     .replace(
@@ -467,6 +485,7 @@ function prepareDocumentMarkdown(markdown: string, isWriteup: boolean): string {
         </video>
       </figure>`,
     )
+    .replace("<ACTION RELIABILITY DIAGRAM HERE>", actionReliabilityVisual())
     .replace(/```mermaid[\s\S]*?```/, architectureVisual())
     .replaceAll("](charts/", "](/media/writeup/");
 }
@@ -504,6 +523,7 @@ const writeupMedia: Record<string, string> = {
   "model-action-mix.svg": "charts/model-action-mix.svg",
   "provider-schema-compliance.png": "charts/provider-schema-compliance.png",
   "audit-trace-before-after.png": "charts/audit-trace-before-after.png",
+  "replay-9f73a404-5m50.png": "charts/replay-9f73a404-5m50.png",
   "unpinned-provider-output-variance.png":
     "charts/unpinned-provider-output-variance.png",
 };
@@ -553,7 +573,7 @@ app.get("/docs/:document", async (req, res) => {
     </nav></header>
     <main class="writeup-shell">
       <aside class="reading-rail" aria-label="Article contents"><p class="rail-kicker">In this case study</p><nav id="toc" class="toc"></nav></aside>
-      <article id="writeup-article" class="writeup">${html}${isWriteup ? `<div class="article-end"><p>Building an agent where reliability matters?</p><div class="article-end-cta"><span>I’d love to hear what you’re working on!</span><a href="https://www.linkedin.com/in/fahim-a/" target="_blank" rel="noopener noreferrer">Let’s chat ↗</a></div></div>` : ""}</article>
+      <article id="writeup-article" class="writeup">${html}${isWriteup ? `<div class="article-end"><p>Building an agent where reliability matters?</p><div class="article-end-cta"><span>I build reliable harnesses and evals for agents in interactive environments.</span><a href="https://www.linkedin.com/in/fahim-a/" target="_blank" rel="noopener noreferrer">Let’s chat ↗</a></div></div>` : ""}</article>
     </main>
     <footer class="site-footer"><div class="footer-inner"><span>OpenFront Harness · Built by Fahim Ahmed</span><span>OpenFront v0.32.9 · <a href="https://github.com/openfrontio/OpenFrontIO">Upstream project</a></span></div></footer>
   </body></html>`);

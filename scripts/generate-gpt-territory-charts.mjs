@@ -14,6 +14,8 @@ const runFiles = [
   "b0462398-8031-4e4a-ba91-81e340d11c06.json.gz",
 ];
 
+const territoryRaceRunPrefixes = ["8463f549", "5c3016b7", "cdf646fa"];
+
 const colors = {
   gpt: "#5B5BD6",
   Hokkaido: "#E76F51",
@@ -245,9 +247,9 @@ function territoryRaceSmallMultiples(runs) {
     height,
     title: "GPT-5.6 Luna territory races",
     description:
-      "Five separate panels chart GPT-5.6 Luna and the built-in nations' territory shares during each evaluated match.",
+      "Three separate panels chart GPT-5.6 Luna and the built-in nations' territory shares during three matches that crossed the 80 percent victory threshold.",
     body: `
-      <text class="title" x="${plotLeft}" y="55">Five paths through the Japan eval</text>
+      <text class="title" x="${plotLeft}" y="55">Three wins in the Japan eval</text>
       <text class="subtitle" x="${plotLeft}" y="87">Each panel shows one GPT-5.6 Luna match against the built-in nations</text>
       ${legend}
       ${panels}
@@ -372,6 +374,9 @@ function modelActionMix() {
 
 const runs = runFiles.map(loadRun);
 const representativeRun = runs.find((run) => run.runId.startsWith("5c3016b7"));
+const territoryRaceRuns = territoryRaceRunPrefixes.map((prefix) =>
+  runs.find((run) => run.runId.startsWith(prefix)),
+);
 
 mkdirSync(outputDir, { recursive: true });
 writeFileSync(
@@ -380,6 +385,6 @@ writeFileSync(
 );
 writeFileSync(
   join(outputDir, "gpt-5.6-territory-races.svg"),
-  territoryRaceSmallMultiples(runs),
+  territoryRaceSmallMultiples(territoryRaceRuns),
 );
 writeFileSync(join(outputDir, "model-action-mix.svg"), modelActionMix());
