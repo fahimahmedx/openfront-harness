@@ -116,6 +116,19 @@
         </div>
 
         <div class="table-wrap">
+          <div class="results-toolbar">
+            <span>Showing benchmark results</span>
+            <label class="model-selector">
+              <span>Model</span>
+              <select
+                data-model-selector
+                aria-label="Model results for full matches"
+                aria-controls="match-results-table"
+              >
+                <option value="gpt-5.6-luna">GPT-5.6 Luna</option>
+              </select>
+            </label>
+          </div>
           <table>
             <thead>
               <tr>
@@ -127,7 +140,7 @@
                 <th scope="col">Trial scores</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="match-results-table" data-model-results="gpt-5.6-luna">
               <tr>
                 <td>
                   <b>Match 01</b
@@ -208,7 +221,8 @@
                 <td>
                   <b>Match 06</b
                   ><small
-                    >Sylvoria spawn · 5 AI opponents (1 Nation + 4 tribes)</small
+                    >Sylvoria spawn · 5 AI opponents (1 Nation + 4
+                    tribes)</small
                   >
                 </td>
                 <td>Four Islands · Hard</td>
@@ -317,8 +331,8 @@
             </tbody>
           </table>
           <p class="leaderboard-note">
-            Nation AIs use the full strategy systems. Tribe bots mainly expand and
-            attack.
+            Nation AIs use the full strategy systems. Tribe bots mainly expand
+            and attack.
           </p>
         </div>
       </section>
@@ -341,6 +355,19 @@
         </div>
 
         <div class="table-wrap">
+          <div class="results-toolbar">
+            <span>Showing benchmark results</span>
+            <label class="model-selector">
+              <span>Model</span>
+              <select
+                data-model-selector
+                aria-label="Model results for focused capabilities"
+                aria-controls="capability-results-table"
+              >
+                <option value="gpt-5.6-luna">GPT-5.6 Luna</option>
+              </select>
+            </label>
+          </div>
           <table class="capability-table">
             <thead>
               <tr>
@@ -352,7 +379,10 @@
                 <th scope="col">Result</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody
+              id="capability-results-table"
+              data-model-results="gpt-5.6-luna"
+            >
               <tr>
                 <td><b>Neutral expansion</b><small>01 · Expansion</small></td>
                 <td>Great Lakes · Hard</td>
@@ -514,5 +544,6 @@
         <a href="/">Back to the harness ↑</a>
       </div>
     </footer>
+    <script type="module" src="/src/client/evals.ts"></script>
   </body>
 </html>
