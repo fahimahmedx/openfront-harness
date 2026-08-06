@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "775ace3d60a192130f8aa7358ccaf218da633745e30320eb5d004308ac7bbe38",
+  "runId": "c57f9b3c-8ce7-4cdc-b0f4-ec326611ae83",
+  "trialId": "fbf0d807-9fed-4f56-a909-e143affd34b5",
+  "taskId": "cap-losing-attack-retreat-scored-world-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "openai/gpt-5.6-luna",
+    "resolved": "openai/gpt-5.6-luna",
+    "provider": "OpenAI",
+    "promptVersion": "agent-v12"
+  },
+  "startedAt": "2026-08-06T05:54:55.770Z",
+  "completedAt": "2026-08-06T05:54:59.994Z",
+  "hashes": {
+    "checkpoint": 8047701585045727,
+    "final": 7353530522560368
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 2017.8243750000006,
+        "timeToFirstTokenMs": 1169.6705420000003,
+        "generationMs": 848.1538330000003,
+        "completionTokens": 59,
+        "timePerOutputTokenMs": 14.623341948275867,
+        "queueMs": null,
+        "generationId": "gen-1785995698-sZUGmYAbXThmu5iMBdzS"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3465,
+    "completionTokens": 59,
+    "costUsd": 0.00007032
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "original-attack-ended",
+      "observed": false,
+      "operator": "=",
+      "threshold": false,
+      "passed": true
+    },
+    {
+      "id": "troops-recovered",
+      "observed": 412976,
+      "operator": ">=",
+      "threshold": 445000,
+      "passed": false
+    },
+    {
+      "id": "territory-preserved",
+      "observed": 831,
+      "operator": ">=",
+      "threshold": 824,
+      "passed": true
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 3803,
+    "finalTileCount": 831,
+    "finalTroops": 412976,
+    "finalTroopCapacityPercent": 89.21010564041342,
+    "initialTileCount": 824,
+    "initialTroops": 260561,
+    "initialTroopCapacityPercent": 56.355373388778794,
+    "territoryChange": 7,
+    "terminal": false
+  },
+  "componentCoverage": 0.75,
+  "taskScore": 0,
+  "artifactPath": "artifacts/fbf0d807-9fed-4f56-a909-e143affd34b5.capability.json.gz"
+}

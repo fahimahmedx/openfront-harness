@@ -120,7 +120,7 @@ export const MICRO_EVAL_FIXTURES: Record<
       observation:
         "3d64dd7da745cfbcf09a1138531ad42e1109f240b07e14bc570806a6190eb78d",
       candidateMenu:
-        "7f9b2e5f78d83140a97dd3624285d2465c8e1fcea18cf82d6669b3172a281a9f",
+        "adbe1cde97fae0bb8acb4e48f5bfca3ed094dcbd03b3820dba51c5eb9583a0d7",
       tileState:
         "9fd62a0db30bc50168b0205720cb6a4a9ec968c3dc84953a22918392fd5eee68",
     },
@@ -133,7 +133,7 @@ export const MICRO_EVAL_FIXTURES: Record<
       observation:
         "ca7c9e949bfd9609227b7fb25beb5d1a24af4bf166ea366cd7ab2eabf673f02b",
       candidateMenu:
-        "593f12e021bc19c3b3112a8e6626b320b42c51341873a4a5c0efd8a5edec2a4c",
+        "6c0b2d01dea6b3248f9015a9b9997859819fe64250721ff9c37de5566797de61",
       tileState:
         "0f6942f3ec35f144bc40f3198e7fed23b641c46befa44caad1a0fea55150339f",
     },

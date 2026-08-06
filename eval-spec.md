@@ -1,580 +1,715 @@
-# OpenFront Agent Micro-Eval Specification
+# OpenFront Public Benchmark Specification
 
-Status: proposed capability suite, version `openfront-micro-v1`.
+Status: release-candidate design for `openfront-bench-v0.1`; the current repository
+implements only the original Japan development fixtures. A result MUST NOT be
+called an `openfront-bench-v0.1` result until every release gate in section 15 is
+met and the frozen manifest is published.
 
-This specification follows the evaluation practices described in Anthropic's
-[Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents):
-grade outcomes rather than prescribed trajectories, prove tasks with reference
-solutions, isolate trials, combine deterministic grading with trace review, and
-report repeated-trial reliability instead of a single score.
+This document is normative. **MUST**, **MUST NOT**, **SHOULD**, and **MAY** have
+their usual requirements-language meanings. It is intended to contain the full
+benchmark contract: task set, participant boundary, scoring, statistics,
+artifacts, local validation, publication guidance, governance, assumptions, and
+launch work.
 
-## 1. Purpose and scope
+## 1. Benchmark goal
 
-This suite measures whether an agent makes sound local decisions while playing
-OpenFront through the production harness. It complements the full `japan-v5`
-match:
+OpenFront Bench measures whether an AI agent can play a deterministic real-time
+strategy game through the production OpenFront harness. The public benchmark
+has 22 scored tasks in two suites:
 
-- the full match measures whether a policy can win one long episode; and
-- the micro-eval identifies which game-playing capabilities succeed or fail.
+1. **Match suite (primary):** twelve complete games across different maps,
+   spawn geometries, opponent counts, Nation policies, tribe bots, and Medium or
+   Hard difficulty.
+2. **Capability suite (diagnostic):** ten multi-map checkpoint tasks covering ten
+   local strategic capabilities. Each task contains one model decision and a
+   deterministic rollout.
 
-`openfront-micro-v1` is a **capability eval**. Its tasks should contain useful
-headroom and may initially have low pass rates. It is not a regression gate.
-Stable, saturated fixtures may later be copied into a separately versioned
-regression suite whose expected pass rate is near 100%.
+The repository also contains ten existing Japan development fixtures, one per
+capability. They are practice tests for prompt and harness development and
+regression checks. They are not public benchmark tasks, do not appear in the
+benchmark release manifest, and never affect a benchmark score.
 
-The suite evaluates the model and agent harness together. The agent receives the
-production game prompt, normalized observation, and legal action menu; it does
-not receive the task name, fixture metadata, grader, reference policy, or
-expected outcome. Its response goes through the production provider request,
-schema validation, retry, resolver, troop policy, and OpenFront engine.
+The public benchmark measures the model and agent harness together. It grades
+game outcomes, not preferred action sequences or prose. The match score is the
+primary benchmark metric. Capability score, validity, latency, and cost are
+required companion metrics and MUST NOT be combined into a hidden composite.
 
-This suite does not replace unit tests for schemas, validators, action conflicts,
-or replay determinism. Those test whether the harness is implemented correctly;
-the micro-eval tests the policy expressed through that harness.
+This benchmark does not replace unit tests for schemas, validators, action
+conflicts, map loading, replay determinism, or graders. Those establish that the
+benchmark implementation works; benchmark tasks measure policy performance.
 
-## 2. Evaluation vocabulary
+## 2. Assumptions and decisions made in this specification
 
-| Term              | Meaning in this suite                                                                                                                           |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Capability family | One of the ten behaviors in section 8.                                                                                                          |
-| Fixture           | One deterministic checkpoint and its hidden grader metadata.                                                                                    |
-| Task              | Running one fixture with one model/configuration.                                                                                               |
-| Trial             | One independent attempt at a task.                                                                                                              |
-| Trace             | The observation, legal menu, accepted decision, attempt diagnostics, applied intents, lifecycle events, state hashes, and metrics from a trial. |
-| Outcome           | The authoritative OpenFront state at the end of the evaluation horizon or earlier terminal state.                                               |
-| Assertion         | One deterministic check against the outcome.                                                                                                    |
-| Reference policy  | A known legal decision that passes every required assertion.                                                                                    |
-| Control policy    | A legal, plausible decision used to demonstrate that the grader rejects a meaningful failure.                                                   |
+The following assumptions are explicit so they can be changed before the first
+frozen release:
 
-A provider retry is part of one trial; it is not another trial. Replaying a
-recorded decision is a determinism check; it is not an independent model trial.
+- A public benchmark should test general play, not only the existing fixed Japan
+  match. Therefore the primary suite uses six bundled maps and two fixed spawns
+  per map.
+- The official engine remains OpenFront `v0.32.9` at commit
+  `dcc18d5231af6253b0e991bf04a4c764982fe262` for version 0.1. Upgrading the
+  engine creates a new non-equivalent benchmark version.
+- All maps use `GameMapSize.Normal`, Free For All, Singleplayer, a 20 simulated
+  minute ceiling, a 100-tick decision interval, exactly two simultaneous action
+  slots, and at most 120 decisions while the agent is alive.
+- Nations and tribe bots are both useful opponents. Nations exercise diplomacy,
+  structures, and long-horizon strategy; tribe bots add irregular nearby
+  pressure and target-selection noise. Difficulty applies to the built-in AI as
+  resolved by the pinned engine.
+- Medium and Hard are sufficient for the first release. Easy has too little
+  headroom and Impossible may make early spawn variance dominate policy quality.
+- Exact fixed spawns are preferable to random spawn because they make trials
+  replayable. Geographic diversity comes from the task matrix instead.
+- Public scored fixtures are published for reproducibility. They are
+  procedurally held out while the development fixtures and frozen prompt are
+  prepared. Anyone publishing a result SHOULD disclose tuning against them. A
+  rolling private set is not assumed to exist.
+- The official version 0.1 comparison uses three independent model trials per
+  full-match task and ten per scored capability fixture: 36 complete matches
+  plus 100 capability decisions per configuration. With the configured ceilings,
+  the maximum model cost is USD 46 per configuration; actual cost is reported.
+- The existing production prompt, observation, legal action generator, resolver,
+  troop policy, retry behavior, and two-slot interface remain the Standard-track
+  agent boundary.
+- Version 0.1 uses the existing OpenRouter adapter. The evaluated model MUST be
+  available through OpenRouter, and each user supplies their own API key and
+  pays their own provider costs.
+- Version 0.1 has a maintainer-hosted leaderboard containing only first-party
+  runs executed by the maintainer with the frozen Standard harness. There is no
+  external score-submission channel. Anyone MAY run the benchmark and publish
+  their own report, but external results are not added to the hosted leaderboard.
+  Custom prompts, policies, planners, or agent implementations MAY reuse the
+  tasks only when clearly labeled `unofficial-custom-agent`.
+- Model generation may be unseeded. OpenFront engine state is deterministic for
+  a fixed task, preparation, and accepted decision sequence.
+- The benchmark maintainer is
+  [`fahimahmedx`](https://github.com/fahimahmedx), who owns benchmark releases,
+  fixture acceptance, first-party leaderboard runs, and publication decisions.
+  The maintainer does not accept, verify, endorse, or rank external scores.
 
-## 3. Dataset design
+## 3. Standard configuration and agent boundary
 
-Version 1 contains ten capability families and **at least two fixtures per
-family**, for a minimum of 20 tasks. One checkpoint per family is not sufficient
-for release because it makes task-specific overfitting too easy and yields a
-fragile aggregate.
+### 3.1 Fixed-harness requirements
 
-Fixtures are divided before model or prompt tuning:
+The Standard track compares models or model configurations using the frozen
+benchmark harness. Participants MAY set only:
 
-- **development fixtures** may be inspected while building the harness; and
-- **test fixtures** are not used to change the evaluated prompt, action policy,
-  or model configuration before a published comparison.
+- model and provider;
+- provider routing, if reported;
+- documented reasoning-effort controls;
+- temperature and other request parameters exposed by the official runner; and
+- credentials, rate limits, and a per-run output directory.
 
-Because this is an open repository, “test” means procedurally held out, not
-secret forever. A used test set may be published for reproducibility, but new
-comparisons that were tuned against it must use a newly versioned test set.
-Published headline scores use the test split only. Development results may be
-shown for diagnosis but must be labeled and must never be pooled with test
-results.
+They MUST NOT change the system prompt, observation, candidate construction,
+action resolver, troop policy, retries, fallback behavior, task order after it
+is drawn, or game configuration. A provider-side model revision is a new
+evaluated configuration even if its public model alias is unchanged.
 
-New fixtures should come from real evidence in this order:
+There is no official custom-agent division in version 0.1. A configuration that
+changes the prompt, observation, candidate generator, resolver, troop policy,
+retry behavior, fallback, memory, tool access, or decision logic does not produce
+a comparable Standard result. Such experiments MAY reuse the public tasks, but
+their reports MUST say `unofficial-custom-agent`.
 
-1. failures found in full-match traces;
-2. behaviors manually checked before a release;
-3. bug reports or user-observed failures; and
-4. intentionally constructed boundary cases for an existing capability.
+### 3.2 What the agent receives
 
-The suite must contain contrasting cases so that optimization is not one-sided.
-In particular, it tests expansion and recovery, offense and restraint, one-front
-and two-front defense, and land and naval reachability. Within a family,
-fixtures must vary at least one strategically relevant factor such as opponent,
-troop ratio, geography, preparation trajectory, or threshold.
+At each decision the agent receives only the production game instructions, the
+normalized observation, and the legal two-slot candidate menu. It does not
+receive the task ID, map task metadata beyond normal observation, checkpoint
+grader, thresholds, reference/control policies, source trace, expected
+opponents, state hash, or split.
 
-## 4. Common fixture contract
+One corrective retry is part of the same decision. After the retry, an invalid
+response becomes two holds. Five consecutive complete decision failures abort a
+full match. Provider errors and fallbacks are valid agent failures, not
+infrastructure-invalid trials.
 
-Every fixture must:
+## 4. Frozen common configuration
 
-- use the pinned OpenFront version and map assets;
-- record the source seed, ordered preparation intents, checkpoint tick, engine
-  RNG state if not derivable, and pre-decision state hash;
-- recreate the same normalized observation and legal candidate menu, verified
-  by hashes of their canonical serialized forms;
-- start the LLM player alive with exactly two action slots;
-- expose enough information in the normal observation and menu for a capable
-  agent to decide correctly, without relying on hidden engine state;
-- make every grader-checked requirement either clear from the prompt or a
-  natural consequence of the stated game rules;
-- record its evaluation horizon and all thresholds, regions, entity roles, and
-  checkpoint-relative ownership sets used by the grader;
-- identify entities by fixture roles in metadata, resolving generated IDs only
-  when the checkpoint is built;
-- include one reference policy that passes and at least two control policies
-  that fail for the intended reason; and
-- be solvable without exploiting grader access, leaked metadata, stale files,
-  another trial's state, or exact generated IDs.
+| Field | Version 0.1 value |
+| --- | --- |
+| OpenFront | `v0.32.9`, commit `dcc18d5231af6253b0e991bf04a4c764982fe262` |
+| Map assets | Files at that commit; every file SHA-256 recorded in the manifest |
+| Mode / type | Free For All / Singleplayer |
+| Map size | Normal |
+| Human players | One evaluated LLM player |
+| Random spawn | `false` |
+| Donations | Gold `false`, troops `false` |
+| Cheats | Infinite gold `false`, infinite troops `false`, instant build `false` |
+| Decision interval | 100 ticks / 10 simulated seconds |
+| Action slots | Exactly two, resolved simultaneously |
+| Candidate ceiling | 64 candidates before the two slot-specific hold entries |
+| Decision ceiling | 120 while the LLM player is alive |
+| Match ceiling | 20 simulated minutes |
+| Wall-clock ceiling | 10 minutes per match, 2 minutes per capability trial |
+| Model-cost ceiling | USD 1 per match and USD 0.10 per capability trial |
+| Response handling | Strict schema, one corrective retry, then two holds |
+| Failure abort | Five consecutive complete decision failures in a match |
+| Troop policy | Expansion reserve 15%; combat reserve 35%; combat trigger 55%; minimum attacker/defender ratio 20%; emergency reserve 15% |
 
-Unless a family says otherwise, the player is not within one decision interval
-of timer victory or elimination and has no hostile incoming attack.
+The release manifest MUST store the complete schema-parsed `GameConfig` and a
+hash of the fully resolved engine configuration. This table is not permission
+to rely on unrecorded engine defaults. Alliances, ports, structures, nukes, SAMs,
+and the ordinary version-1 doomsday/timer behavior remain enabled unless the
+resolved manifest explicitly says otherwise.
 
-Each trial starts in a fresh process or equivalently reset engine instance. It
-must not share files, caches, mutable game objects, rate-limit state, or model
-conversation history with another trial. Fixture execution order should be
-randomized, and configurations in a comparison should be interleaved to reduce
-time-of-day and provider-drift bias.
+## 5. Match suite task matrix
 
-After the decision is applied, the engine advances for the fixture's fixed
-horizon using the ordinary built-in nation policies. If the game ends first,
-the terminal state is the outcome. Otherwise, the state at the exact final tick
-is the outcome. The grader compares checkpoint metadata with this authoritative
-state, not with the agent's strategy note or a claimed result.
+Each row is one match task. The spawn labels are descriptive; coordinates are
+authoritative. `N` means built-in Nation players and `T` means tribe bots. The
+listed opponent names are deterministic consequences of the seed and pinned
+engine and MUST be checked after spawn. A mismatch invalidates the trial before
+the first model request.
 
-## 5. Grading
+| ID | Map | Seed | LLM spawn | Difficulty | Opponents | Expected deterministic roster |
+| --- | --- | --- | --- | --- | --- | --- |
+| `match-01` | Japan | `OFB101` | Kanto `(1613,1133)` | Medium | 3 N | Shikoku; Tokyo; Chubu |
+| `match-02` | Japan | `OFB102` | Okinawa `(397,2283)` | Hard | 3 N + 2 T | Kanto; Tokyo; Kyoto; Filipino Republics; Mapuche Regime |
+| `match-03` | Europe Classic | `OFB103` | France `(729,648)` | Medium | 5 N | Portugal; Lithuania; Italy; Poland; Tunisia |
+| `match-04` | Europe Classic | `OFB104` | Iceland `(171,171)` | Hard | 3 N + 3 T | France; Romania; Ukraine; Palmyrene Ascendancy; Romanov Assembly; Iroquois Sisterhood |
+| `match-05` | Four Islands | `OFB105A` | Korinthal `(403,1296)` | Medium | 3 N | Myrkwind; Lunareth; Sylvoria |
+| `match-06` | Four Islands | `OFB106` | Sylvoria `(1328,322)` | Hard | 1 N + 4 T | Myrkwind; Danish Alliance; Zuni Hierarchy; York Kingdom; Hopi Army |
+| `match-07` | Great Lakes | `OFB107A` | Detroit `(1120,1098)` | Medium | 5 N | Toronto; Goderich; Parry Sound; Rouyn-Noranda; Green Bay |
+| `match-08` | Great Lakes | `OFB108` | Duluth `(38,326)` | Hard | 3 N + 3 T | Marquette; Marathon; Wausau; Tuareg Supremacy; Ptolemaic District; Almohad Protectorate |
+| `match-09` | Strait of Gibraltar | `OFB109` | Andalusia `(1555,258)` | Medium | 3 N + 2 T | Spain; Portugal; Rif; Stuart Duchy; Mongolian Monkdom |
+| `match-10` | Strait of Gibraltar | `OFB110` | Morocco `(1287,1175)` | Hard | 1 N + 5 T | Shilha; Rashidun Territory; Latin Colony; Norwegian Matriarchy; Wolof Free State; Kazakh Queendom |
+| `match-11` | World | `OFB111` | Germany `(990,195)` | Medium | 7 N | Cuba; South Africa; Japan; Peru; Chad; Oman; Antarctica |
+| `match-12` | World | `OFB112` | New Zealand `(1890,775)` | Hard | 5 N + 4 T | India; Poland; Romania; Antarctica; Iran; Hittite Republic; British Monkdom; Mapuche Federation; Filipino Army |
 
-### 5.1 Primary outcome grade
+This matrix deliberately crosses continental, island, strait, inland-water, and
+global geography; central and edge spawns; three to nine opponents; pure Nation
+and mixed Nation/tribe rosters; and Medium and Hard AI. The launch acceptance
+run MUST verify that every named spawn is land and that no selected Nation uses
+the evaluated player's named anchor.
 
-Every task has one or more required deterministic assertions. A trial passes
-only when **all** required assertions pass:
+### 5.1 Match termination and authoritative placement
+
+A match ends at the first of engine victory, evaluated-player elimination, 120
+decisions while alive, 20 simulated minutes, the cost ceiling, the wall-clock
+ceiling, or five consecutive decision failures. Cost and wall-clock termination
+are valid outcomes and place the player using the last authoritative state.
+
+At termination, surviving players rank by land tiles, descending. Eliminated
+players rank after survivors, later elimination first; equal elimination ticks
+break by land tiles immediately before elimination, then stable engine player
+order. An engine-declared winner is rank 1. The initial field size is the LLM
+plus all configured opponents.
+
+For trial `i` with initial field size `P_i` and one-indexed rank `r_i`:
+
+```text
+match_points_i = 100 * (P_i - r_i) / (P_i - 1)
+```
+
+The match-suite headline is the unweighted macro-average of the twelve task
+means, so larger lobbies and repeated trials do not receive more weight:
+
+```text
+match_score = mean_task(mean_trial(match_points))
+```
+
+Required diagnostics are win rate, mean placement, survival rate, final land
+share, final troop share, victory/termination reason, decisions, validity,
+latency, tokens, and cost. Match points reward relative game outcome without
+creating map-specific territory thresholds; win rate remains visible and MUST
+never be omitted from a leaderboard report.
+
+## 6. Capability suite and development tools
+
+Version 0.1 has exactly ten scored capability tasks, one per family. These are
+new multi-map fixtures and all ten contribute to the capability score. The ten
+existing Japan fixtures remain separate development tools: they can be inspected
+and used freely while improving the prompt, observation, actions, or graders.
+This separation reduces the risk of designing the harness around the exact
+scored situations.
+
+The scored fixtures below are required work, not fabricated finished fixtures.
+They become benchmark tasks only after hashes, graders, references, controls,
+and acceptance reports are frozen.
+
+| Family | Development aid (not scored) | Public scored source |
+| --- | --- | --- |
+| Neutral expansion | existing Japan/Kanto | `match-08` Great Lakes/Duluth |
+| Saturated-capacity expansion | existing Japan/Kanto | `match-11` World/Germany |
+| Post-expansion recovery | existing Japan/Kanto | `match-04` Europe/Iceland |
+| Weaker-target selection | existing Japan/Kanto | `match-03` Europe/France |
+| Frontier restraint | existing Japan/Kanto | `match-10` Gibraltar/Morocco |
+| Incoming-attack response | existing Japan/Kanto | `match-07` Great Lakes/Detroit |
+| Split-front defense | existing Japan/Kanto | `match-06` Four Islands/Sylvoria |
+| Losing-attack retreat | existing Japan/Kanto | `match-12` World/New Zealand |
+| Naval target recognition | existing Japan/Kanto | `match-09` Gibraltar/Andalusia |
+| Construction-failure recovery | existing Japan/Kanto | `match-03` Europe/France |
+
+Canonical fixture IDs use
+`cap-<family-slug>-<split>-<map-slug>-<three-digit-ordinal>`, for example
+`cap-naval-target-recognition-scored-gibraltar-001`. A fixture source identifies
+the base map, seed, spawn, difficulty, and opponent policy; ordered preparation
+intents create the exact checkpoint.
+
+The Japan development fixtures MAY be inspected while building the harness.
+Scored fixtures MUST be generated and accepted after the evaluated prompt and
+action policy are frozen. If scored results influence either, the next claim
+MUST use a newly versioned scored fixture set.
+
+## 7. Common capability fixture contract
+
+Every scored capability fixture MUST:
+
+- use a match task's pinned map, seed, spawn, difficulty, opponent counts, and
+  assets;
+- record ordered preparation intents, checkpoint tick, engine RNG state if not
+  derivable, pre-decision state hash, and all periodic hashes;
+- recreate identical normalized observation, legal menu, and tile-state hashes;
+- start the evaluated player alive with exactly two legal action slots;
+- expose enough information through the ordinary observation and menu for a
+  capable agent to decide without hidden state;
+- record its fixed horizon, grader version, thresholds, regions, entity roles,
+  and checkpoint-relative ownership sets;
+- resolve generated player, attack, unit, and action IDs to semantic fixture
+  roles only when the checkpoint is built;
+- contain one reference policy that passes five clean replays and at least two
+  legal control policies that fail for the intended reason;
+- admit any legal trajectory that reaches the graded outcome, regardless of
+  action ID, slot order, action count, fraction, or strategy wording; and
+- be solvable without grader access, leaked metadata, stale files, cross-trial
+  state, exact generated IDs, or provider-specific behavior.
+
+Unless a family says otherwise, the player is not one decision interval from
+timer victory or elimination and has no hostile incoming attack. After the
+decision, the ordinary built-in policies advance the engine to the exact fixed
+horizon or earlier terminal state.
+
+Each trial uses a fresh process or proven-equivalent reset. It MUST NOT share
+mutable maps, game objects, files, caches, rate-limit state, or conversation
+history with another trial. Fixture order is randomized from a recorded runner
+seed. Configurations in a comparison are interleaved.
+
+## 8. Capability families and graders
+
+Every required assertion is evaluated against authoritative engine state. The
+concrete thresholds and role-owned tile sets live in the frozen fixture
+manifest, not in agent-visible input.
+
+### 8.1 Neutral expansion
+
+**Capability:** Spend a safe early troop surplus on neutral territory.
+
+**Checkpoint:** No opponent border or incoming attack; bordered unclaimed land;
+70–90% troop capacity; no active neutral expansion; all four expansion fractions
+available in both slots.
+
+**Horizon:** 100 ticks.
+
+**Pass:** Own at least one tile that was neutral at checkpoint.
+
+### 8.2 Saturated-capacity expansion
+
+**Capability:** Recognize that waiting at maximum capacity does not rebuild the
+army.
+
+**Checkpoint:** At least 98% capacity with near-zero growth; bordered unclaimed
+land; no hostile border or incoming attack; positive `spendableTroops`.
+
+**Horizon:** 100 ticks.
+
+**Pass:** Own at least one tile that was neutral at checkpoint.
+
+### 8.3 Post-expansion recovery
+
+**Capability:** Rebuild after expansion without surrendering territory.
+
+**Checkpoint:** At most 20% capacity; one active neutral expansion; no incoming
+attack; at least one small troop-spending distractor remains legal.
+
+**Horizon:** 100 ticks.
+
+**Pass:** Alive; capacity increased; land-tile count is not below checkpoint.
+
+### 8.4 Weaker-target selection
+
+**Capability:** Progress against a vulnerable opponent when a dangerous
+alternative is also available.
+
+**Checkpoint:** Exactly two attackable bordered opponents with land-attack
+candidates; weak target has at most 40% of player troops; other has 80–99%; no
+incoming attacks or alliances; weak target has capturable adjacent territory.
+
+**Horizon:** 200 ticks.
+
+**Pass:** Own at least one checkpoint tile of the designated weak target.
+
+### 8.5 Frontier restraint
+
+**Capability:** Avoid a low-value attack while rebuilding against a nearly equal
+opponent.
+
+**Checkpoint:** Exactly one attackable bordered opponent at 75–95% of player
+troops; player at 55–70% capacity; attack candidates exist; no incoming or
+outgoing attack; calibrated protected frontier tiles.
+
+**Horizon:** 200 ticks.
+
+**Pass:** Alive; capacity increased; losses in `protectedTiles` do not exceed
+`maximumAllowedTileLoss`.
+
+### 8.6 Incoming-attack response
+
+**Capability:** Preserve threatened territory during one active incoming land
+attack.
+
+**Checkpoint:** Exactly one hostile incoming attack; counter candidates at 25%,
+50%, 75%, and 100% of capped per-slot emergency budget; calibrated such that a
+reference defense passes and double hold fails.
+
+**Horizon:** 200 ticks.
+
+**Pass:** Alive; losses in `protectedTiles` do not exceed the fixture maximum.
+
+### 8.7 Split-front defense
+
+**Capability:** Preserve both frontiers during simultaneous attacks.
+
+**Checkpoint:** Exactly two opponents attack; incoming troop counts differ by at
+most 10%; both have counters in both slots; neither attack is certain to fail
+without response; frontier tile sets are disjoint.
+
+**Horizon:** 200 ticks.
+
+**Pass:** Alive; neither frontier exceeds its own maximum protected-tile loss.
+
+### 8.8 Losing-attack retreat
+
+**Capability:** End a deteriorated offensive commitment and recover forces.
+
+**Checkpoint:** Exactly one outgoing attack with force at most 25% of defender
+troops; negligible prior-interval progress; retreat is legal; no incoming
+attack; calibrated `minimumRecoveredTroops`.
+
+**Horizon:** 100 ticks.
+
+**Pass:** Alive; original attack inactive; available troops meet the fixture
+minimum; land-tile count is not below checkpoint.
+
+### 8.9 Naval target recognition
+
+**Capability:** Establish a foothold against a vulnerable target unreachable by
+land.
+
+**Checkpoint:** No land border with target; legal transport attack; target has at
+most 40% of player troops; no land attack against an opponent; no incoming
+attack.
+
+**Horizon:** 300 ticks.
+
+**Pass:** Own at least one checkpoint tile of the designated target.
+
+### 8.10 Construction-failure recovery
+
+**Capability:** Recover from stale construction failure and establish a needed
+defensive structure.
+
+**Checkpoint:** Most recent decision has failed Defense Post construction with
+`anchor_lost` or `placement_blocked`; failed structure absent; sufficient gold;
+new candidate at a different anchor; hostile border but no incoming attack;
+replacement deterministically completes in a calibrated defense zone.
+
+**Horizon:** 200 ticks.
+
+**Pass:** Alive; own a completed active Defense Post in `defenseZoneTiles`.
+
+For all families, required diagnostics include each assertion's observed value,
+threshold, outcome, action lifecycle, troop/capacity minimum and final values,
+territory change, relevant attacks or units, and terminal state.
+
+## 9. Capability grading and aggregate
+
+A capability trial is binary:
 
 ```text
 task_pass = AND(required assertions)
 task_score = 100 if task_pass else 0
+component_coverage = passed assertions / required assertions
 ```
 
-The grader may inspect core state, ownership, units, attacks, resources, and
-terminal outcome. It must not award or remove gameplay credit based on action
-IDs, slot order, action count, troop fraction, strategy wording, retries, or a
-preferred trajectory. Any legal decision that reaches the required outcome
-passes.
-
-If a task has multiple assertions, also report `component_coverage`, the
-fraction that passed. This is diagnostic partial credit, not the headline score;
-it distinguishes a near miss from a total failure without weakening the task's
-success contract.
-
-### 5.2 Other graders and metrics
-
-Code-based transcript checks report interface reliability separately:
-
-- first-attempt valid response rate;
-- retry rate by stable failure code;
-- fallback-to-holds rate;
-- applied-action lifecycle outcomes;
-- total decision latency and per-attempt TTFT/generation metrics; and
-- prompt tokens, completion tokens, and model cost.
-
-These checks do not alter the outcome grade. A retry or fallback can still cause
-the gameplay outcome to fail, which is the appropriate consequence when the
-production harness behaves that way.
-
-No LLM judge is required for version 1. The outcomes are machine-verifiable, and
-the public strategy note is not reliable evidence of the policy's reasoning. If
-a future task needs a model grader, it must have a single-dimension rubric, an
-`unknown` option, examples at each score boundary, and measured agreement with
-expert human labels before release.
-
-### 5.3 Invalid trials
-
-A trial is invalid and rerun only when the eval infrastructure cannot present or
-grade the task—for example, checkpoint hash mismatch, engine crash, missing
-fixture metadata, or grader exception. Report invalid-trial counts and reasons.
-
-Provider errors, malformed model responses, corrective retries, and production
-fallbacks are agent-harness behavior. They remain valid trials and count toward
-the result.
-
-## 6. Repeated trials and statistics
-
-Model generation is unseeded, so a single attempt is anecdotal. Predeclare the
-number of trials before starting:
-
-- development runs: at least 10 trials per fixture; and
-- published model/configuration comparisons: at least 20 trials per fixture.
-
-Larger samples are required when the intended decision depends on a small score
-difference. Do not stop early because a result looks favorable, discard legal
-failures, or select the best sample.
-
-For every fixture, report:
-
-- successes and total valid trials;
-- empirical `pass@1` (successes divided by trials);
-- a 95% Wilson confidence interval for `pass@1`;
-- mean component coverage; and
-- estimated `pass^3 = pass@1³`, labeled as an estimate of three-run
-  consistency rather than an observed result.
-
-For each capability family and the suite aggregate, report the macro-average of
-its fixture rates with a stratified bootstrap confidence interval that resamples
-trials within fixtures and fixtures within families. Do not treat heterogeneous
-fixtures as one identically distributed binomial sample.
-
-`pass@k` for `k > 1` is not a headline metric because the deployed harness gets
-one gameplay decision, not multiple solutions from which an oracle selects the
-best. If a future product actually permits multiple attempts and defines a
-selection rule, that system may report observed `pass@k` separately.
-
-For comparisons, use the same eval version and trial count, interleave runs, and
-report the pass-rate difference with a confidence interval. Claims of
-improvement must not be based only on overlapping point estimates or on the
-aggregate hiding a regressed family.
-
-## 7. Required trace and run metadata
-
-Every trial record must contain enough evidence to reproduce the engine outcome
-and audit the grade:
-
-- eval version, suite split, family ID, fixture ID, and grader version;
-- OpenFront commit, scenario ID, prompt version, harness commit, model, provider,
-  reasoning configuration, request parameters, and run timestamp;
-- checkpoint state, observation, and candidate-menu hashes;
-- exact normalized observation and legal candidate menu shown to the model;
-- accepted strategy note and selected action IDs;
-- failed-attempt codes, retries, fallback state, and usage/latency metrics;
-- resolved intents and post-execution lifecycle events;
-- checkpoint, periodic, and final state hashes; and
-- each assertion's observed value, threshold, pass/fail result, and overall
-  task grade.
-- a renderer-compatible OpenFront game record containing the preparation,
-  evaluated decision, rollout horizon, intent-bearing turns, and periodic
-  hashes.
-
-The trace need not persist private chain-of-thought or raw rejected model text.
-Existing privacy and artifact-retention rules continue to apply.
-
-## 8. Capability families
-
-The requirements below define a family. Each released fixture supplies concrete
-checkpoint-relative IDs, ownership sets, and calibrated thresholds.
-
-### 1. Neutral expansion
-
-**Capability:** Converts a safe early troop surplus into neutral territory
-instead of waiting unnecessarily.
-
-**Checkpoint requirements:**
-
-- No shared border with an opponent and no incoming attack.
-- Unclaimed land borders the player's territory.
-- Troop capacity is between 70% and 90%.
-- No outgoing neutral expansion is still consuming troops.
-- All four neutral-expansion fractions are available in both slots.
-
-**Horizon:** 100 ticks.
-
-**Required assertion:** The player owns at least one tile that was neutral at
-the checkpoint.
-
-**Diagnostics:** Neutral tiles gained, troop capacity, and action lifecycle
-outcomes.
-
-### 2. Saturated-capacity expansion
-
-**Capability:** Understands that holding at maximum troop capacity does not
-rebuild the army further.
-
-**Checkpoint requirements:**
-
-- Troop capacity is at least 98% and troop growth is near zero.
-- Unclaimed bordered land and neutral-expansion actions are available.
-- There is no incoming attack or hostile shared border.
-- The observation reports positive `spendableTroops`.
-
-**Horizon:** 100 ticks.
-
-**Required assertion:** The player owns at least one tile that was neutral at
-the checkpoint.
-
-**Diagnostics:** Neutral tiles gained, troop capacity, troop growth, and action
-lifecycle outcomes. Strategy wording may be inspected during trace review but
-is not a metric.
-
-### 3. Post-expansion recovery
-
-**Capability:** Rebuilds troop capacity without surrendering territory after an
-expansion has depleted the army.
-
-**Checkpoint requirements:**
-
-- Troop capacity is at most 20%.
-- At least one outgoing neutral expansion is active.
-- There is no hostile incoming attack.
-- At least one small troop-spending action remains legal, so the menu does not
-  force inaction.
-- A no-new-commitment reference policy survives more reliably than the largest
-  offered new troop commitment.
-
-**Horizon:** 100 ticks.
-
-**Required assertions:**
-
-- The player is alive.
-- Troop capacity is greater than at the checkpoint.
-- The player owns at least as many land tiles as at the checkpoint.
-
-**Diagnostics:** Capacity change, minimum capacity, territory change, new troops
-committed, and survival.
-
-### 4. Weaker-target selection
-
-**Capability:** Makes progress against a vulnerable opponent when a more
-dangerous alternative is also available.
-
-**Checkpoint requirements:**
-
-- The player shares borders with exactly two attackable opponents.
-- Both opponents have proactive land-attack candidates.
-- The designated weak opponent has at most 40% of the player's troops.
-- The other opponent has between 80% and 99% of the player's troops.
-- Neither opponent has an active incoming attack against the player.
-- The weak opponent owns enough adjacent territory for measurable progress.
-- The player is allied with neither opponent.
-
-**Horizon:** 200 ticks.
-
-**Required assertion:** The player owns at least one tile that the designated
-weak opponent owned at the checkpoint.
-
-**Diagnostics:** Checkpoint-owned tiles captured from each opponent, territory
-change, active attacks, troop capacity, and action lifecycle outcomes.
-
-### 5. Frontier restraint
-
-**Capability:** Avoids a low-value offensive commitment when the only available
-opponent is nearly as strong and rebuilding is safer.
-
-**Checkpoint requirements:**
-
-- The player shares a border with exactly one attackable opponent.
-- The opponent has between 75% and 95% of the player's troops.
-- Troop capacity is between 55% and 70%, so proactive attack candidates exist
-  but the player is not saturated.
-- There is no incoming hostile attack or active outgoing attack.
-- The fixture records frontier `protectedTiles` and
-  `maximumAllowedTileLoss`.
-- A conservative reference policy increases capacity and protects the frontier;
-  selecting the largest offered attack in both slots fails at least one required
-  assertion.
-
-**Horizon:** 200 ticks.
-
-**Required assertions:**
-
-- The player is alive.
-- Troop capacity is greater than at the checkpoint.
-- No more than `maximumAllowedTileLoss` protected tiles are owned by another
-  player.
-
-**Diagnostics:** Troop commitment, minimum and final capacity, protected tiles
-lost, and territory change. Holding is not required if another legal strategy
-produces the same outcome.
-
-### 6. Incoming-attack response
-
-**Capability:** Preserves threatened territory during one active incoming
-attack.
-
-**Checkpoint requirements:**
-
-- Exactly one opponent has a hostile incoming land attack.
-- The force threatens meaningful territory but is small enough that counter
-  candidates exist.
-- Counter variants at 25%, 50%, 75%, and 100% of the capped per-slot emergency
-  budget are available.
-- The fixture records frontier `protectedTiles` and
-  `maximumAllowedTileLoss`, calibrated so a reference defense passes and double
-  hold fails.
-
-**Horizon:** 200 ticks.
-
-**Required assertions:**
-
-- The player is alive.
-- No more than `maximumAllowedTileLoss` protected tiles are owned by another
-  player.
-
-**Diagnostics:** Protected tiles lost, attacker ownership gains, incoming force
-remaining, minimum troop capacity, and action lifecycle outcomes.
-
-### 7. Split-front defense
-
-**Capability:** Preserves both threatened frontiers during simultaneous incoming
-attacks.
-
-**Checkpoint requirements:**
-
-- Exactly two opponents have hostile incoming attacks.
-- Their incoming troop counts differ by no more than 10%.
-- Both attackers have counterattack candidates in both slots.
-- Neither attack is already certain to fail without a response.
-- The fixture records disjoint `protectedTiles` and a separate
-  `maximumAllowedTileLoss` for each frontier.
-
-**Horizon:** 200 ticks.
-
-**Required assertions:**
-
-- The player is alive.
-- Frontier A loses no more than its `maximumAllowedTileLoss`.
-- Frontier B loses no more than its `maximumAllowedTileLoss`.
-
-**Diagnostics:** Protected tiles lost on each frontier, ownership gains by each
-attacker, incoming forces remaining, minimum troop capacity, and whether a legal
-two-attacker response was rejected.
-
-### 8. Losing-attack retreat
-
-**Capability:** Ends a deteriorated offensive commitment and recovers forces
-without losing territory.
-
-**Checkpoint requirements:**
-
-- The player has exactly one outgoing attack.
-- Its force is at most 25% of the defender's current troops.
-- It made negligible progress during the preceding decision interval.
-- A retreat action for it is legal.
-- The player has no hostile incoming attack.
-- The fixture records `minimumRecoveredTroops`, calibrated so a timely reference
-  retreat reaches it and allowing the attack to continue does not.
-
-**Horizon:** 100 ticks.
-
-**Required assertions:**
-
-- The player is alive.
-- The original losing attack is no longer active.
-- Available troops are at least `minimumRecoveredTroops`.
-- The player owns at least as many land tiles as at the checkpoint.
-
-**Diagnostics:** Original attack status, troops recovered, territory change,
-outgoing attack count, and action lifecycle outcomes. A retreat action itself is
-not required if another legal method reaches the outcome.
-
-### 9. Naval target recognition
-
-**Capability:** Establishes a foothold against a vulnerable opponent that cannot
-be reached by land.
-
-**Checkpoint requirements:**
-
-- The player does not share a border with the designated target.
-- A transport-ship attack against the target is legal.
-- The target has at most 40% of the player's troops.
-- No land attack against any opponent is available.
-- There is no hostile incoming attack.
-
-**Horizon:** 300 ticks.
-
-**Required assertion:** The player owns at least one tile that the designated
-target owned at the checkpoint.
-
-**Diagnostics:** Target tiles captured, transports started or failed, landing
-events, transport troops remaining, and territory change.
-
-### 10. Construction-failure recovery
-
-**Capability:** Recovers from a stale construction failure and establishes a
-needed defensive structure.
-
-**Checkpoint requirements:**
-
-- The most recent decision records a failed Defense Post construction with
-  `failureCode: "anchor_lost"` or `"placement_blocked"`.
-- The failed structure does not exist.
-- The player has enough gold and a new legal Defense Post candidate at a
-  different anchor.
-- The player has a hostile shared border but no active incoming attack.
-- The selected replacement completes under the deterministic rollout.
-- The fixture records `defenseZoneTiles`, the acceptable protected area for the
-  replacement.
-
-**Horizon:** 200 ticks.
-
-**Required assertions:**
-
-- The player is alive.
-- The player owns a completed, active Defense Post within `defenseZoneTiles`.
-
-**Diagnostics:** Defense Post location and status, distance from the hostile
-frontier, construction lifecycle outcomes, and any second failure code.
-
-## 9. Fixture acceptance gate
-
-Before a fixture enters either split, its owner must provide an acceptance
-report showing that:
-
-1. The checkpoint reproduces the same state, observation, and menu hashes in
-   five clean local rebuilds.
-2. Every checkpoint requirement is asserted from the normalized observation,
-   legal candidates, or authoritative core state.
-3. The reference policy passes every grader in five clean replays.
-4. At least two meaningfully different legal decisions that reach the required
-   outcome also pass, when the family admits alternatives.
-5. At least two control policies miss the intended outcome and score zero; one
-   should be a plausible distractor, not merely malformed output.
-6. Boundary-value tests exercise every threshold just below, at, and just above
-   the pass boundary where the engine permits construction of those states.
-7. The grader cannot be satisfied by changing fixture metadata, matching a
-   generated action ID, claiming success in text, or exploiting state left by a
-   previous trial.
-8. A human reviewer, without hidden grader metadata, can independently identify
-   the intended strategic tradeoff from the same observation and menu.
-9. The reviewer reads the reference and control traces and confirms that each
-   failure is fair, attributable, and not caused by ambiguous instructions or a
-   harness constraint.
-
-A 0% success rate across many trials triggers a fixture audit before it is
-interpreted as a model limitation. An impossible reference policy, an ambiguous
-task, or a valid creative solution rejected by the grader is an eval bug.
-
-## 10. Aggregate reporting
-
-Aggregate one named split at a time and by capability family so families with
-extra fixtures do not receive more weight:
+Component coverage is diagnostic partial credit only. Retries, wording, action
+IDs, slot order, or a preferred reference path MUST NOT add or remove gameplay
+credit.
+
+For fixture `f`, `pass@1_f` is successes divided by valid trials. In version 0.1
+there is one scored fixture per family, so each scored family rate equals that
+fixture's rate.
 
 ```text
-family_pass@1 = mean(fixture pass@1 within the family)
-micro_eval_score = 100 * mean(family_pass@1 across the 10 families)
+capability_score = 100 * mean(pass@1 of the ten scored fixtures)
 ```
 
-The headline report must show:
+All ten family rates MUST accompany the aggregate. Results from the Japan
+development tools MUST NOT be included. The capability score is never averaged
+with match score.
 
-| Metric                   | Meaning                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------ |
-| Micro-eval score         | Macro-average `pass@1`, scaled to 0–100, with a bootstrap 95% confidence interval over fixtures. |
-| Per-family `pass@1`      | Macro-average fixture success rate with a stratified bootstrap interval.                         |
-| Reliability              | Per-family and macro-average estimated `pass^3`.                                                 |
-| Component coverage       | Mean fraction of required outcome assertions satisfied.                                          |
-| First-attempt validity   | Responses accepted without a corrective retry.                                                   |
-| Retry and fallback rates | Rates with counts and stable failure codes.                                                      |
-| Latency                  | Median and p95 total decision latency; per-attempt timing remains available.                     |
-| Cost                     | Mean cost per task and estimated cost per 100 decisions.                                         |
-| Invalid trials           | Count and reason, excluded from the denominator.                                                 |
+## 10. Repetitions and statistics
 
-Always show all ten family results beside the aggregate. Full-match win rate,
-placement, territory, victory type, decision count, cost, and latency remain a
-separate report and are never folded into the micro-eval score.
+Predeclare trial counts before execution:
 
-## 11. Trace review, maintenance, and versioning
+- smoke/development: one match trial per task and at least ten capability trials
+  per fixture;
+- complete version 0.1 result: three match trials per task and ten
+  capability trials per scored fixture, for 36 matches and 100 capability
+  decisions in total; and
+- paired comparison: identical task membership and valid-trial target for every
+  configuration.
 
-Automated scores are not accepted at face value. For each candidate release:
+Do not stop early, drop legal failures, or select the best trial. Infrastructure-
+invalid trials are rerun until the declared valid count is reached or the run is
+reported incomplete.
 
-- review every unexpected reference/control result;
-- review every apparent grader disagreement or novel solution;
-- review all failures for a new fixture during acceptance; and
-- sample at least 10% of passing and 20% of failing model trials, with a minimum
-  of five from each class when available.
+For each capability fixture report successes, valid trials, empirical `pass@1`,
+95% Wilson interval, mean component coverage, and estimated
+`pass^3 = pass@1^3`. Label `pass^3` as an estimate, not an observed result.
 
-Record review findings as task ambiguity, grader bug, harness/environment bug,
-genuine policy failure, or valid novel solution. Do not manually flip a frozen
-trial's score. Fix the fixture or grader, increment the eval version, and rerun
-the comparison.
+For each match task report mean match points with a percentile-bootstrap 95%
+interval, wins, placement distribution, and survival. For each suite aggregate,
+use a stratified bootstrap that resamples trials within tasks and tasks within
+map or capability strata. Publish the bootstrap seed and at least 10,000
+replicates. Heterogeneous tasks MUST NOT be treated as one binomial sample.
 
-The suite has a named maintainer. Product and domain contributors may add tasks,
-but the maintainer owns fixture isolation, grader tests, release reports, and
-versioning. New real-world failures should be converted into development tasks
-before prompt changes are made.
+Comparisons report paired task-level differences with bootstrap intervals.
+Claims of improvement MUST show both aggregate suites and all per-map/per-family
+results; an aggregate gain does not erase a material regression.
 
-A capability fixture is considered saturated when it no longer distinguishes
-current configurations. Graduation to the regression suite is explicit, not
-automatic: it requires at least 95% observed `pass@1` over 50 or more trials in
-two evaluation releases, no unresolved grader disputes, and a frozen grader.
-Regression fixtures should run continuously and target near-100% pass rates;
-the capability suite should receive harder replacements as it saturates.
+## 11. Interface reliability, latency, and cost
 
-Any change to checkpoint construction, horizon, grader logic, threshold,
-fixture membership, split assignment, or aggregation creates a new eval version.
-Prompt, model, provider, reasoning, or agent-harness changes define a new
-evaluated configuration and must be recorded, but do not by themselves change
-the eval version. Comparisons across eval versions must be labeled non-equivalent.
+The following are mandatory separate metrics and never change gameplay grades:
+
+- first-attempt valid response rate;
+- corrective retry rate by stable failure code;
+- fallback-to-holds and five-failure abort rates;
+- resolved/applied/rejected action lifecycle outcomes;
+- total decision latency and per-attempt TTFT, generation time, and TPOT;
+- prompt and completion tokens;
+- model cost per decision, task, and complete suite; and
+- peak runner memory and wall-clock time for reproducibility diagnostics.
+
+Report median and p95 latency, mean cost, total cost, and raw counts. Cached
+tokens and provider discounts MUST be identified. Unknown cost is reported as
+unknown, never zero.
+
+## 12. Invalid trials
+
+A trial is invalid only when infrastructure cannot present or grade the frozen
+task: map/checkpoint/hash mismatch, wrong roster, engine or runner crash not
+caused by agent output, missing metadata, corrupted artifact, or grader
+exception. Record the reason and rerun.
+
+Provider errors, timeouts, malformed output, retries, production fallback,
+agent-triggered cost ceiling, and legal but harmful actions are valid outcomes.
+If attribution is unclear, preserve the artifact, mark it `needs-review`, and do
+not silently exclude it. The benchmark maintainer makes a documented ruling
+before publication.
+
+## 13. Manifest, trace, and artifact contract
+
+### 13.1 Release manifest
+
+The signed canonical JSON manifest covers only the 22 public benchmark tasks and
+MUST contain:
+
+- benchmark semantic version, release date, license, and maintainer;
+- OpenFront version/commit and SHA-256 for every map asset;
+- harness commit, prompt version/hash, schema versions, resolver version, troop
+  policy, grader package hash, and complete resolved configuration;
+- every task ID, suite, split, map enum/path, seed, fixed spawn, difficulty,
+  Nation/tribe counts, ordered expected roster, and all ceilings;
+- capability preparation turns, checkpoint tick and hashes, horizon, semantic
+  roles, thresholds, ownership sets, and grader version;
+- reference/control policy hashes and acceptance-report paths; and
+- the canonical task-order randomization algorithm, runner seed format, and
+  bootstrap implementation/version.
+
+The release archive MUST include JSON Schema files for the manifest, trial, and
+run report. Canonical JSON uses UTF-8, sorted object keys, no insignificant
+whitespace, decimal integers, and SHA-256 lowercase hex.
+
+### 13.2 Trial trace
+
+Every trial MUST record:
+
+- benchmark version, task/fixture/family/split, grader version, and run UUID;
+- model, immutable model revision when available, provider, routing, reasoning,
+  request parameters, prompt hash, timestamps, and runner host metadata;
+- checkpoint, observation, menu, tile-state, periodic, and final hashes;
+- exact normalized observations and legal menus shown to the model;
+- accepted public strategy note and selected action IDs;
+- failed-attempt codes, retries, fallback state, usage, cost, and latency;
+- resolved intents and post-execution lifecycle events;
+- each assertion's observed value, operator, threshold, pass/fail, component
+  coverage, and task grade; and
+- a renderer-compatible sparse OpenFront game record containing spawn,
+  preparation, agent decisions, rollout, intent-bearing turns, and periodic
+  hashes.
+
+Raw rejected output and private chain-of-thought are not required and SHOULD NOT
+be retained. Public strategy notes are untrusted text and MUST be escaped when
+rendered.
+
+### 13.3 Run report
+
+The report stores manifest hash, declared and completed trial counts, task order,
+all trial references, invalid counts/reasons, per-task summaries, suite
+aggregates, confidence intervals, reliability, interface metrics, cost/latency,
+and the exact CLI invocation with secrets removed. Writes are atomic and partial
+runs remain inspectable.
+
+## 14. Public running and maintainer-hosted leaderboard
+
+### 14.1 Running the public benchmark
+
+Anyone MAY clone the tagged release, supply their own OpenRouter credentials,
+and run the same frozen Standard configuration. Version 0.1 MUST provide this
+workflow:
+
+```bash
+git clone --recurse-submodules https://github.com/fahimahmedx/openfront-harness.git
+cd openfront-harness
+npm run inst
+cp example.env .env
+# Set OPENROUTER_API_KEY, OPENROUTER_MODEL, and optionally OPENROUTER_PROVIDER.
+npm run benchmark:smoke
+npm run benchmark:run -- --profile official
+npm run benchmark:verify -- data/benchmarks/<run-id>
+```
+
+`benchmark:smoke` checks credentials, model availability, structured output,
+one map/checkpoint path, replay generation, and cost estimation without producing
+a complete score. `benchmark:run` executes the recorded randomized schedule,
+writes atomically, and supports safe resume without permitting trial selection.
+`benchmark:verify` makes no model calls and checks schemas, manifest and harness
+hashes, task/trial counts, configuration consistency, rosters, spawns,
+checkpoints, replayed decisions, final hashes, graders, aggregates, artifact
+uniqueness, and duplicate traces.
+
+A locally verified report MAY be published by its owner. It SHOULD include all
+artifacts needed for reproduction and disclose whether public test tasks
+influenced model or request-parameter selection. External reports MUST identify
+themselves as `external-self-run` and MUST NOT imply inclusion in, verification
+by, or endorsement from the hosted OpenFront leaderboard.
+
+The project provides no score-upload endpoint, score-submission form, pull-
+request process, or email review path. The maintainer does not ingest external
+reports or artifacts into the hosted leaderboard.
+
+### 14.2 Hosted leaderboard
+
+The hosted leaderboard contains only first-party Standard runs executed by
+`fahimahmedx` using the frozen release and maintainer-controlled runner. The
+maintainer selects model/provider configurations, supplies credentials, runs
+the complete schedule, validates and replays every artifact, reviews all wins,
+invalid trials, and unusual terminations, and then publishes the result.
+
+The leaderboard shows, at minimum: rank, match score with interval, win rate,
+capability score with interval, all map and capability subscores, first-attempt
+validity, p50/p95 latency, total/mean cost, model revision, provider, benchmark
+version, run date, test-informed status, and links to downloadable reports and
+replays. Test-informed first-party configurations remain ranked with a prominent
+label and optional filter. Incomplete runs MAY be displayed as `preview` but do
+not receive a rank. Results from different benchmark versions are never placed
+in one ranking.
+
+## 15. Fixture acceptance and release gates
+
+Before a scored capability fixture enters the benchmark, its acceptance report
+MUST show:
+
+1. identical state, observation, menu, and tile hashes in five clean rebuilds;
+2. machine checks for every checkpoint requirement;
+3. reference policy passes all assertions in five clean replays;
+4. at least two different legal successful decisions when alternatives exist;
+5. at least two meaningful legal controls score zero, including one plausible
+   distractor;
+6. boundary tests just below, at, and just above every threshold where possible;
+7. no success through metadata edits, generated-ID matching, text claims, stale
+   state, or cross-trial leakage;
+8. a blinded human can identify the strategic tradeoff from ordinary input;
+9. reference/control trace review finds the outcome fair and attributable; and
+10. no map, spawn, opponent, prompt, or horizon gives away the family label.
+
+Before `openfront-bench-v0.1` release, the maintainer MUST also complete:
+
+- generic Node map loading with an allowlist and asset-hash verification;
+- scenario objects for all twelve match rows and tests for land spawns, rosters,
+  field sizes, difficulty, config hashes, and deterministic clean starts;
+- multi-map observation, action, pathfinding, checkpoint, replay, and renderer
+  tests;
+- the ten scored capability fixtures and their ten acceptance reports;
+- passing deterministic tests for the ten existing Japan development fixtures;
+- isolated-process execution and recorded randomized/interleaved ordering;
+- match scoring, tie-breaking, stratified bootstrap, report schema, and artifact
+  validator tests with golden examples;
+- a reference agent smoke run over every match and capability task;
+- replay verification of every reference/control trace and one complete
+  first-party run through leaderboard publication;
+- benchmark and artifact licenses, security/privacy review, contribution guide,
+  public-running guide, leaderboard publication policy, and a documented
+  maintainer/contact; and
+- a release candidate with no unresolved impossible, ambiguous, leaking, or
+  nondeterministic task.
+
+A 0% model pass rate triggers an audit before being called model failure. An
+impossible reference, valid creative solution rejected by the grader, ambiguous
+input, or harness-induced failure is an evaluation bug.
+
+## 16. Review, contamination, maintenance, and versioning
+
+For each release, review every unexpected reference/control result, every grader
+dispute, every invalid trial, all failures from a new fixture, at least 10% of
+passing model trials, and at least 20% of failing trials (minimum five from each
+available class). Classify findings as ambiguity, grader bug,
+harness/environment bug, genuine policy failure, or valid novel solution.
+
+Do not manually flip a frozen score. Fix the implementation, issue a new patch
+version if task semantics do not change or a new minor/major version if they do,
+and rerun affected comparisons.
+
+Anyone publishing an external result SHOULD disclose whether public tasks,
+artifacts, or replays were used for training, fine-tuning, prompt development,
+policy rules, request-parameter selection, or model selection. This disclosure
+is self-reported and is not verified by the benchmark maintainer. First-party
+leaderboard runs record the same disclosure and prominently label a
+configuration `test-informed` when applicable. A custom policy or
+fixture-specific lookup is not comparable to the frozen Standard configuration.
+
+A capability fixture is saturated after at least 95% observed `pass@1` over 50
+trials in two releases with no grader dispute. It MAY graduate to a separately
+versioned regression suite and be replaced by a harder fixture.
+
+Semantic versioning rules are:
+
+- **patch:** artifact/schema clarification or bug fix that provably leaves every
+  accepted action sequence and grade unchanged;
+- **minor:** task, threshold, grader, prompt, harness policy, map asset, or split
+  change that invalidates score equivalence; and
+- **major:** engine upgrade, agent interface change, suite/scoring definition
+  change, or material benchmark-purpose change.
+
+Prompt, model, provider, reasoning, or request changes identify a new evaluated
+configuration. Except for the frozen Standard prompt itself, they do not change
+the benchmark version. Comparisons across non-equivalent versions are labeled
+historical; the hosted leaderboard does not rank different versions together.
+
+## 17. Resolved launch decisions
+
+Version 0.1 launches with these owner-approved decisions:
+
+1. The benchmark is public and anyone may run the frozen Standard configuration
+   with their own OpenRouter credentials and publish an `external-self-run`
+   report.
+2. The hosted leaderboard contains only first-party runs executed and published
+   by `fahimahmedx`. External scores are not accepted, verified, or ranked, and
+   there is no submission workflow.
+3. A complete configuration runs three trials for each of twelve full-match
+   tasks and ten trials for each of ten scored capability fixtures: 36 matches
+   and 100 capability decisions, with a configured maximum model cost of USD 46.
+4. Test-informed first-party Standard entries remain ranked with a prominent
+   disclosure label and an optional leaderboard filter.
+5. The named benchmark maintainer is
+   [`fahimahmedx`](https://github.com/fahimahmedx).

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "775ace3d60a192130f8aa7358ccaf218da633745e30320eb5d004308ac7bbe38",
+  "runId": "c57f9b3c-8ce7-4cdc-b0f4-ec326611ae83",
+  "trialId": "1684ca3f-c7e3-4060-b59a-1905a88d6778",
+  "taskId": "cap-naval-target-recognition-scored-strait-of-gibraltar-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "openai/gpt-5.6-luna",
+    "resolved": "openai/gpt-5.6-luna",
+    "provider": "OpenAI",
+    "promptVersion": "agent-v12"
+  },
+  "startedAt": "2026-08-06T05:54:36.148Z",
+  "completedAt": "2026-08-06T05:54:40.122Z",
+  "hashes": {
+    "checkpoint": "9141791540387038",
+    "final": 8804650805105200
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 943.609958,
+        "timeToFirstTokenMs": 618.663458,
+        "generationMs": 324.9465,
+        "completionTokens": 61,
+        "timePerOutputTokenMs": 5.415775,
+        "queueMs": null,
+        "generationId": "gen-1785995678-0BOSgymltJNU81VptmVW"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3001,
+    "completionTokens": 61,
+    "costUsd": 0.00006688
+  },
+  "assertions": [
+    {
+      "id": "captures-target-tile",
+      "observed": 11480,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": true
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 5003,
+    "finalTileCount": 471050,
+    "finalTroops": 4145579,
+    "finalTroopCapacityPercent": 76.50939552079619,
+    "initialTileCount": 459570,
+    "initialTroops": 3759683,
+    "initialTroopCapacityPercent": 70.35449097425088,
+    "territoryChange": 11480,
+    "terminal": false
+  },
+  "componentCoverage": 1,
+  "taskScore": 100,
+  "artifactPath": "artifacts/1684ca3f-c7e3-4060-b59a-1905a88d6778.capability.json.gz"
+}

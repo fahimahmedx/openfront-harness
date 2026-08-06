@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "benchmark-fixture-acceptance-v1",
+  "fixtureId": "cap-construction-failure-recovery-scored-europe-classic-001",
+  "status": "accepted",
+  "sourceArtifact": "data/benchmark-fixture-sources/match-03/68ee3632-fd48-42db-8b76-6645a96e8fbe.json.gz",
+  "cleanRebuilds": [
+    {
+      "state": 7757807469498684,
+      "observation": "333d66aa88c02de2f7267149359ce8b34327fd8384057cfa59e0102173071321",
+      "candidateMenu": "c0faa4e58c30413b10f3c18f7476adc916dfdaa7113eaf7a59ec63278f19affe",
+      "tileState": "94f7e835a66525cb1cfafd43ad0697c399835cd26cd6e16cc9ecf98147b4deb1"
+    },
+    {
+      "state": 7757807469498684,
+      "observation": "333d66aa88c02de2f7267149359ce8b34327fd8384057cfa59e0102173071321",
+      "candidateMenu": "c0faa4e58c30413b10f3c18f7476adc916dfdaa7113eaf7a59ec63278f19affe",
+      "tileState": "94f7e835a66525cb1cfafd43ad0697c399835cd26cd6e16cc9ecf98147b4deb1"
+    },
+    {
+      "state": 7757807469498684,
+      "observation": "333d66aa88c02de2f7267149359ce8b34327fd8384057cfa59e0102173071321",
+      "candidateMenu": "c0faa4e58c30413b10f3c18f7476adc916dfdaa7113eaf7a59ec63278f19affe",
+      "tileState": "94f7e835a66525cb1cfafd43ad0697c399835cd26cd6e16cc9ecf98147b4deb1"
+    },
+    {
+      "state": 7757807469498684,
+      "observation": "333d66aa88c02de2f7267149359ce8b34327fd8384057cfa59e0102173071321",
+      "candidateMenu": "c0faa4e58c30413b10f3c18f7476adc916dfdaa7113eaf7a59ec63278f19affe",
+      "tileState": "94f7e835a66525cb1cfafd43ad0697c399835cd26cd6e16cc9ecf98147b4deb1"
+    },
+    {
+      "state": 7757807469498684,
+      "observation": "333d66aa88c02de2f7267149359ce8b34327fd8384057cfa59e0102173071321",
+      "candidateMenu": "c0faa4e58c30413b10f3c18f7476adc916dfdaa7113eaf7a59ec63278f19affe",
+      "tileState": "94f7e835a66525cb1cfafd43ad0697c399835cd26cd6e16cc9ecf98147b4deb1"
+    }
+  ],
+  "machineChecks": {
+    "checkpointRequirements": true,
+    "twoActionSlots": true,
+    "ordinaryInputOnly": true
+  },
+  "referenceReplays": {
+    "attempted": 5,
+    "passed": 5
+  },
+  "controls": [
+    "double-hold",
+    "plausible-distractor"
+  ],
+  "review": {
+    "blindedTradeoffIdentifiable": true,
+    "fairAndAttributable": true
+  }
+}

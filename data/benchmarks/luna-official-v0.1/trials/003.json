@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "158ab7aa3fe04452df162b320ddc6429fc789548867044893c7916abf1b856a9",
+  "runId": "82c9478d-a516-4eda-8291-eb7e3b92daa7",
+  "trialId": "3d44d4c8-c7c7-44be-a3b7-1e18062582e1",
+  "taskId": "cap-weaker-target-selection-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "openai/gpt-5.6-luna",
+    "resolved": "openai/gpt-5.6-luna",
+    "provider": "OpenAI",
+    "promptVersion": "agent-v12"
+  },
+  "startedAt": "2026-08-06T05:15:26.278Z",
+  "completedAt": "2026-08-06T05:15:31.337Z",
+  "hashes": {
+    "checkpoint": 7394309500874276,
+    "final": 8452231023712392
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 3132.409,
+        "timeToFirstTokenMs": 2760.40375,
+        "generationMs": 372.00525000000016,
+        "completionTokens": 62,
+        "timePerOutputTokenMs": 6.098446721311478,
+        "queueMs": null,
+        "generationId": "gen-1785993328-hkExkwz0eh7zHdvbSQEA"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3097,
+    "completionTokens": 62,
+    "costUsd": 0.00042425
+  },
+  "assertions": [
+    {
+      "id": "captures-target-tile",
+      "observed": 146,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": true
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 3703,
+    "finalTileCount": 136969,
+    "finalTroops": 1821854,
+    "finalTroopCapacityPercent": 55.79131539199504,
+    "initialTileCount": 119056,
+    "initialTroops": 1894607,
+    "initialTroopCapacityPercent": 67.16908352159116,
+    "territoryChange": 17913,
+    "terminal": false
+  },
+  "componentCoverage": 1,
+  "taskScore": 100,
+  "artifactPath": "artifacts/3d44d4c8-c7c7-44be-a3b7-1e18062582e1.capability.json.gz"
+}

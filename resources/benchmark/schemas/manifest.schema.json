@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/fahimahmedx/openfront-harness/schemas/openfront-bench-v0.1/manifest.schema.json",
+  "title": "OpenFront Bench v0.1 release manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "benchmarkVersion",
+    "releaseDate",
+    "license",
+    "maintainer",
+    "engine",
+    "mapAssets",
+    "harnessCommit",
+    "promptVersion",
+    "promptHash",
+    "schemaVersions",
+    "resolverVersion",
+    "troopPolicy",
+    "graderPackageHash",
+    "taskOrder",
+    "bootstrap",
+    "tasks"
+  ],
+  "properties": {
+    "benchmarkVersion": { "const": "openfront-bench-v0.1" },
+    "releaseDate": { "type": "string", "format": "date" },
+    "license": { "type": "string", "minLength": 1 },
+    "maintainer": { "type": "string", "minLength": 1 },
+    "engine": {
+      "type": "object",
+      "required": ["version", "commit"],
+      "properties": {
+        "version": { "const": "v0.32.9" },
+        "commit": { "const": "dcc18d5231af6253b0e991bf04a4c764982fe262" }
+      }
+    },
+    "mapAssets": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/sha256" }
+    },
+    "harnessCommit": { "type": "string", "minLength": 7 },
+    "promptVersion": { "type": "string", "minLength": 1 },
+    "promptHash": { "$ref": "#/$defs/sha256" },
+    "schemaVersions": { "type": "object" },
+    "resolverVersion": { "type": "string", "minLength": 1 },
+    "troopPolicy": { "type": "object" },
+    "graderPackageHash": { "$ref": "#/$defs/sha256" },
+    "taskOrder": { "type": "object" },
+    "bootstrap": { "type": "object" },
+    "tasks": {
+      "type": "array",
+      "minItems": 22,
+      "maxItems": 22,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "suite",
+          "split",
+          "map",
+          "seed",
+          "spawn",
+          "resolvedConfigHash"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "suite": { "enum": ["match", "capability"] },
+          "split": { "const": "scored" },
+          "resolvedConfigHash": { "$ref": "#/$defs/sha256" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

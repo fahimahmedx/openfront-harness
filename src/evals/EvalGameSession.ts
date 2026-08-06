@@ -27,6 +27,12 @@ import {
   OPENFRONT_COMMIT,
   SCENARIO,
 } from "../Scenario";
+import {
+  BENCHMARK_CLIENT_ID,
+  BENCHMARK_MAPS,
+  BenchmarkMatchTask,
+  createBenchmarkStartInfo,
+} from "../benchmark/BenchmarkConfig";
 
 const PROJECT_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -84,6 +90,7 @@ export class EvalGameSession {
     runner: GameRunner,
     mapSnapshots: MapSnapshot[],
     private readonly gameStart: GameStartInfo,
+    private readonly clientID: string,
     private readonly callbackState: {
       session: EvalGameSession | null;
       pendingUpdates: Array<GameUpdateViewData | ErrorUpdate>;
@@ -97,16 +104,23 @@ export class EvalGameSession {
   static async create(
     playerModelName: string,
     mapsDir = path.join(PROJECT_ROOT, "OpenFrontIO/resources/maps"),
+    benchmarkTask?: BenchmarkMatchTask,
   ): Promise<EvalGameSession> {
     const callbackState: {
       session: EvalGameSession | null;
       pendingUpdates: Array<GameUpdateViewData | ErrorUpdate>;
     } = { session: null, pendingUpdates: [] };
-    const gameStart = createScenarioStartInfo(playerModelName);
+    const gameStart = benchmarkTask
+      ? createBenchmarkStartInfo(benchmarkTask, playerModelName)
+      : createScenarioStartInfo(playerModelName);
+    const clientID = benchmarkTask ? BENCHMARK_CLIENT_ID : SCENARIO.clientID;
     const runner = await createGameRunner(
       gameStart,
-      SCENARIO.clientID,
-      new NodeGameMapLoader(mapsDir),
+      clientID,
+      new NodeGameMapLoader(
+        mapsDir,
+        benchmarkTask ? BENCHMARK_MAPS : undefined,
+      ),
       (update) => {
         if (callbackState.session === null) {
           callbackState.pendingUpdates.push(update);
@@ -119,6 +133,7 @@ export class EvalGameSession {
       runner,
       [snapshotMap(runner.game.map()), snapshotMap(runner.game.miniMap())],
       gameStart,
+      clientID,
       callbackState,
     );
     callbackState.session = session;
@@ -144,12 +159,18 @@ export class EvalGameSession {
   }
 
   execute(intents: Intent[] = []): void {
+    this.executePrepared(
+      intents.map((intent) => ({ ...intent, clientID: this.clientID })),
+    );
+  }
+
+  executePrepared(intents: Array<Intent & { clientID?: string }> = []): void {
     this.assertOpen();
     const turn: Turn = {
       turnNumber: this.turns.length,
       intents: intents.map((intent) => ({
         ...intent,
-        clientID: SCENARIO.clientID,
+        clientID: intent.clientID ?? this.clientID,
       })),
     };
     this.turns.push(turn);

@@ -573,10 +573,13 @@ export function createLegalActions(
         opponent.troops(),
       );
     const troopAmounts = countering
-      ? budgetedTroopAmounts(
-          policy,
-          counterTroopCap(incomingTroops, totalHostileIncoming),
-        )
+      ? budgetedTroopAmounts({
+          ...policy,
+          perActionTroopBudget: Math.min(
+            policy.perActionTroopBudget,
+            counterTroopCap(incomingTroops, totalHostileIncoming),
+          ),
+        })
       : ordinaryOffense
         ? budgetedTroopAmounts(policy).filter(
             ({ troops }) =>
@@ -779,9 +782,21 @@ export function createLegalActions(
     buckets.set(candidate.category, bucket);
   }
   const selected = [...holds];
+  const emergencyCounters = actions.filter((candidate) =>
+    candidate.id.startsWith("counter:"),
+  );
+  for (const candidate of emergencyCounters) {
+    if (selected.length < SCENARIO.maxCandidates) selected.push(candidate);
+  }
   const categories = Array.from(buckets.keys()).sort(
     (a, b) => categoryOrder[a] - categoryOrder[b],
   );
+  for (const [category, bucket] of buckets) {
+    buckets.set(
+      category,
+      bucket.filter((candidate) => !candidate.id.startsWith("counter:")),
+    );
+  }
   for (let round = 0; selected.length < SCENARIO.maxCandidates; round++) {
     let added = false;
     for (const category of categories) {

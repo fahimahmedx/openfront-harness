@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/fahimahmedx/openfront-harness/schemas/openfront-bench-v0.1/trial.schema.json",
+  "title": "OpenFront Bench v0.1 trial",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "benchmarkVersion",
+    "manifestHash",
+    "runId",
+    "trialId",
+    "taskId",
+    "suite",
+    "split",
+    "status",
+    "model",
+    "startedAt",
+    "completedAt",
+    "hashes",
+    "attempts",
+    "usage",
+    "assertions",
+    "diagnostics",
+    "componentCoverage",
+    "taskScore",
+    "artifactPath"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "benchmark-trial-v1" },
+    "benchmarkVersion": { "const": "openfront-bench-v0.1" },
+    "manifestHash": { "$ref": "#/$defs/sha256" },
+    "runId": { "type": "string", "format": "uuid" },
+    "trialId": { "type": "string", "format": "uuid" },
+    "taskId": { "type": "string", "minLength": 1 },
+    "suite": { "enum": ["match", "capability"] },
+    "split": { "const": "scored" },
+    "status": { "enum": ["valid", "invalid", "needs-review"] },
+    "invalidReason": { "type": ["string", "null"] },
+    "model": { "type": "object" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "completedAt": { "type": "string", "format": "date-time" },
+    "hashes": { "type": "object" },
+    "attempts": { "type": "object" },
+    "usage": { "type": "object" },
+    "assertions": { "type": "array" },
+    "diagnostics": { "type": "object" },
+    "componentCoverage": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "taskScore": { "type": "number", "minimum": 0, "maximum": 100 },
+    "artifactPath": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

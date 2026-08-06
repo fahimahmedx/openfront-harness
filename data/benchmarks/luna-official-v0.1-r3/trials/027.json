@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "775ace3d60a192130f8aa7358ccaf218da633745e30320eb5d004308ac7bbe38",
+  "runId": "c57f9b3c-8ce7-4cdc-b0f4-ec326611ae83",
+  "trialId": "48118f38-8305-4113-9114-e0e40f16e445",
+  "taskId": "cap-frontier-restraint-scored-strait-of-gibraltar-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "openai/gpt-5.6-luna",
+    "resolved": "openai/gpt-5.6-luna",
+    "provider": "OpenAI",
+    "promptVersion": "agent-v12"
+  },
+  "startedAt": "2026-08-06T05:54:40.439Z",
+  "completedAt": "2026-08-06T05:54:44.153Z",
+  "hashes": {
+    "checkpoint": 8981880362868571,
+    "final": 8941326880758917
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 973.2440000000001,
+        "timeToFirstTokenMs": 682.0063749999999,
+        "generationMs": 291.2376250000002,
+        "completionTokens": 57,
+        "timePerOutputTokenMs": 5.200671875000004,
+        "queueMs": null,
+        "generationId": "gen-1785995683-QodAINDeGpH7LViOoU1N"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3075,
+    "completionTokens": 57,
+    "costUsd": 0.00006522
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "capacity-increased",
+      "observed": 56.78878089517529,
+      "operator": ">",
+      "threshold": 56.46262697666879,
+      "passed": true
+    },
+    {
+      "id": "protected-frontier-held",
+      "observed": 1287,
+      "operator": "<=",
+      "threshold": 1201,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 4903,
+    "finalTileCount": 477572,
+    "finalTroops": 3100884,
+    "finalTroopCapacityPercent": 56.78878089517529,
+    "initialTileCount": 476160,
+    "initialTroops": 3077953,
+    "initialTroopCapacityPercent": 56.46262697666879,
+    "territoryChange": 1412,
+    "terminal": false
+  },
+  "componentCoverage": 0.6666666666666666,
+  "taskScore": 0,
+  "artifactPath": "artifacts/48118f38-8305-4113-9114-e0e40f16e445.capability.json.gz"
+}

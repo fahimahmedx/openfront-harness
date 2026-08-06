@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/fahimahmedx/openfront-harness/schemas/openfront-bench-v0.1/run-report.schema.json",
+  "title": "OpenFront Bench v0.1 run report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "benchmarkVersion",
+    "classification",
+    "complete",
+    "manifestHash",
+    "runId",
+    "runnerSeed",
+    "bootstrapSeed",
+    "bootstrapReplicates",
+    "declaredTrials",
+    "completedTrials",
+    "taskOrder",
+    "trialReferences",
+    "invalidTrials",
+    "summaries",
+    "exactInvocation"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "benchmark-run-v1" },
+    "benchmarkVersion": { "const": "openfront-bench-v0.1" },
+    "classification": {
+      "enum": [
+        "first-party-standard",
+        "external-self-run",
+        "unofficial-custom-agent"
+      ]
+    },
+    "complete": { "type": "boolean" },
+    "manifestHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "runId": { "type": "string", "format": "uuid" },
+    "runnerSeed": { "type": "string", "minLength": 1 },
+    "bootstrapSeed": { "type": "string", "minLength": 1 },
+    "bootstrapReplicates": { "type": "integer", "minimum": 10000 },
+    "declaredTrials": { "type": "object" },
+    "completedTrials": { "type": "object" },
+    "taskOrder": { "type": "array", "items": { "type": "string" } },
+    "trialReferences": { "type": "array", "items": { "type": "string" } },
+    "invalidTrials": { "type": "array" },
+    "summaries": { "type": "object" },
+    "exactInvocation": { "type": "string", "minLength": 1 }
+  }
+}

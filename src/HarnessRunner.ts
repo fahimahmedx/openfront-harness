@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import path from "path";
 import { fileURLToPath } from "url";
-import { Player, PlayerType, Team } from "../OpenFrontIO/src/core/game/Game";
+import { Player, Team } from "../OpenFrontIO/src/core/game/Game";
 import {
   GameUpdateType,
   HashUpdate,
@@ -38,6 +38,15 @@ import {
   publicScenario,
   SCENARIO,
 } from "./Scenario";
+import {
+  BENCHMARK_CLIENT_ID,
+  BENCHMARK_LIMITS,
+  BENCHMARK_MAPS,
+  BenchmarkMatchTask,
+  createBenchmarkStartInfo,
+  publicBenchmarkTask,
+} from "./benchmark/BenchmarkConfig";
+import { matchPoints } from "./benchmark/BenchmarkStatistics";
 import {
   AgentResult,
   DecisionRecord,
@@ -86,27 +95,27 @@ export type PlacementEntry = {
 export function calculateFinalPlacement(
   entries: PlacementEntry[],
   playerId: string,
+  winnerId?: string,
 ): number {
-  const player = entries.find((entry) => entry.id === playerId);
-  if (!player) return entries.length;
-  if (player.alive) {
-    return (
-      [...entries]
-        .map((entry, order) => ({ entry, order }))
-        .filter(({ entry }) => entry.alive)
-        .sort((a, b) => b.entry.tiles - a.entry.tiles || a.order - b.order)
-        .findIndex(({ entry }) => entry.id === playerId) + 1
-    );
-  }
-  return (
-    1 +
-    entries.filter(
-      (entry) =>
-        entry.id !== playerId &&
-        (entry.alive ||
-          (entry.eliminatedAt ?? -1) > (player.eliminatedAt ?? -1)),
-    ).length
-  );
+  const ranked = entries
+    .map((entry, order) => ({ entry, order }))
+    .sort((left, right) => {
+      if (left.entry.id === winnerId) return -1;
+      if (right.entry.id === winnerId) return 1;
+      if (left.entry.alive !== right.entry.alive) {
+        return left.entry.alive ? -1 : 1;
+      }
+      if (left.entry.alive) {
+        return right.entry.tiles - left.entry.tiles || left.order - right.order;
+      }
+      return (
+        (right.entry.eliminatedAt ?? -1) - (left.entry.eliminatedAt ?? -1) ||
+        right.entry.tiles - left.entry.tiles ||
+        left.order - right.order
+      );
+    });
+  const index = ranked.findIndex(({ entry }) => entry.id === playerId);
+  return index < 0 ? entries.length : index + 1;
 }
 
 export class HarnessRunner {
@@ -117,6 +126,7 @@ export class HarnessRunner {
       PROJECT_ROOT,
       "OpenFrontIO/resources/maps",
     ),
+    private readonly benchmarkTask?: BenchmarkMatchTask,
   ) {}
 
   static fromEnvironment(store: RunStore): HarnessRunner {
@@ -126,7 +136,26 @@ export class HarnessRunner {
     return new HarnessRunner(store, new OpenRouterAgent(apiKey));
   }
 
+  static benchmarkFromEnvironment(
+    store: RunStore,
+    task: BenchmarkMatchTask,
+  ): HarnessRunner {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey)
+      throw new Error("OPENROUTER_API_KEY is required to run matches");
+    return new HarnessRunner(
+      store,
+      new OpenRouterAgent(apiKey),
+      path.join(PROJECT_ROOT, "OpenFrontIO/resources/maps"),
+      task,
+    );
+  }
+
   async run(runId: string = randomUUID()): Promise<RunArtifact> {
+    const limits = this.benchmarkTask ? BENCHMARK_LIMITS : SCENARIO;
+    const clientID = this.benchmarkTask
+      ? BENCHMARK_CLIENT_ID
+      : SCENARIO.clientID;
     const startedAt = new Date();
     let progress: RunProgress = {
       runId,
@@ -134,14 +163,18 @@ export class HarnessRunner {
       startedAt: startedAt.toISOString(),
       tick: 0,
       decisionCount: 0,
-      maxDecisionCount: SCENARIO.maxDecisionCount,
-      latestStrategy: "Loading Japan and initializing the four players…",
+      maxDecisionCount: limits.maxDecisionCount,
+      latestStrategy: this.benchmarkTask
+        ? `Loading ${this.benchmarkTask.map} and initializing the field…`
+        : "Loading Japan and initializing the four players…",
       costUsd: 0,
     };
     this.store.setProgress(progress);
     await this.store.savePending(progress);
 
-    const gameStart = createScenarioStartInfo(this.agent.requestedModel);
+    const gameStart = this.benchmarkTask
+      ? createBenchmarkStartInfo(this.benchmarkTask, this.agent.requestedModel)
+      : createScenarioStartInfo(this.agent.requestedModel);
     const turns: Turn[] = [];
     const decisions: DecisionRecord[] = [];
     let lastHash: number | null = null;
@@ -157,8 +190,11 @@ export class HarnessRunner {
     const lifecycleGroups = new Set<TrackedAction[]>();
     const runner = await createGameRunner(
       gameStart,
-      SCENARIO.clientID,
-      new NodeGameMapLoader(this.mapsDir),
+      clientID,
+      new NodeGameMapLoader(
+        this.mapsDir,
+        this.benchmarkTask ? BENCHMARK_MAPS : undefined,
+      ),
       (update) => {
         if ("errMsg" in update) {
           fatalError = update.errMsg;
@@ -186,7 +222,7 @@ export class HarnessRunner {
         turnNumber: turns.length,
         intents: intents.map((intent) => ({
           ...intent,
-          clientID: SCENARIO.clientID,
+          clientID,
         })),
       };
       turns.push(turn);
@@ -206,43 +242,50 @@ export class HarnessRunner {
 
     let terminationReason = "maximum decisions reached";
     try {
-      const spawnTile = game.ref(SCENARIO.spawn.x, SCENARIO.spawn.y);
+      const spawn = this.benchmarkTask?.spawn ?? SCENARIO.spawn;
+      const spawnTile = game.ref(spawn.x, spawn.y);
       if (!game.isLand(spawnTile)) {
         throw new Error("Configured Kanto spawn is not a land tile");
       }
       executeTurn([{ type: "spawn", tile: spawnTile }]);
       for (let i = 0; i < 20; i++) {
         const allSpawned =
-          game.players().length === 4 &&
-          game.players().every((player) => player.hasSpawned());
+          game.players().length ===
+            (this.benchmarkTask
+              ? 1 +
+                this.benchmarkTask.nationCount +
+                this.benchmarkTask.tribeBotCount
+              : 4) && game.players().every((player) => player.hasSpawned());
         if (allSpawned && !game.inSpawnPhase()) break;
         executeTurn();
       }
 
-      const player = game.playerByClientID(SCENARIO.clientID);
+      const player = game.playerByClientID(clientID);
       if (!player?.hasSpawned()) throw new Error("LLM player did not spawn");
       trackEliminations = true;
-      const nationNames = game
+      const rosterNames = game
         .players()
-        .filter((candidate) => candidate.type() === PlayerType.Nation)
+        .filter((candidate) => candidate.clientID() === null)
         .map((candidate) => candidate.name())
         .sort();
-      const expected = [...SCENARIO.expectedNations].sort();
-      if (JSON.stringify(nationNames) !== JSON.stringify(expected)) {
+      const expected = [
+        ...(this.benchmarkTask?.expectedRoster ?? SCENARIO.expectedNations),
+      ].sort();
+      if (JSON.stringify(rosterNames) !== JSON.stringify(expected)) {
         throw new Error(
-          `Scenario drift: expected nations ${expected.join(", ")}, got ${nationNames.join(", ")}`,
+          `Scenario drift: expected roster ${expected.join(", ")}, got ${rosterNames.join(", ")}`,
         );
       }
 
       let consecutiveFailures = 0;
       for (
         let decisionIndex = 0;
-        decisionIndex < SCENARIO.maxDecisionCount &&
+        decisionIndex < limits.maxDecisionCount &&
         game.getWinner() === null &&
         player.isAlive();
         decisionIndex++
       ) {
-        if (Date.now() - startedAt.getTime() > SCENARIO.maxWallClockMs) {
+        if (Date.now() - startedAt.getTime() > limits.maxWallClockMs) {
           terminationReason = "wall-clock safety limit";
           break;
         }
@@ -271,7 +314,10 @@ export class HarnessRunner {
           (sum, record) => sum + record.costUsd,
           0,
         );
-        if (spent + estimate > SCENARIO.maxRunCostUsd) {
+        const maxCost = this.benchmarkTask
+          ? BENCHMARK_LIMITS.maxMatchCostUsd
+          : SCENARIO.maxRunCostUsd;
+        if (spent + estimate > maxCost) {
           terminationReason = "model cost limit";
           break;
         }
@@ -316,7 +362,7 @@ export class HarnessRunner {
         }
         for (
           let tick = 1;
-          tick < SCENARIO.decisionIntervalTicks && game.getWinner() === null;
+          tick < limits.decisionIntervalTicks && game.getWinner() === null;
           tick++
         ) {
           executeTurn();
@@ -384,7 +430,7 @@ export class HarnessRunner {
         this.store.setProgress(progress);
         await this.store.savePending(progress);
 
-        if (consecutiveFailures >= SCENARIO.maxConsecutiveDecisionFailures) {
+        if (consecutiveFailures >= limits.maxConsecutiveDecisionFailures) {
           terminationReason = "five consecutive model decision failures";
           break;
         }
@@ -395,7 +441,7 @@ export class HarnessRunner {
       if (!player.isAlive() && game.getWinner() === null) {
         while (
           game.ticks() <
-            SCENARIO.maxDecisionCount * SCENARIO.decisionIntervalTicks + 20 &&
+            limits.maxDecisionCount * limits.decisionIntervalTicks + 20 &&
           game.getWinner() === null
         ) {
           executeTurn();
@@ -410,7 +456,7 @@ export class HarnessRunner {
       // asking the model for a 121st decision.
       if (
         game.getWinner() === null &&
-        decisions.length === SCENARIO.maxDecisionCount
+        decisions.length === limits.maxDecisionCount
       ) {
         for (let tick = 0; tick < 20 && game.getWinner() === null; tick++) {
           executeTurn();
@@ -437,7 +483,7 @@ export class HarnessRunner {
 
     const completedAt = new Date();
     const winner = game.getWinner();
-    const human = game.playerByClientID(SCENARIO.clientID);
+    const human = game.playerByClientID(clientID);
     const finalPlacement =
       human === null
         ? game.allPlayers().length
@@ -449,8 +495,14 @@ export class HarnessRunner {
               eliminatedAt: eliminatedAt.get(candidate.id()),
             })),
             human.id(),
+            typeof winner === "string" || winner === null
+              ? undefined
+              : winner.id(),
           );
-    const status = winner !== null && !fatalError ? "completed" : "failed";
+    const status =
+      !fatalError && (winner !== null || this.benchmarkTask !== undefined)
+        ? "completed"
+        : "failed";
     const usage = decisions.reduce(
       (total, record) => ({
         promptTokens: total.promptTokens + record.promptTokens,
@@ -463,6 +515,13 @@ export class HarnessRunner {
       (turn) => turn.intents.length > 0 || turn.hash !== undefined,
     );
     const simulatedSeconds = game.elapsedGameSeconds();
+    const fieldSize = game.allPlayers().length;
+    const totalTiles = game
+      .allPlayers()
+      .reduce((sum, candidate) => sum + candidate.numTilesOwned(), 0);
+    const totalTroops = game
+      .allPlayers()
+      .reduce((sum, candidate) => sum + candidate.troops(), 0);
     const replay: GameRecord = GameRecordSchema.parse({
       info: {
         ...gameStart,
@@ -491,7 +550,12 @@ export class HarnessRunner {
             schemaVersion: 2,
             runId,
             status,
-            scenario: publicScenario(this.agent.requestedModel),
+            scenario: this.benchmarkTask
+              ? publicBenchmarkTask(
+                  this.benchmarkTask,
+                  this.agent.requestedModel,
+                )
+              : publicScenario(this.agent.requestedModel),
             model: {
               requested: this.agent.requestedModel,
               resolved:
@@ -516,6 +580,17 @@ export class HarnessRunner {
               finalHash: lastHash,
               finalPlacement,
               terminationReason,
+              ...(this.benchmarkTask && human
+                ? {
+                    fieldSize,
+                    survived: human.isAlive(),
+                    finalLandShare:
+                      totalTiles === 0 ? 0 : human.numTilesOwned() / totalTiles,
+                    finalTroopShare:
+                      totalTroops === 0 ? 0 : human.troops() / totalTroops,
+                    matchPoints: matchPoints(fieldSize, finalPlacement),
+                  }
+                : {}),
             },
             decisions,
             replay,

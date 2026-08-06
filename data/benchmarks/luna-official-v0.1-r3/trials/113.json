@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "775ace3d60a192130f8aa7358ccaf218da633745e30320eb5d004308ac7bbe38",
+  "runId": "c57f9b3c-8ce7-4cdc-b0f4-ec326611ae83",
+  "trialId": "4f62b307-2c67-444e-b8fe-61a5a39a8b88",
+  "taskId": "cap-post-expansion-recovery-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "openai/gpt-5.6-luna",
+    "resolved": "openai/gpt-5.6-luna",
+    "provider": "OpenAI",
+    "promptVersion": "agent-v12"
+  },
+  "startedAt": "2026-08-06T07:33:09.470Z",
+  "completedAt": "2026-08-06T07:33:10.757Z",
+  "hashes": {
+    "checkpoint": 127918484471915,
+    "final": 252183512853959
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 929.216625,
+        "timeToFirstTokenMs": 568.940542,
+        "generationMs": 360.27608299999997,
+        "completionTokens": 55,
+        "timePerOutputTokenMs": 6.671779314814814,
+        "queueMs": null,
+        "generationId": "gen-1786001589-lXYeF5DMv9uLiMUDHw4i"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3293,
+    "completionTokens": 55,
+    "costUsd": 0.0000662
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "capacity-increased",
+      "observed": 36.44237731366844,
+      "operator": ">",
+      "threshold": 19.294935428730952,
+      "passed": true
+    },
+    {
+      "id": "territory-preserved",
+      "observed": 736,
+      "operator": ">=",
+      "threshold": 373,
+      "passed": true
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 145,
+    "finalTileCount": 736,
+    "finalTroops": 74704,
+    "finalTroopCapacityPercent": 36.44237731366844,
+    "initialTileCount": 373,
+    "initialTroops": 32769,
+    "initialTroopCapacityPercent": 19.294935428730952,
+    "territoryChange": 363,
+    "terminal": false
+  },
+  "componentCoverage": 1,
+  "taskScore": 100,
+  "artifactPath": "artifacts/4f62b307-2c67-444e-b8fe-61a5a39a8b88.capability.json.gz"
+}
