@@ -158,7 +158,7 @@ const bundledRunFiles = (await fs.readdir(bundledRunRoot, { recursive: true }))
   .map((file) => path.join(bundledRunRoot, file));
 
 const htmlCache = new Map<string, Promise<string>>();
-function renderShell(fileName: "replay.html" | "harness.html") {
+function renderShell(fileName: "replay.html" | "harness.html" | "evals.html") {
   let rendered = htmlCache.get(fileName);
   if (rendered) return rendered;
   rendered = (async () => {
@@ -203,7 +203,7 @@ function renderShell(fileName: "replay.html" | "harness.html") {
 async function sendShell(
   res: express.Response,
   next: express.NextFunction,
-  fileName: "replay.html" | "harness.html",
+  fileName: "replay.html" | "harness.html" | "evals.html",
 ) {
   try {
     res.setHeader("Cache-Control", "no-store");
@@ -448,9 +448,8 @@ app.get("/api/runs/:runId/artifact", async (req, res, next) => {
     const baseline = artifact
       ? null
       : await getVisualBaselineArtifact(req.params.runId);
-    const evalTrial = artifact || baseline
-      ? null
-      : await evalStore.getTrial(req.params.runId);
+    const evalTrial =
+      artifact || baseline ? null : await evalStore.getTrial(req.params.runId);
     const downloadable = artifact ?? baseline ?? evalTrial;
     if (!downloadable) return res.status(404).json({ error: "Run not found" });
     res.setHeader(
@@ -636,6 +635,20 @@ app.get(["/baseline", "/baseline.html"], (_req, res, next) => {
 });
 app.get(["/lab", "/lab.html"], (_req, res) => {
   res.redirect(302, "/");
+});
+app.get("/evals/report.json", (_req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  res
+    .type("json")
+    .sendFile(
+      path.join(
+        projectRoot,
+        "data/benchmarks/luna-official-v0.1-r3/report.json",
+      ),
+    );
+});
+app.get(["/evals", "/evals.html"], (_req, res, next) => {
+  void sendShell(res, next, "evals.html");
 });
 app.get(["/", "/harness.html"], (_req, res, next) => {
   void sendShell(res, next, "harness.html");

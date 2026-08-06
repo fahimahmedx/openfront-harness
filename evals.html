@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Verified OpenFront Bench v0.1 results for GPT-5.6 Luna across 12 full-match tasks and 10 focused capability tasks."
+    />
+    <meta name="theme-color" content="#eef1e9" />
+    <title>Model evals · OpenFront Harness</title>
+    <link rel="stylesheet" href="/src/client/evals.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to results</a>
+
+    <header class="site-header">
+      <nav class="shell" aria-label="Primary navigation">
+        <a class="brand" href="/" aria-label="OpenFront Harness home">
+          OpenFront <span>Harness</span>
+        </a>
+        <div class="nav-links">
+          <a class="active" href="/evals" aria-current="page">Evals</a>
+          <a href="https://fahimahmed.ca/blog/openfront-harness/">Writeup</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="hero shell" aria-labelledby="eval-title">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow"
+              ><i aria-hidden="true"></i>OpenFront Bench v0.1</span
+            >
+            <h1 id="eval-title">
+              Evaluating agents<br /><span>across OpenFront</span>
+            </h1>
+          </div>
+          <p class="lede">
+            We evaluate model experiments in the real OpenFront engine, from
+            complete strategy matches to focused tactical decisions.
+          </p>
+        </div>
+      </section>
+
+      <section class="leaderboard shell" aria-labelledby="leaderboard-title">
+        <div class="leaderboard-bar">
+          <div class="view-tabs" aria-label="Results view">
+            <span class="active">Models</span
+            ><a href="#match-results">Matches</a
+            ><a href="#capability-results">Capabilities</a>
+          </div>
+          <span class="verified-label">Verified benchmark</span>
+        </div>
+        <h2 id="leaderboard-title" class="visually-hidden">
+          Model leaderboard
+        </h2>
+        <div class="table-wrap leaderboard-table">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Rank</th>
+                <th scope="col">Model</th>
+                <th scope="col">Match score</th>
+                <th scope="col">Capability score</th>
+                <th scope="col">Win rate</th>
+                <th scope="col">First-try valid</th>
+                <th scope="col">Trials</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="rank">1</span></td>
+                <td>
+                  <span class="model-mark" aria-hidden="true">◎</span>
+                  <b>GPT-5.6 Luna</b>
+                  <small>OpenAI · reasoning none · agent-v12</small>
+                </td>
+                <td>
+                  <strong class="positive">81.5%</strong
+                  ><small>73.1–90.0 CI</small>
+                </td>
+                <td>
+                  <strong class="positive">73.0%</strong
+                  ><small>69.0–77.0 CI</small>
+                </td>
+                <td><strong>47.2%</strong><small>17 / 36 wins</small></td>
+                <td><strong>94.9%</strong><small>0% fallback</small></td>
+                <td><strong>136</strong><small>all valid</small></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="leaderboard-note">
+          One model has a complete verified public run so far. New runs will be
+          added only after every declared fixture passes artifact verification.
+        </p>
+      </section>
+
+      <section
+        id="match-results"
+        class="results-section shell"
+        aria-labelledby="matches-title"
+      >
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">Suite 01 · Full matches</span>
+            <h2 id="matches-title">Result of each match task</h2>
+          </div>
+          <p>
+            Three deterministic trials per task. Placement is converted to a
+            0–100 score adjusted for lobby size: first place earns 100 and last
+            place earns 0. Trial scores are shown in run order.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Task</th>
+                <th scope="col">Scenario</th>
+                <th scope="col">Result</th>
+                <th scope="col">Wins</th>
+                <th scope="col">Placements</th>
+                <th scope="col">Trial scores</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <b>Match 01</b
+                  ><small>Kanto spawn · 3 AI opponents (3 Nations)</small>
+                </td>
+                <td>Japan · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="100">100</meter
+                  ><strong>100.0</strong>
+                </td>
+                <td><span class="pill perfect">3 / 3</span></td>
+                <td>1 · 1 · 1</td>
+                <td>100 · 100 · 100</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 02</b
+                  ><small
+                    >Okinawa spawn · 5 AI opponents (3 Nations + 2
+                    tribes)</small
+                  >
+                </td>
+                <td>Japan · Hard</td>
+                <td>
+                  <meter min="0" max="100" value="60">60</meter
+                  ><strong>60.0</strong>
+                </td>
+                <td><span class="pill weak">0 / 3</span></td>
+                <td>3 · 3 · 3</td>
+                <td>60 · 60 · 60</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 03</b
+                  ><small>France spawn · 5 AI opponents (5 Nations)</small>
+                </td>
+                <td>Europe Classic · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="86.7">86.7</meter
+                  ><strong>86.7</strong>
+                </td>
+                <td><span class="pill">1 / 3</span></td>
+                <td>1 · 2 · 2</td>
+                <td>100 · 80 · 80</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 04</b
+                  ><small
+                    >Iceland spawn · 6 AI opponents (3 Nations + 3
+                    tribes)</small
+                  >
+                </td>
+                <td>Europe Classic · Hard</td>
+                <td>
+                  <meter min="0" max="100" value="66.7">66.7</meter
+                  ><strong>66.7</strong>
+                </td>
+                <td><span class="pill weak">0 / 3</span></td>
+                <td>2 · 3 · 4</td>
+                <td>83.3 · 66.7 · 50</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 05</b
+                  ><small>Korinthal spawn · 3 AI opponents (3 Nations)</small>
+                </td>
+                <td>Four Islands · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="100">100</meter
+                  ><strong>100.0</strong>
+                </td>
+                <td><span class="pill perfect">3 / 3</span></td>
+                <td>1 · 1 · 1</td>
+                <td>100 · 100 · 100</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 06</b
+                  ><small
+                    >Sylvoria spawn · 5 AI opponents (1 Nation + 4 tribes)</small
+                  >
+                </td>
+                <td>Four Islands · Hard</td>
+                <td>
+                  <meter min="0" max="100" value="73.3">73.3</meter
+                  ><strong>73.3</strong>
+                </td>
+                <td><span class="pill weak">0 / 3</span></td>
+                <td>2 · 3 · 2</td>
+                <td>80 · 60 · 80</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 07</b
+                  ><small>Detroit spawn · 5 AI opponents (5 Nations)</small>
+                </td>
+                <td>Great Lakes · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="100">100</meter
+                  ><strong>100.0</strong>
+                </td>
+                <td><span class="pill perfect">3 / 3</span></td>
+                <td>1 · 1 · 1</td>
+                <td>100 · 100 · 100</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 08</b
+                  ><small
+                    >Duluth spawn · 6 AI opponents (3 Nations + 3 tribes)</small
+                  >
+                </td>
+                <td>Great Lakes · Hard</td>
+                <td>
+                  <meter min="0" max="100" value="83.3">83.3</meter
+                  ><strong>83.3</strong>
+                </td>
+                <td><span class="pill">1 / 3</span></td>
+                <td>1 · 3 · 2</td>
+                <td>100 · 66.7 · 83.3</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 09</b
+                  ><small
+                    >Andalusia spawn · 5 AI opponents (3 Nations + 2
+                    tribes)</small
+                  >
+                </td>
+                <td>Strait of Gibraltar · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="86.7">86.7</meter
+                  ><strong>86.7</strong>
+                </td>
+                <td><span class="pill good">2 / 3</span></td>
+                <td>1 · 1 · 3</td>
+                <td>100 · 100 · 60</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 10</b
+                  ><small
+                    >Morocco spawn · 6 AI opponents (1 Nation + 5 tribes)</small
+                  >
+                </td>
+                <td>Strait of Gibraltar · Hard</td>
+                <td>
+                  <meter min="0" max="100" value="100">100</meter
+                  ><strong>100.0</strong>
+                </td>
+                <td><span class="pill perfect">3 / 3</span></td>
+                <td>1 · 1 · 1</td>
+                <td>100 · 100 · 100</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 11</b
+                  ><small>Germany spawn · 7 AI opponents (7 Nations)</small>
+                </td>
+                <td>World · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="81">81</meter
+                  ><strong>81.0</strong>
+                </td>
+                <td><span class="pill">1 / 3</span></td>
+                <td>3 · 1 · 3</td>
+                <td>71.4 · 100 · 71.4</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 12</b
+                  ><small
+                    >New Zealand spawn · 9 AI opponents (5 Nations + 4
+                    tribes)</small
+                  >
+                </td>
+                <td>World · Hard</td>
+                <td>
+                  <meter class="low" min="0" max="100" value="40.7">40.7</meter
+                  ><strong>40.7</strong>
+                </td>
+                <td><span class="pill weak">0 / 3</span></td>
+                <td>6 · 6 · 7</td>
+                <td>44.4 · 44.4 · 33.3</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="leaderboard-note">
+            Nation AIs use the full strategy systems. Tribe bots mainly expand and
+            attack.
+          </p>
+        </div>
+      </section>
+
+      <section
+        id="capability-results"
+        class="results-section capability-section shell"
+        aria-labelledby="capabilities-title"
+      >
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">Suite 02 · Focused capabilities</span>
+            <h2 id="capabilities-title">Result of each capability task</h2>
+          </div>
+          <p>
+            Each checkpoint is attempted 10 times from the same verified game
+            state. Pass@1 is the percentage of trials that met every success
+            condition. For example, 7 successful trials scores 70%.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table class="capability-table">
+            <thead>
+              <tr>
+                <th scope="col">Task</th>
+                <th scope="col">Checkpoint</th>
+                <th scope="col">Passed</th>
+                <th scope="col">Pass@1</th>
+                <th scope="col">Component coverage</th>
+                <th scope="col">Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>Neutral expansion</b><small>01 · Expansion</small></td>
+                <td>Great Lakes · Hard</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Saturated capacity expansion</b
+                  ><small>02 · Expansion</small>
+                </td>
+                <td>World · Medium</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Post-expansion recovery</b><small>03 · Recovery</small>
+                </td>
+                <td>Europe Classic · Hard</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Weaker target selection</b><small>04 · Targeting</small>
+                </td>
+                <td>Europe Classic · Medium</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td><b>Frontier restraint</b><small>05 · Restraint</small></td>
+                <td>Strait of Gibraltar · Hard</td>
+                <td>0 / 10</td>
+                <td><strong class="negative">0%</strong></td>
+                <td>66.7%</td>
+                <td><span class="status failed">Failed</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Incoming attack response</b><small>06 · Defense</small>
+                </td>
+                <td>Great Lakes · Medium</td>
+                <td>9 / 10</td>
+                <td><strong class="positive">90%</strong></td>
+                <td>95%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td><b>Split-front defense</b><small>07 · Defense</small></td>
+                <td>Four Islands · Hard</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td><b>Losing-attack retreat</b><small>08 · Retreat</small></td>
+                <td>World · Hard</td>
+                <td>4 / 10</td>
+                <td><strong class="negative">40%</strong></td>
+                <td>85%</td>
+                <td><span class="status partial">Partial</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Naval target recognition</b><small>09 · Naval</small>
+                </td>
+                <td>Strait of Gibraltar · Medium</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Construction failure recovery</b
+                  ><small>10 · Recovery</small>
+                </td>
+                <td>Europe Classic · Medium</td>
+                <td>0 / 10</td>
+                <td><strong class="negative">0%</strong></td>
+                <td>50%</td>
+                <td><span class="status failed">Failed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="method shell" aria-labelledby="method-title">
+        <div>
+          <span class="section-kicker">Run integrity</span>
+          <h2 id="method-title">A complete, reproducible result</h2>
+          <p>
+            OpenFront Bench v0.1 pins the engine, prompt, task manifest,
+            resolver, seeds, and graders. The verifier accepted all 136 trials
+            with no invalid artifacts.
+          </p>
+        </div>
+        <dl>
+          <div>
+            <dt>Completed trials</dt>
+            <dd>136 / 136</dd>
+          </div>
+          <div>
+            <dt>Survival rate</dt>
+            <dd>86.1%</dd>
+          </div>
+          <div>
+            <dt>Mean placement</dt>
+            <dd>2.19</dd>
+          </div>
+          <div>
+            <dt>Total inference cost</dt>
+            <dd>$1.348</dd>
+          </div>
+          <div>
+            <dt>Median latency</dt>
+            <dd>1.10 s</dd>
+          </div>
+          <div>
+            <dt>P95 latency</dt>
+            <dd>2.88 s</dd>
+          </div>
+        </dl>
+        <div class="provenance">
+          <div>
+            <span>Benchmark version</span><code>openfront-bench-v0.1</code>
+          </div>
+          <div>
+            <span>Run ID</span><code>c57f9b3c-8ce7-4cdc-b0f4-ec326611ae83</code>
+          </div>
+          <div>
+            <span>Manifest SHA-256</span
+            ><code
+              >775ace3d60a192130f8aa7358ccaf218da633745e30320eb5d004308ac7bbe38</code
+            >
+          </div>
+          <a href="/evals/report.json" download
+            >Download verified report <span aria-hidden="true">↓</span></a
+          >
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell">
+        <span>OpenFront Harness · Built by Fahim Ahmed</span>
+        <a href="/">Back to the harness ↑</a>
+      </div>
+    </footer>
+  </body>
+</html>
