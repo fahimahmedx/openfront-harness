@@ -11,7 +11,7 @@ This is a portfolio project and a first step toward a reproducible strategy-agen
 - A real OpenFront v0.32.9 simulation, not a simplified game clone
 - One LLM spawned in Kanto against Hokkaido, Shikoku, and Kansai
 - A bounded menu of currently legal core intents every 100 ticks
-- Exactly two action slots per model decision, including explicit holds
+- Exactly one legal action per model decision, including an explicit hold
 - Structured model output validated against both JSON Schema and the legal menu
 - Full intent-based replay in OpenFront's existing renderer
 - A synchronized trace showing the public strategy note, actions, state, total latency, per-attempt TTFT, generation time, TPOT, tokens, provider, and cost
@@ -46,16 +46,18 @@ npm test               # focused unit and artifact tests
 npm run eval:neutral   # run 10 live neutral-expansion eval trials
 npm run eval:micro     # run the ten-family live micro-eval suite
 npm run eval:fixtures  # regenerate tracked replay prefixes from source runs
-npm run eval:add-replays -- path/to/report.json # upgrade a legacy eval report
-npm run verify:sample  # replay recorded actions and verify tick/hash/outcome
+npm run eval:add-replays -- path/to/report.json # add replays to current eval reports
+npm run verify:sample  # verify the bundled replay directly, without model calls
 npm run build          # type-check and production Vite build
 npm run sample         # spend live API credits to create a new sample
-npm run refresh:sample # rebuild sample from its recorded trace, no API call
+npm run refresh:sample # intentionally disabled for the immutable legacy sample
 npm run baseline:run:controls # run the screenshot baseline with the public manual
 npm run baseline:run:naive    # run the screenshot baseline without game instructions
 ```
 
-`npm run sample` uses the same hard $1 run cap as the public app. `verify:sample` is the stronger determinism check: it feeds the saved decisions back through OpenFront and requires the final winner, tick, and state hash to match.
+`npm run sample` uses the same hard $1 run cap as the public app. `verify:sample`
+validates and loads the stored OpenFront replay directly. The bundled sample is
+a legacy two-action artifact and is never fed through the current resolver.
 
 The raw-UI comparison protocols and run instructions are documented in
 [baseline.md](baseline.md). They keep deterministic setup and scoring outside
@@ -63,11 +65,11 @@ the model boundary while limiting the model itself to stock-renderer screenshots
 and primitive controls. `npm run baseline:run` remains an alias for the original
 `visual-controls-v1` condition.
 
-The `openfront-micro-v1` suite covers neutral and saturated expansion,
-post-expansion recovery, target selection, restraint, one- and two-front
-defense, retreat, naval reachability, and construction recovery. Each task
+The `openfront-micro-v2` suite covers neutral and saturated expansion,
+post-expansion recovery, target selection, restraint, incoming defense,
+split-front prioritization, retreat, naval reachability, and construction recovery. Each task
 rebuilds a pinned checkpoint, verifies state/observation/menu/tile hashes, sends
-the production-shaped two-slot decision, and grades authoritative engine state
+the production-shaped single-action decision, and grades authoritative engine state
 after its fixed horizon. Tracked replay prefixes retain their source artifact
 path and SHA-256; the original ignored run archives are not needed to execute
 the suite.
@@ -89,29 +91,40 @@ and refuses to write if the reconstructed checkpoint or final outcome differs.
 
 ## Fixed benchmark preset
 
-| Setting           | Value                                                      |
-| ----------------- | ---------------------------------------------------------- |
-| Scenario          | `japan-v5`                                                 |
-| Map               | Japan, Normal                                              |
-| Mode              | Free For All, Singleplayer                                 |
-| Players           | 1 LLM + 3 Nation players                                   |
-| Difficulty        | Medium                                                     |
-| Game seed / ID    | `JAPAN01A`                                                 |
-| LLM spawn         | Kanto, tile `(1613, 1133)`                                 |
-| Nations           | Hokkaido, Shikoku, Kansai                                  |
-| Decision interval | 100 ticks / 10 simulated seconds                           |
-| Action slots      | Exactly 2                                                  |
-| Decision ceiling  | 120 while the LLM is alive                                 |
-| Match ceiling     | 20 simulated minutes                                       |
-| OpenFront         | v0.32.9, commit `dcc18d5231af6253b0e991bf04a4c764982fe262` |
+| Setting            | Value                                                      |
+| ------------------ | ---------------------------------------------------------- |
+| Scenario           | `japan-v6`                                                 |
+| Map                | Japan, Normal                                              |
+| Mode               | Free For All, Singleplayer                                 |
+| Players            | 1 LLM + 3 Nation players                                   |
+| Difficulty         | Medium                                                     |
+| Game seed / ID     | `JAPAN01A`                                                 |
+| LLM spawn          | Kanto, tile `(1613, 1133)`                                 |
+| Nations            | Hokkaido, Shikoku, Kansai                                  |
+| Decision interval  | 100 ticks / 10 simulated seconds                           |
+| Actions / decision | Exactly 1                                                  |
+| Decision ceiling   | 120 while the LLM is alive                                 |
+| Match ceiling      | 20 simulated minutes                                       |
+| OpenFront          | v0.32.9, commit `dcc18d5231af6253b0e991bf04a4c764982fe262` |
 
-The model is never given permission to invent a command. The server enumerates a deterministic set of legal action IDs from current state and gives each named output slot its own strict enum. Both slots execute simultaneously, so the second action cannot depend on the first action's result. Repeatable troop actions may fill both slots because each commitment is already bounded to half of the shared safe budget; repeated non-repeatable actions normalize to a hold. Cooperative and hostile actions toward the same opponent are rejected as a conflicting pair and retried. The selected IDs resolve to ordinary OpenFront intents. Invalid output is retried once and then converted to two holds. Five consecutive complete decision failures abort a run.
+The model is never given permission to invent a command. The server enumerates
+a deterministic set of legal action IDs from current state and requires exactly
+one ID. The selected ID resolves to one ordinary OpenFront intent; `hold` is the
+explicit no-op. Invalid output is retried once and then converted to one hold.
+Five consecutive complete decision failures abort a run.
 
-Troop-spending actions share one two-slot budget instead of independently spending percentages of the same balance. Neutral expansion preserves 15% of troop capacity, ordinary combat preserves 35% and unlocks at 55% capacity, and attacks against stronger defenders are withheld. During an invasion, unrelated troop spending is suppressed and bounded counterattacks preserve a 15% emergency reserve.
+Troop-spending actions may use the full safe surplus above the reserve floor.
+Neutral expansion preserves 15% of troop capacity, ordinary combat preserves
+35% and unlocks at 55% capacity, and attacks against stronger defenders are
+withheld. During an invasion, unrelated troop spending is suppressed and a
+counterattack is capped by the selected attacker's incoming force while
+preserving a 15% emergency reserve.
 
 ## Artifact shape
 
-New `.json.gz` artifacts use schema version 2; schema-version-1 artifacts remain readable. Each artifact contains:
+New `.json.gz` artifacts use schema version 3 and `agent-v13`. Schema-version-1
+and schema-version-2 artifacts are accepted only by the read-only replay and
+download paths. Each current artifact contains:
 
 - scenario, source commit, model, provider, prompt version, and reasoning configuration;
 - start/end timestamps and exact token/cost usage;

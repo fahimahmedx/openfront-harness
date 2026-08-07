@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { resolveDecisionActions } from "../src/ObservationActions";
+import { resolveDecisionAction } from "../src/ObservationActions";
 import {
   controlActions,
   createMicroEvalCheckpoint,
@@ -27,21 +27,18 @@ function policy(
   return {
     requestedModel: `${kind}-${family}`,
     provider: "local",
-    promptVersion: "agent-v12",
+    promptVersion: "agent-v13",
     async decide(observation, candidates) {
       const ids = candidates.map((candidate) => candidate.id);
-      let actions: [string, string] = ["hold:1", "hold:2"];
+      let action = "hold";
       if (kind === "reference") {
         if (family === "saturated-capacity-expansion") {
-          actions = [
-            maximum(ids.filter((id) => id.startsWith("expand:"))),
-            "hold:2",
-          ];
+          action = maximum(ids.filter((id) => id.startsWith("expand:")));
         } else if (
           family === "post-expansion-recovery" ||
           family === "frontier-restraint"
         ) {
-          actions = ["hold:1", "hold:2"];
+          action = "hold";
         } else if (family === "weaker-target-selection") {
           const target = observation.opponents
             .map(
@@ -59,25 +56,25 @@ function policy(
               candidate.startsWith(`attack:${target.id}:`),
             ),
           );
-          actions = [id, id];
+          action = id;
         } else if (family === "incoming-attack-response") {
           const id = maximum(
             ids.filter((candidate) => candidate.startsWith("counter:")),
           );
-          actions = [id, id];
-        } else if (family === "split-front-defense") {
-          const targets = Array.from(
-            new Set(
-              ids
-                .filter((id) => id.startsWith("counter:"))
-                .map((id) => id.split(":")[1]),
-            ),
+          action = id;
+        } else if (family === "split-front-prioritization") {
+          const incoming = observation.self.incomingAttacks as Array<{
+            from: string;
+            troops: number;
+          }>;
+          const target = [...incoming].sort(
+            (left, right) => right.troops - left.troops,
+          )[0].from;
+          action = maximum(
+            ids.filter((id) => id.startsWith(`counter:${target}:`)),
           );
-          actions = targets.map((target) =>
-            maximum(ids.filter((id) => id.startsWith(`counter:${target}:`))),
-          ) as [string, string];
         } else if (family === "losing-attack-retreat") {
-          actions = [ids.find((id) => id.startsWith("retreat:"))!, "hold:2"];
+          action = ids.find((id) => id.startsWith("retreat:"))!;
         } else if (family === "naval-target-recognition") {
           const target = observation.opponents
             .map(
@@ -98,24 +95,17 @@ function policy(
               candidate.startsWith(`boat:${target.id}:`),
             ),
           );
-          actions = [id, id];
+          action = id;
         } else {
-          actions = [
-            ids.find((id) => id.startsWith("build:Defense Post:"))!,
-            "hold:2",
-          ];
+          action = ids.find((id) => id.startsWith("build:Defense Post:"))!;
         }
       } else if (family === "post-expansion-recovery") {
         const id = maximum(
           ids.filter((candidate) => candidate.startsWith("expand:")),
         );
-        actions = [id, id];
+        action = id;
       }
-      return scriptedAgentResult(
-        this.requestedModel,
-        `${kind} policy`,
-        actions,
-      );
+      return scriptedAgentResult(this.requestedModel, `${kind} policy`, action);
     },
   };
 }
@@ -133,15 +123,15 @@ describe("remaining micro-eval families", () => {
         );
         expect(checkpoint.observation.self.alive).toBe(true);
 
-        const reference = resolveDecisionActions(
+        const reference = resolveDecisionAction(
           referenceActions(family, checkpoint),
           checkpoint.candidates,
         );
         expect(reference.fallback).toBe(false);
-        expect(reference.actions).toHaveLength(2);
+        expect(reference.action.id).toBe(referenceActions(family, checkpoint));
 
         for (const control of controlActions(family, checkpoint)) {
-          const resolved = resolveDecisionActions(
+          const resolved = resolveDecisionAction(
             control,
             checkpoint.candidates,
           );
@@ -158,7 +148,7 @@ describe("remaining micro-eval families", () => {
     "post-expansion-recovery",
     "frontier-restraint",
     "incoming-attack-response",
-    "split-front-defense",
+    "split-front-prioritization",
     "losing-attack-retreat",
     "naval-target-recognition",
     "construction-failure-recovery",
@@ -181,7 +171,7 @@ describe("remaining micro-eval families", () => {
     "post-expansion-recovery",
     "weaker-target-selection",
     "incoming-attack-response",
-    "split-front-defense",
+    "split-front-prioritization",
     "losing-attack-retreat",
     "naval-target-recognition",
     "construction-failure-recovery",

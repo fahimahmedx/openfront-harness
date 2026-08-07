@@ -25,7 +25,7 @@ const selections = {
       "data/previous/lifecycle-verification/fa907146-94dc-426b-b49b-a8ea6c641f19.json.gz",
     decisionIndex: 108,
   },
-  "split-front-defense": {
+  "split-front-prioritization": {
     source: "data/glm-5.2/f7e8e361-047d-43ab-a53c-1055af01117c.json.gz",
     decisionIndex: 71,
   },
@@ -70,16 +70,6 @@ for (const [familyId, selection] of Object.entries(selections)) {
       `${familyId} source is missing decision ${selection.decisionIndex}`,
     );
   }
-  const recentDecisions = artifact.decisions
-    .filter((candidate) => candidate.tick < decision.tick)
-    .slice(-3)
-    .map((candidate) => ({
-      tick: candidate.tick,
-      strategy: candidate.strategy ?? "",
-      appliedActionIds: candidate.appliedActionIds ?? ["hold:1", "hold:2"],
-      outcomes: candidate.outcomes ?? [],
-      actionOutcomes: candidate.actionOutcomes ?? [],
-    }));
   fixtures[familyId] = {
     sourceArtifact: selection.source,
     sourceArtifactSha256: createHash("sha256").update(compressed).digest("hex"),
@@ -93,7 +83,7 @@ for (const [familyId, selection] of Object.entries(selections)) {
           ({ clientID: _clientID, ...intent }) => intent,
         ),
       })),
-    recentDecisions,
+    recentDecisions: [],
   };
 }
 

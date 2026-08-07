@@ -18,7 +18,7 @@ if (!taskId)
 const policy: AgentPolicy = {
   requestedModel: "fixture-hostile-policy",
   provider: "local",
-  promptVersion: "agent-v12",
+  promptVersion: "agent-v13",
   async estimateNextCost() {
     return 0;
   },
@@ -36,10 +36,9 @@ const policy: AgentPolicy = {
     const boats = candidates.filter(
       (action) => action.category === "boat" && action.id.startsWith("boat:"),
     );
-    let actions: [string, string] = ["hold:1", "hold:2"];
+    let action = "hold";
     if (expansions.length > 0) {
-      const action = maximum(expansions)!;
-      actions = [action.id, action.id];
+      action = maximum(expansions)!.id;
     } else if (attacks.length > 0) {
       const opponents = observation.opponents as Array<Record<string, unknown>>;
       const target = opponents
@@ -53,18 +52,16 @@ const policy: AgentPolicy = {
             Number(left.troopsRelativeToSelf ?? Infinity) -
             Number(right.troopsRelativeToSelf ?? Infinity),
         )[0];
-      const action = maximum(
+      action = maximum(
         attacks.filter((candidate) =>
           candidate.id.startsWith(`attack:${target.id}:`),
         ),
-      )!;
-      actions = [action.id, action.id];
+      )!.id;
     } else if (boats.length > 0) {
-      const action = maximum(boats)!;
-      actions = [action.id, action.id];
+      action = maximum(boats)!.id;
     }
     return {
-      decision: { strategy: "Fixture preparation policy", actions },
+      decision: { strategy: "Fixture preparation policy", action },
       attempts: 1,
       attemptFailures: [],
       attemptTimings: [],
@@ -78,10 +75,7 @@ const policy: AgentPolicy = {
   },
 };
 
-const directory = path.resolve(
-  "data/benchmark-fixture-sources",
-  `${taskId}-hostile`,
-);
+const directory = path.resolve("data/benchmark-fixture-sources", taskId);
 const store = new RunStore(directory);
 await store.init();
 const artifact = await new HarnessRunner(

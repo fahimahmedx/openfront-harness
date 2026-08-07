@@ -24,18 +24,42 @@ const CommonTaskSchema = z.object({
   expectedRoster: z.array(z.string().min(1)),
   resolvedConfig: z.record(z.string(), z.unknown()),
   resolvedConfigHash: LowerHexSha256Schema,
-  ceilings: z.record(z.string(), z.unknown()),
+  ceilings: z
+    .object({ actionsPerDecision: z.literal(1) })
+    .passthrough()
+    .refine((ceilings) => !("actionSlots" in ceilings), {
+      message: "Legacy actionSlots is not valid in the one-action benchmark",
+    }),
 });
+
+const BenchmarkRecentDecisionSchema = z
+  .object({
+    selectedActionIds: z.array(z.string()).length(1),
+    appliedActionIds: z.array(z.string()).length(1),
+    actionOutcomes: z.array(z.record(z.string(), z.unknown())).length(1),
+  })
+  .passthrough();
 
 export const BenchmarkManifestTaskSchema = z.discriminatedUnion("suite", [
   CommonTaskSchema.extend({ suite: z.literal("match") }),
   CommonTaskSchema.extend({
     suite: z.literal("capability"),
-    family: z.string().min(1),
+    family: z.enum([
+      "neutral-expansion",
+      "saturated-capacity-expansion",
+      "post-expansion-recovery",
+      "weaker-target-selection",
+      "frontier-restraint",
+      "incoming-attack-response",
+      "split-front-prioritization",
+      "losing-attack-retreat",
+      "naval-target-recognition",
+      "construction-failure-recovery",
+    ]),
     sourceTaskId: z.string().min(1),
     preparationTurns: z.array(z.record(z.string(), z.unknown())),
     decisionIndex: z.number().int().nonnegative(),
-    recentDecisions: z.array(z.record(z.string(), z.unknown())),
+    recentDecisions: z.array(BenchmarkRecentDecisionSchema),
     checkpointTick: z.number().int().nonnegative(),
     hashes: z.object({
       state: z.union([
@@ -53,7 +77,7 @@ export const BenchmarkManifestTaskSchema = z.discriminatedUnion("suite", [
       z.string(),
       z.array(z.number().int().nonnegative()),
     ),
-    graderVersion: z.string().min(1),
+    graderVersion: z.literal("capability-grader-v2"),
     referencePolicyHash: LowerHexSha256Schema,
     controlPolicyHashes: z.array(LowerHexSha256Schema).min(2),
     acceptanceReportPath: z.string().min(1),
@@ -71,10 +95,10 @@ export const BenchmarkManifestSchema = z.object({
   }),
   mapAssets: z.record(z.string(), LowerHexSha256Schema),
   harnessCommit: z.string().min(7),
-  promptVersion: z.string().min(1),
+  promptVersion: z.literal("agent-v13"),
   promptHash: LowerHexSha256Schema,
   schemaVersions: z.record(z.string(), z.string().min(1)),
-  resolverVersion: z.string().min(1),
+  resolverVersion: z.literal("single-action-v1"),
   troopPolicy: z.record(z.string(), z.number()),
   graderPackageHash: LowerHexSha256Schema,
   taskOrder: z.object({

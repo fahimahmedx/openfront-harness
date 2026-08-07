@@ -50,8 +50,8 @@ frozen release:
   `dcc18d5231af6253b0e991bf04a4c764982fe262` for version 0.1. Upgrading the
   engine creates a new non-equivalent benchmark version.
 - All maps use `GameMapSize.Normal`, Free For All, Singleplayer, a 20 simulated
-  minute ceiling, a 100-tick decision interval, exactly two simultaneous action
-  slots, and at most 120 decisions while the agent is alive.
+  minute ceiling, a 100-tick decision interval, exactly one action per
+  decision, and at most 120 decisions while the agent is alive.
 - Nations and tribe bots are both useful opponents. Nations exercise diplomacy,
   structures, and long-horizon strategy; tribe bots add irregular nearby
   pressure and target-selection noise. Difficulty applies to the built-in AI as
@@ -69,7 +69,7 @@ frozen release:
   plus 100 capability decisions per configuration. With the configured ceilings,
   the maximum model cost is USD 46 per configuration; actual cost is reported.
 - The existing production prompt, observation, legal action generator, resolver,
-  troop policy, retry behavior, and two-slot interface remain the Standard-track
+  troop policy, retry behavior, and single-action interface remain the Standard-track
   agent boundary.
 - Version 0.1 uses the existing OpenRouter adapter. The evaluated model MUST be
   available through OpenRouter, and each user supplies their own API key and
@@ -114,38 +114,38 @@ their reports MUST say `unofficial-custom-agent`.
 ### 3.2 What the agent receives
 
 At each decision the agent receives only the production game instructions, the
-normalized observation, and the legal two-slot candidate menu. It does not
+normalized observation, and the legal candidate menu. It does not
 receive the task ID, map task metadata beyond normal observation, checkpoint
 grader, thresholds, reference/control policies, source trace, expected
 opponents, state hash, or split.
 
 One corrective retry is part of the same decision. After the retry, an invalid
-response becomes two holds. Five consecutive complete decision failures abort a
+response becomes one hold. Five consecutive complete decision failures abort a
 full match. Provider errors and fallbacks are valid agent failures, not
 infrastructure-invalid trials.
 
 ## 4. Frozen common configuration
 
-| Field | Version 0.1 value |
-| --- | --- |
-| OpenFront | `v0.32.9`, commit `dcc18d5231af6253b0e991bf04a4c764982fe262` |
-| Map assets | Files at that commit; every file SHA-256 recorded in the manifest |
-| Mode / type | Free For All / Singleplayer |
-| Map size | Normal |
-| Human players | One evaluated LLM player |
-| Random spawn | `false` |
-| Donations | Gold `false`, troops `false` |
-| Cheats | Infinite gold `false`, infinite troops `false`, instant build `false` |
-| Decision interval | 100 ticks / 10 simulated seconds |
-| Action slots | Exactly two, resolved simultaneously |
-| Candidate ceiling | 64 candidates before the two slot-specific hold entries |
-| Decision ceiling | 120 while the LLM player is alive |
-| Match ceiling | 20 simulated minutes |
-| Wall-clock ceiling | 10 minutes per match, 2 minutes per capability trial |
-| Model-cost ceiling | USD 1 per match and USD 0.10 per capability trial |
-| Response handling | Strict schema, one corrective retry, then two holds |
-| Failure abort | Five consecutive complete decision failures in a match |
-| Troop policy | Expansion reserve 15%; combat reserve 35%; combat trigger 55%; minimum attacker/defender ratio 20%; emergency reserve 15% |
+| Field                | Version 0.1 value                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| OpenFront            | `v0.32.9`, commit `dcc18d5231af6253b0e991bf04a4c764982fe262`                                                              |
+| Map assets           | Files at that commit; every file SHA-256 recorded in the manifest                                                         |
+| Mode / type          | Free For All / Singleplayer                                                                                               |
+| Map size             | Normal                                                                                                                    |
+| Human players        | One evaluated LLM player                                                                                                  |
+| Random spawn         | `false`                                                                                                                   |
+| Donations            | Gold `false`, troops `false`                                                                                              |
+| Cheats               | Infinite gold `false`, infinite troops `false`, instant build `false`                                                     |
+| Decision interval    | 100 ticks / 10 simulated seconds                                                                                          |
+| Actions per decision | Exactly one                                                                                                               |
+| Candidate ceiling    | 64 candidates, including the single `hold` entry                                                                          |
+| Decision ceiling     | 120 while the LLM player is alive                                                                                         |
+| Match ceiling        | 20 simulated minutes                                                                                                      |
+| Wall-clock ceiling   | 10 minutes per match, 2 minutes per capability trial                                                                      |
+| Model-cost ceiling   | USD 1 per match and USD 0.10 per capability trial                                                                         |
+| Response handling    | Strict schema, one corrective retry, then one hold                                                                        |
+| Failure abort        | Five consecutive complete decision failures in a match                                                                    |
+| Troop policy         | Expansion reserve 15%; combat reserve 35%; combat trigger 55%; minimum attacker/defender ratio 20%; emergency reserve 15% |
 
 The release manifest MUST store the complete schema-parsed `GameConfig` and a
 hash of the fully resolved engine configuration. This table is not permission
@@ -161,20 +161,20 @@ listed opponent names are deterministic consequences of the seed and pinned
 engine and MUST be checked after spawn. A mismatch invalidates the trial before
 the first model request.
 
-| ID | Map | Seed | LLM spawn | Difficulty | Opponents | Expected deterministic roster |
-| --- | --- | --- | --- | --- | --- | --- |
-| `match-01` | Japan | `OFB101` | Kanto `(1613,1133)` | Medium | 3 N | Shikoku; Tokyo; Chubu |
-| `match-02` | Japan | `OFB102` | Okinawa `(397,2283)` | Hard | 3 N + 2 T | Kanto; Tokyo; Kyoto; Filipino Republics; Mapuche Regime |
-| `match-03` | Europe Classic | `OFB103` | France `(729,648)` | Medium | 5 N | Portugal; Lithuania; Italy; Poland; Tunisia |
-| `match-04` | Europe Classic | `OFB104` | Iceland `(171,171)` | Hard | 3 N + 3 T | France; Romania; Ukraine; Palmyrene Ascendancy; Romanov Assembly; Iroquois Sisterhood |
-| `match-05` | Four Islands | `OFB105A` | Korinthal `(403,1296)` | Medium | 3 N | Myrkwind; Lunareth; Sylvoria |
-| `match-06` | Four Islands | `OFB106` | Sylvoria `(1328,322)` | Hard | 1 N + 4 T | Myrkwind; Danish Alliance; Zuni Hierarchy; York Kingdom; Hopi Army |
-| `match-07` | Great Lakes | `OFB107A` | Detroit `(1120,1098)` | Medium | 5 N | Toronto; Goderich; Parry Sound; Rouyn-Noranda; Green Bay |
-| `match-08` | Great Lakes | `OFB108` | Duluth `(38,326)` | Hard | 3 N + 3 T | Marquette; Marathon; Wausau; Tuareg Supremacy; Ptolemaic District; Almohad Protectorate |
-| `match-09` | Strait of Gibraltar | `OFB109` | Andalusia `(1555,258)` | Medium | 3 N + 2 T | Spain; Portugal; Rif; Stuart Duchy; Mongolian Monkdom |
-| `match-10` | Strait of Gibraltar | `OFB110` | Morocco `(1287,1175)` | Hard | 1 N + 5 T | Shilha; Rashidun Territory; Latin Colony; Norwegian Matriarchy; Wolof Free State; Kazakh Queendom |
-| `match-11` | World | `OFB111` | Germany `(990,195)` | Medium | 7 N | Cuba; South Africa; Japan; Peru; Chad; Oman; Antarctica |
-| `match-12` | World | `OFB112` | New Zealand `(1890,775)` | Hard | 5 N + 4 T | India; Poland; Romania; Antarctica; Iran; Hittite Republic; British Monkdom; Mapuche Federation; Filipino Army |
+| ID         | Map                 | Seed      | LLM spawn                | Difficulty | Opponents | Expected deterministic roster                                                                                  |
+| ---------- | ------------------- | --------- | ------------------------ | ---------- | --------- | -------------------------------------------------------------------------------------------------------------- |
+| `match-01` | Japan               | `OFB101`  | Kanto `(1613,1133)`      | Medium     | 3 N       | Shikoku; Tokyo; Chubu                                                                                          |
+| `match-02` | Japan               | `OFB102`  | Okinawa `(397,2283)`     | Hard       | 3 N + 2 T | Kanto; Tokyo; Kyoto; Filipino Republics; Mapuche Regime                                                        |
+| `match-03` | Europe Classic      | `OFB103`  | France `(729,648)`       | Medium     | 5 N       | Portugal; Lithuania; Italy; Poland; Tunisia                                                                    |
+| `match-04` | Europe Classic      | `OFB104`  | Iceland `(171,171)`      | Hard       | 3 N + 3 T | France; Romania; Ukraine; Palmyrene Ascendancy; Romanov Assembly; Iroquois Sisterhood                          |
+| `match-05` | Four Islands        | `OFB105A` | Korinthal `(403,1296)`   | Medium     | 3 N       | Myrkwind; Lunareth; Sylvoria                                                                                   |
+| `match-06` | Four Islands        | `OFB106`  | Sylvoria `(1328,322)`    | Hard       | 1 N + 4 T | Myrkwind; Danish Alliance; Zuni Hierarchy; York Kingdom; Hopi Army                                             |
+| `match-07` | Great Lakes         | `OFB107A` | Detroit `(1120,1098)`    | Medium     | 5 N       | Toronto; Goderich; Parry Sound; Rouyn-Noranda; Green Bay                                                       |
+| `match-08` | Great Lakes         | `OFB108`  | Duluth `(38,326)`        | Hard       | 3 N + 3 T | Marquette; Marathon; Wausau; Tuareg Supremacy; Ptolemaic District; Almohad Protectorate                        |
+| `match-09` | Strait of Gibraltar | `OFB109`  | Andalusia `(1555,258)`   | Medium     | 3 N + 2 T | Spain; Portugal; Rif; Stuart Duchy; Mongolian Monkdom                                                          |
+| `match-10` | Strait of Gibraltar | `OFB110`  | Morocco `(1287,1175)`    | Hard       | 1 N + 5 T | Shilha; Rashidun Territory; Latin Colony; Norwegian Matriarchy; Wolof Free State; Kazakh Queendom              |
+| `match-11` | World               | `OFB111`  | Germany `(990,195)`      | Medium     | 7 N       | Cuba; South Africa; Japan; Peru; Chad; Oman; Antarctica                                                        |
+| `match-12` | World               | `OFB112`  | New Zealand `(1890,775)` | Hard       | 5 N + 4 T | India; Poland; Romania; Antarctica; Iran; Hittite Republic; British Monkdom; Mapuche Federation; Filipino Army |
 
 This matrix deliberately crosses continental, island, strait, inland-water, and
 global geography; central and edge spawns; three to nine opponents; pure Nation
@@ -227,18 +227,18 @@ The scored fixtures below are required work, not fabricated finished fixtures.
 They become benchmark tasks only after hashes, graders, references, controls,
 and acceptance reports are frozen.
 
-| Family | Development aid (not scored) | Public scored source |
-| --- | --- | --- |
-| Neutral expansion | existing Japan/Kanto | `match-08` Great Lakes/Duluth |
-| Saturated-capacity expansion | existing Japan/Kanto | `match-11` World/Germany |
-| Post-expansion recovery | existing Japan/Kanto | `match-04` Europe/Iceland |
-| Weaker-target selection | existing Japan/Kanto | `match-03` Europe/France |
-| Frontier restraint | existing Japan/Kanto | `match-10` Gibraltar/Morocco |
-| Incoming-attack response | existing Japan/Kanto | `match-07` Great Lakes/Detroit |
-| Split-front defense | existing Japan/Kanto | `match-06` Four Islands/Sylvoria |
-| Losing-attack retreat | existing Japan/Kanto | `match-12` World/New Zealand |
-| Naval target recognition | existing Japan/Kanto | `match-09` Gibraltar/Andalusia |
-| Construction-failure recovery | existing Japan/Kanto | `match-03` Europe/France |
+| Family                        | Development aid (not scored) | Public scored source             |
+| ----------------------------- | ---------------------------- | -------------------------------- |
+| Neutral expansion             | existing Japan/Kanto         | `match-08` Great Lakes/Duluth    |
+| Saturated-capacity expansion  | existing Japan/Kanto         | `match-11` World/Germany         |
+| Post-expansion recovery       | existing Japan/Kanto         | `match-04` Europe/Iceland        |
+| Weaker-target selection       | existing Japan/Kanto         | `match-03` Europe/France         |
+| Frontier restraint            | existing Japan/Kanto         | `match-10` Gibraltar/Morocco     |
+| Incoming-attack response      | existing Japan/Kanto         | `match-07` Great Lakes/Detroit   |
+| Split-front defense           | existing Japan/Kanto         | `match-06` Four Islands/Sylvoria |
+| Losing-attack retreat         | existing Japan/Kanto         | `match-12` World/New Zealand     |
+| Naval target recognition      | existing Japan/Kanto         | `match-09` Gibraltar/Andalusia   |
+| Construction-failure recovery | existing Japan/Kanto         | `match-03` Europe/France         |
 
 Canonical fixture IDs use
 `cap-<family-slug>-<split>-<map-slug>-<three-digit-ordinal>`, for example
@@ -260,7 +260,7 @@ Every scored capability fixture MUST:
 - record ordered preparation intents, checkpoint tick, engine RNG state if not
   derivable, pre-decision state hash, and all periodic hashes;
 - recreate identical normalized observation, legal menu, and tile-state hashes;
-- start the evaluated player alive with exactly two legal action slots;
+- start the evaluated player alive with at least one legal action (`hold`);
 - expose enough information through the ordinary observation and menu for a
   capable agent to decide without hidden state;
 - record its fixed horizon, grader version, thresholds, regions, entity roles,
@@ -270,7 +270,7 @@ Every scored capability fixture MUST:
 - contain one reference policy that passes five clean replays and at least two
   legal control policies that fail for the intended reason;
 - admit any legal trajectory that reaches the graded outcome, regardless of
-  action ID, slot order, action count, fraction, or strategy wording; and
+  action ID, troop fraction, or strategy wording; and
 - be solvable without grader access, leaked metadata, stale files, cross-trial
   state, exact generated IDs, or provider-specific behavior.
 
@@ -296,7 +296,7 @@ manifest, not in agent-visible input.
 
 **Checkpoint:** No opponent border or incoming attack; bordered unclaimed land;
 70–90% troop capacity; no active neutral expansion; all four expansion fractions
-available in both slots.
+available.
 
 **Horizon:** 100 ticks.
 
@@ -358,24 +358,26 @@ outgoing attack; calibrated protected frontier tiles.
 attack.
 
 **Checkpoint:** Exactly one hostile incoming attack; counter candidates at 25%,
-50%, 75%, and 100% of capped per-slot emergency budget; calibrated such that a
-reference defense passes and double hold fails.
+50%, 75%, and 100% of the capped emergency budget; calibrated such that a
+reference defense passes and hold fails.
 
 **Horizon:** 200 ticks.
 
 **Pass:** Alive; losses in `protectedTiles` do not exceed the fixture maximum.
 
-### 8.7 Split-front defense
+### 8.7 Split-front prioritization
 
-**Capability:** Preserve both frontiers during simultaneous attacks.
+**Capability:** Prioritize the more dangerous of two simultaneous attacks.
 
-**Checkpoint:** Exactly two opponents attack; incoming troop counts differ by at
-most 10%; both have counters in both slots; neither attack is certain to fail
-without response; frontier tile sets are disjoint.
+**Checkpoint:** Exactly two opponents attack with materially unequal incoming
+forces; both have legal counters; the dangerous and lesser frontier tile sets
+are disjoint.
 
 **Horizon:** 200 ticks.
 
-**Pass:** Alive; neither frontier exceeds its own maximum protected-tile loss.
+**Pass:** Alive; dangerous-front loss and combined protected-territory loss stay
+within their frozen maxima. Hold and countering only the lesser threat fail
+calibration.
 
 ### 8.8 Losing-attack retreat
 

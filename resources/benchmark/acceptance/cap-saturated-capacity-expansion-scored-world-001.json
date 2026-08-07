@@ -2,42 +2,42 @@
   "schemaVersion": "benchmark-fixture-acceptance-v1",
   "fixtureId": "cap-saturated-capacity-expansion-scored-world-001",
   "status": "accepted",
-  "sourceArtifact": "data/benchmark-fixture-sources/match-11/b5eaa455-4726-43f8-9d93-a7cedc26c985.json.gz",
+  "sourceArtifact": "data/benchmark-fixture-sources/match-11/5924f438-b911-4903-a2a1-4c476bec129d.json.gz",
   "cleanRebuilds": [
     {
       "state": 1433033086910016,
-      "observation": "7eea04d5711706532af1233efd5e536a74f488d8976e52e3642d7d0f2b00f816",
-      "candidateMenu": "2bbf76c4ac7f6dbc197a223f0d2ee3223b80c5c9d97bbaa4a737c66f8c59faa5",
+      "observation": "d82872a6eacf4bd786341c859b40da44622e30ef0c94e721519e8473d034ba39",
+      "candidateMenu": "4232d6313ef90c8adf89904d5b52e68c5636d0d89774b7909ed236efb9349dee",
       "tileState": "01ac1c58a3437916f67e679838d875f85fb033ee4e5b6ae8e39fc934e7aaf043"
     },
     {
       "state": 1433033086910016,
-      "observation": "7eea04d5711706532af1233efd5e536a74f488d8976e52e3642d7d0f2b00f816",
-      "candidateMenu": "2bbf76c4ac7f6dbc197a223f0d2ee3223b80c5c9d97bbaa4a737c66f8c59faa5",
+      "observation": "d82872a6eacf4bd786341c859b40da44622e30ef0c94e721519e8473d034ba39",
+      "candidateMenu": "4232d6313ef90c8adf89904d5b52e68c5636d0d89774b7909ed236efb9349dee",
       "tileState": "01ac1c58a3437916f67e679838d875f85fb033ee4e5b6ae8e39fc934e7aaf043"
     },
     {
       "state": 1433033086910016,
-      "observation": "7eea04d5711706532af1233efd5e536a74f488d8976e52e3642d7d0f2b00f816",
-      "candidateMenu": "2bbf76c4ac7f6dbc197a223f0d2ee3223b80c5c9d97bbaa4a737c66f8c59faa5",
+      "observation": "d82872a6eacf4bd786341c859b40da44622e30ef0c94e721519e8473d034ba39",
+      "candidateMenu": "4232d6313ef90c8adf89904d5b52e68c5636d0d89774b7909ed236efb9349dee",
       "tileState": "01ac1c58a3437916f67e679838d875f85fb033ee4e5b6ae8e39fc934e7aaf043"
     },
     {
       "state": 1433033086910016,
-      "observation": "7eea04d5711706532af1233efd5e536a74f488d8976e52e3642d7d0f2b00f816",
-      "candidateMenu": "2bbf76c4ac7f6dbc197a223f0d2ee3223b80c5c9d97bbaa4a737c66f8c59faa5",
+      "observation": "d82872a6eacf4bd786341c859b40da44622e30ef0c94e721519e8473d034ba39",
+      "candidateMenu": "4232d6313ef90c8adf89904d5b52e68c5636d0d89774b7909ed236efb9349dee",
       "tileState": "01ac1c58a3437916f67e679838d875f85fb033ee4e5b6ae8e39fc934e7aaf043"
     },
     {
       "state": 1433033086910016,
-      "observation": "7eea04d5711706532af1233efd5e536a74f488d8976e52e3642d7d0f2b00f816",
-      "candidateMenu": "2bbf76c4ac7f6dbc197a223f0d2ee3223b80c5c9d97bbaa4a737c66f8c59faa5",
+      "observation": "d82872a6eacf4bd786341c859b40da44622e30ef0c94e721519e8473d034ba39",
+      "candidateMenu": "4232d6313ef90c8adf89904d5b52e68c5636d0d89774b7909ed236efb9349dee",
       "tileState": "01ac1c58a3437916f67e679838d875f85fb033ee4e5b6ae8e39fc934e7aaf043"
     }
   ],
   "machineChecks": {
     "checkpointRequirements": true,
-    "twoActionSlots": true,
+    "oneActionPerDecision": true,
     "ordinaryInputOnly": true
   },
   "referenceReplays": {
@@ -45,7 +45,7 @@
     "passed": 5
   },
   "controls": [
-    "double-hold",
+    "hold",
     "plausible-distractor"
   ],
   "review": {

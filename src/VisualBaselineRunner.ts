@@ -558,12 +558,14 @@ export async function runVisualBaseline(
     startedAt: startedAt.toISOString(),
     completedAt: new Date().toISOString(),
     scenario: {
-      id: scenario.id,
+      // The visual baseline remains the independent two-intent japan-v5
+      // division; the normalized harness now uses japan-v6.
+      id: "japan-v5",
       seed: scenario.seed,
       clientID: scenario.clientID,
       spawn: scenario.spawn,
       decisionIntervalTicks: scenario.decisionIntervalTicks,
-      actionSlots: scenario.actionSlots,
+      actionSlots: 2,
       maxDecisionCount: scenario.maxDecisionCount,
       maxSimulatedMinutes: scenario.maxSimulatedMinutes,
       openfront: scenario.openfront,

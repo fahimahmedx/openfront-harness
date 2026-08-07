@@ -10,7 +10,7 @@ import {
 import {
   createLegalActions,
   createObservation,
-  resolveDecisionActions,
+  resolveDecisionAction,
 } from "../ObservationActions";
 import { OPENFRONT_COMMIT, SCENARIO } from "../Scenario";
 import { AgentDecision, AgentResult, LegalAction, Observation } from "../Types";
@@ -20,8 +20,8 @@ const PLAYER_MODEL_NAME = "neutral-expansion-eval";
 const OWNER_ID_MASK = 0xfff;
 
 export const NEUTRAL_EXPANSION_FIXTURE = {
-  evalVersion: "openfront-micro-v1",
-  graderVersion: "neutral-expansion-v1",
+  evalVersion: "openfront-micro-v2",
+  graderVersion: "neutral-expansion-v2",
   familyId: "neutral-expansion",
   fixtureId: "neutral-expansion-japan-kanto-001",
   split: "development",
@@ -36,9 +36,9 @@ export const NEUTRAL_EXPANSION_FIXTURE = {
   expectedCheckpoint: {
     stateHash: 184348445389306,
     observationHash:
-      "26ff6f97949dde962602a4e5b2c1f116714b9242828a8bd525095dbddeab210a",
+      "f3ab5a2a72a73829d55e2b13fa663fa3cc650d443666116f96d83c725a8a55c5",
     candidateMenuHash:
-      "6ea2039143291c21fd9b0f25b8017ae17023e100b679e5dcfccb894b75e2ebd4",
+      "13af39ec5bbcfcedc9ffb983ee543705d1ff1350ac35e48e953d827ff5bb6ae2",
     tileStateHash:
       "582f6a2a5816d5ba1a0a07f4d40c7ae66de145b4cff6fed60b68652ac5a0b84f",
   },
@@ -98,8 +98,8 @@ export type NeutralExpansionTrial = {
     observation: Observation;
     candidates: LegalAction[];
     strategy: string;
-    selectedActionIds: [string, string];
-    appliedActionIds: [string, string];
+    selectedActionIds: [string];
+    appliedActionIds: [string];
     actionOutcomes: ReturnType<typeof actionOutcomes>;
     attempts: number;
     attemptFailures: AgentResult["attemptFailures"];
@@ -288,12 +288,9 @@ function assertFixtureRequirements(checkpoint: NeutralExpansionCheckpoint) {
   }
   for (const fraction of expectedFractions) {
     const id = `expand:neutral:${fraction}`;
-    const repeated = resolveDecisionActions([id, id], candidates);
-    if (
-      repeated.fallback ||
-      repeated.actions.some((candidate) => candidate.id !== id)
-    ) {
-      throw new Error(`${id} is not legal in both eval action slots`);
+    const resolved = resolveDecisionAction(id, candidates);
+    if (resolved.fallback || resolved.action.id !== id) {
+      throw new Error(`${id} is not a legal eval action`);
     }
   }
 }
@@ -374,37 +371,37 @@ export async function createNeutralExpansionCheckpoint(
   }
 }
 
-export function selectNeutralExpansionReferenceActions(
+export function selectNeutralExpansionReferenceAction(
   candidates: LegalAction[],
-): [string, string] {
+): string {
   if (!candidates.some((candidate) => candidate.id === "expand:neutral:100")) {
     throw new Error("Reference expansion action is missing from the menu");
   }
-  return ["expand:neutral:100", "hold:2"];
+  return "expand:neutral:100";
 }
 
-export function selectNeutralExpansionHoldControl(): [string, string] {
-  return ["hold:1", "hold:2"];
+export function selectNeutralExpansionHoldControl(): string {
+  return "hold";
 }
 
 export function selectNeutralExpansionDiplomacyControl(
   candidates: LegalAction[],
-): [string, string] {
+): string {
   const diplomacy = candidates.find(
     (candidate) => candidate.category === "diplomacy",
   );
   if (diplomacy === undefined) {
     throw new Error("Diplomacy control is missing from the eval menu");
   }
-  return [diplomacy.id, "hold:2"];
+  return diplomacy.id;
 }
 
 export function scriptedAgentResult(
   model: string,
   strategy: string,
-  actions: [string, string],
+  action: string,
 ): AgentResult {
-  const decision: AgentDecision = { strategy, actions };
+  const decision: AgentDecision = { strategy, action };
   return {
     decision,
     attempts: 1,
@@ -439,19 +436,14 @@ export async function runNeutralExpansionTrial(
   const { candidates, observation, player, session } = checkpoint;
   try {
     const agentResult = await agent.decide(observation, candidates);
-    const selectedActionIds = agentResult.decision?.actions ?? [
-      "hold:1",
-      "hold:2",
-    ];
-    const resolved = resolveDecisionActions(selectedActionIds, candidates);
-    const appliedIntents = resolved.actions
+    const selectedActionId = agentResult.decision?.action ?? "hold";
+    const resolved = resolveDecisionAction(selectedActionId, candidates);
+    const appliedIntents = [resolved.action]
       .map((candidate) => candidate.intent)
       .filter((intent): intent is Intent => intent !== null);
-    const trackers = beginActionTracking(
-      session.game,
-      player,
-      resolved.actions,
-    );
+    const trackers = beginActionTracking(session.game, player, [
+      resolved.action,
+    ]);
     const stopObserving = session.onUpdate((update) => {
       if (!("errMsg" in update)) observeActionUpdates(trackers, update);
     });
@@ -508,11 +500,8 @@ export async function runNeutralExpansionTrial(
           `Decision failed; holding. ${agentResult.error ?? ""}`
             .trim()
             .slice(0, 160),
-        selectedActionIds: selectedActionIds as [string, string],
-        appliedActionIds: resolved.actions.map((candidate) => candidate.id) as [
-          string,
-          string,
-        ],
+        selectedActionIds: [selectedActionId],
+        appliedActionIds: [resolved.action.id],
         actionOutcomes: actionOutcomes(
           trackers,
           session.game,

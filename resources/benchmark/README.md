@@ -5,6 +5,11 @@ the ten scored multi-map capability acceptance reports, and versioned JSON
 Schemas for benchmark artifacts. The existing Japan fixtures remain development
 aids and are never included in a public score.
 
+This v0.1 release is the current single-action contract: `agent-v13`,
+`single-action-v1`, and `actionsPerDecision: 1`. Earlier two-action v0.1
+manifests and artifacts are intentionally incompatible and are not accepted as
+benchmark input.
+
 Release checks:
 
 ```bash

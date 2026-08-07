@@ -1,6 +1,16 @@
 # OpenFront LLM Harness — Design Decisions
 
-Status: implemented for benchmark scenario `japan-v5`; the timer-aware `agent-v5` contract was added on 2026-07-27, the neutral troop-semantics `agent-v6` contract on 2026-07-29, the explicit standings `agent-v7` contract on 2026-07-29, simultaneous-slot conflict semantics in `agent-v8` on 2026-08-01, the single gold-spending slot in `agent-v9` on 2026-08-01, stale-build safety and diagnostics in `agent-v10` on 2026-08-01, semantic diplomacy guidance in `agent-v11` on 2026-08-01, and the one-front proactive-offense invariant in `agent-v12` on 2026-08-01. Existing schema-v1, `japan-v1` through `japan-v4`, and `agent-v1` through `agent-v11` artifacts remain replay-compatible.
+Status: implemented for benchmark scenario `japan-v6`, prompt contract
+`agent-v13`, and run schema 3. Each decision requires exactly one legal action
+ID in `{ strategy, action }`; `hold` is the explicit no-op. A troop action may
+use the full safe surplus above its reserve floor. Schema-v1/v2 two-action runs
+remain available only through the read-only replay, trace, and download paths.
+
+Sections describing agent-v1 through agent-v12 are retained as chronological
+history of the former two-action harness. They do not define the current runner
+or public benchmark contract. The current public `openfront-bench-v0.1` release
+requires `actionsPerDecision: 1`, `single-action-v1`, and `agent-v13` and rejects
+the former benchmark shape.
 
 This document records every material decision made for the harness. A scenario-affecting change must create a new scenario ID instead of silently changing an existing benchmark, because future leaderboard results need to remain comparable.
 
@@ -22,7 +32,9 @@ This document records every material decision made for the harness. A scenario-a
 
 ## 3. One immutable Japan scenario
 
-**Decision:** Expose only Japan at Normal size under scenario ID `japan-v5`. The game preset and seed remain those of v1; v2 versioned the action and observation contract, v3 versioned simultaneous-slot conflict validation, v4 versioned the one-gold-action-per-decision invariant, and v5 versions semantic diplomacy observations plus the one-front proactive-offense invariant.
+**Decision:** Expose only Japan at Normal size under current scenario ID
+`japan-v6`. The game preset and seed remain unchanged; v6 replaces the former
+two-action contract with exactly one action per decision.
 
 **Pros:** A narrow surface is easier to validate and explain; every run is directly comparable; Railway images can omit all other map binaries.
 
@@ -60,7 +72,52 @@ This document records every material decision made for the harness. A scenario-a
 
 **Cons:** The agent cannot react inside the interval; important attacks may develop between decisions; another cadence would produce a different task.
 
-## 8. Exactly two action slots
+## 8. Exactly one action slot
+
+**Decision:** Agent v13 requires exactly one action ID per decision. The model
+still receives a deterministic menu of individually legal actions and may
+choose `hold`, but the harness no longer asks it to compose two actions that
+must also be valid together.
+
+**Why:** The DeepSeek V4 Flash evaluation repeatedly exposed cross-slot action
+conflicts. The model could select two actions that were each legal in isolation
+but invalid as a pair because they competed for the same resources, repeated a
+non-repeatable operation, mixed incompatible diplomatic postures, or launched
+proactive attacks against different opponents. The validator kept invalid
+commands out of the game, but the frequency of these errors showed that the
+two-slot interface was making the model solve a harness-specific constraint
+problem in addition to choosing a strategy.
+
+Keeping two slots would require one of two unsatisfactory designs:
+
+- The harness could generate only valid paired actions and ask the model to
+  choose one pair. With `n` individually legal actions, however, the candidate
+  space can grow on the order of `n²`. Even after filtering invalid pairs, this
+  substantially enlarges the prompt and structured-output enum, duplicates the
+  same action across many entries, and makes the interface harder for both the
+  model and a human reviewing the trace.
+- The resolver could preserve the first action and replace a conflicting second
+  action with a hold. That silently rewrites the model's decision, gives the
+  first slot arbitrary priority, and may execute only half of a strategy whose
+  actions were intended to work together. Although safe, it does not feel like
+  a faithful or correct interpretation of the model's output.
+
+Rejecting a conflicting pair and retrying was more faithful than silently
+rewriting it, but it still spent latency, tokens, and retry budget on a failure
+mode created by the harness interface itself. Requiring one action removes the
+pairwise-conflict class structurally, keeps the candidate space linear, and
+makes the selected action correspond exactly to the action executed.
+
+**Pros:** The response contract and trace are simpler; every offered action is
+independently executable; safe troop surplus no longer has to be divided across
+slots; no slot has implicit priority; and the harness does not need pairwise
+conflict, repeatability, or gold-slot rules.
+
+**Cons:** The agent has less action bandwidth at each 100-tick decision gate and
+cannot intentionally combine two compatible commands on the same tick. This is
+accepted in exchange for a smaller and more faithful decision boundary.
+
+## 8.1 Historical: exactly two action slots (agent-v4 through agent-v12)
 
 **Decision:** Require exactly two named action slots, `action1` and `action2`. Both execute together on the next core tick; neither slot is sequential or conditional on the other. Each slot has its own legal-ID enum and its own hold. Expansion, attack, and boat candidates may be selected in both slots because their troop amount is already bounded to one slot's half of the shared safe budget. Repeated retreat, diplomacy, or hold actions are normalized deterministically to the appropriate slot hold. Build and upgrade actions are legal only in `action1`; `action2` cannot contain a gold-spending action.
 

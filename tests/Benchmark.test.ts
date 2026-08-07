@@ -1,4 +1,5 @@
 import path from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 import { GameMapType } from "../OpenFrontIO/src/core/game/Game";
 import {
@@ -26,6 +27,7 @@ import {
   verifyBenchmarkMapAssets,
 } from "../src/benchmark/BenchmarkManifest";
 import { NodeGameMapLoader } from "../src/NodeGameMapLoader";
+import { BenchmarkManifestSchema } from "../src/benchmark/BenchmarkSchemas";
 
 describe("public benchmark contract", () => {
   test("contains the exact scored suite dimensions", () => {
@@ -35,6 +37,59 @@ describe("public benchmark contract", () => {
       new Set(BENCHMARK_CAPABILITY_TASKS.map((task) => task.family)),
     ).toEqual(new Set(BENCHMARK_CAPABILITY_FAMILIES));
     expect(new Set(BENCHMARK_MATCH_TASKS.map((task) => task.map)).size).toBe(6);
+  });
+
+  test("accepts only the replacement one-action v0.1 manifest", () => {
+    const raw = JSON.parse(
+      readFileSync(path.resolve("resources/benchmark/manifest.json"), "utf8"),
+    );
+    const manifest = BenchmarkManifestSchema.parse(raw);
+    expect(manifest.promptVersion).toBe("agent-v13");
+    expect(manifest.resolverVersion).toBe("single-action-v1");
+    expect(
+      manifest.tasks.every((task) => task.ceilings.actionsPerDecision === 1),
+    ).toBe(true);
+
+    expect(() =>
+      BenchmarkManifestSchema.parse({
+        ...raw,
+        promptVersion: "agent-v12",
+        resolverVersion: "simultaneous-two-slot-v1",
+      }),
+    ).toThrow();
+
+    expect(() =>
+      BenchmarkManifestSchema.parse({
+        ...raw,
+        tasks: raw.tasks.map((task: { ceilings: object }) => ({
+          ...task,
+          ceilings: { ...task.ceilings, actionSlots: 2 },
+        })),
+      }),
+    ).toThrow();
+
+    const capability = raw.tasks.find(
+      (task: { suite: string }) => task.suite === "capability",
+    );
+    expect(() =>
+      BenchmarkManifestSchema.parse({
+        ...raw,
+        tasks: raw.tasks.map((task: { id: string }) =>
+          task.id === capability.id
+            ? {
+                ...task,
+                recentDecisions: [
+                  {
+                    selectedActionIds: ["hold:1", "hold:2"],
+                    appliedActionIds: ["hold:1", "hold:2"],
+                    actionOutcomes: [{}, {}],
+                  },
+                ],
+              }
+            : task,
+        ),
+      }),
+    ).toThrow();
   });
 
   test("fully resolves every game config without relying on benchmark-changing defaults", () => {
@@ -60,7 +115,7 @@ describe("public benchmark contract", () => {
         1 + task.expectedRoster.length,
       );
     }
-    expect(BENCHMARK_LIMITS.actionSlots).toBe(2);
+    expect(BENCHMARK_LIMITS.actionsPerDecision).toBe(1);
     expect(BENCHMARK_LIMITS.maxCandidates).toBe(64);
   });
 

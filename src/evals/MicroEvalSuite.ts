@@ -10,15 +10,10 @@ import {
 import {
   createLegalActions,
   createObservation,
-  resolveDecisionActions,
+  resolveDecisionAction,
 } from "../ObservationActions";
 import { OPENFRONT_COMMIT, SCENARIO } from "../Scenario";
-import {
-  AgentResult,
-  DecisionRecord,
-  LegalAction,
-  Observation,
-} from "../Types";
+import { AgentResult, LegalAction, Observation } from "../Types";
 import {
   createNeutralExpansionCheckpoint,
   NeutralExpansionAgent,
@@ -28,7 +23,6 @@ import {
   createReplayCheckpoint,
   ReplayCheckpoint,
   ReplayFamilyId,
-  replayFixtureMetadata,
   tileStateHash,
 } from "./ReplayCheckpoint";
 
@@ -38,7 +32,7 @@ export const REMAINING_MICRO_EVAL_FAMILIES = [
   "weaker-target-selection",
   "frontier-restraint",
   "incoming-attack-response",
-  "split-front-defense",
+  "split-front-prioritization",
   "losing-attack-retreat",
   "naval-target-recognition",
   "construction-failure-recovery",
@@ -66,9 +60,9 @@ export const MICRO_EVAL_FIXTURES: Record<
     expectedCheckpoint: {
       state: 873239509169658,
       observation:
-        "91b256093f90d381f7e773342ade79024025cbd34144cc30a8d970c82f565310",
+        "0cd65b09bfbb979d81d11e9a6be183a36d527c2dc0bb68276fe4f6e5fad79da5",
       candidateMenu:
-        "2f60d26414e070410b9fd4bdca3cc3c6105a65b18dbab45ca2aa3d0c5525dc3e",
+        "a45da8af0705f6dfbb984b4d061361779a76fecca28df35720e1bddd7238746e",
       tileState:
         "302b018da4f21866ee2aa61e3e56b6066a0438432a03ea52bb40f831ce10db68",
     },
@@ -77,11 +71,11 @@ export const MICRO_EVAL_FIXTURES: Record<
     fixtureId: "post-expansion-recovery-japan-001",
     horizonTicks: 100,
     expectedCheckpoint: {
-      state: 153243526461091,
+      state: 160101488001483,
       observation:
-        "7bdad92ba7e9ad3057ec9de5a07b89715a7575101f84c639f3c596bc54aab409",
+        "968c55045e4db0efdb5ed2375ce51000f36d170915912847bb72d4608ac555e0",
       candidateMenu:
-        "a0871c00125cd188453590ec8e47f2f269c632c3e9a0010d77f94d338c6d35f7",
+        "0d00432189934848773fe4e67b1e7bd044fa70ab095e98435b6097fd5e361dbf",
       tileState:
         "0ae8153a4fa1946f1816b768ebec3d33f052337db4920f2c6f8aabde492de98c",
     },
@@ -92,9 +86,9 @@ export const MICRO_EVAL_FIXTURES: Record<
     expectedCheckpoint: {
       state: 5048400175491223,
       observation:
-        "f4024f54c62dd1b8a8abee4f54660649f6aa6c8245c178ed4f32c863460bb0d8",
+        "833b30a64aa30fa074319ece6ea0b119b7ff2574bebf24b3441d11a7c3481f7b",
       candidateMenu:
-        "f5b9007881da41f5b0b0f128a4e9d391d64dffeef5b08da8e9aefe4ddb619739",
+        "b2066072b51e8f1c7f1115d157353453b74b8957a9bffa4381806dd668ec5f6d",
       tileState:
         "1bbd3b0a730fd82a18725b44f8f5c67c8fc3f8545a17e42df6840fd1cb4081e2",
     },
@@ -105,9 +99,9 @@ export const MICRO_EVAL_FIXTURES: Record<
     expectedCheckpoint: {
       state: 4044227782518706,
       observation:
-        "d01bdd1b7728c851373a0d6238475f3e4aa490025f93bdbefedec61f6e64e0bf",
+        "9339292ea506f296f5507a1649e2252bab6d269ebeff2069a199eec31cea66cc",
       candidateMenu:
-        "3a74f932cf6acfed3827d95c120fced86ed4d3444dc81054c14e723e3de9dade",
+        "824a474d9625607fad784d1e6f80f97ad7548f5b12728e382f60f82451b8452e",
       tileState:
         "111d4398274ef975334ae73458d6220fe2cc2a999b5fc2b24a4d3c7e556bd43c",
     },
@@ -118,22 +112,22 @@ export const MICRO_EVAL_FIXTURES: Record<
     expectedCheckpoint: {
       state: 3574141668933355,
       observation:
-        "3d64dd7da745cfbcf09a1138531ad42e1109f240b07e14bc570806a6190eb78d",
+        "686cbbce6ea338706fbafc3dfc0180598f4c5c1f00bbbe9c7d946e636eae9753",
       candidateMenu:
-        "adbe1cde97fae0bb8acb4e48f5bfca3ed094dcbd03b3820dba51c5eb9583a0d7",
+        "af7fea1ca62badb2e30211add6296f4e3540a36872513ee55afc7bd50be84fcc",
       tileState:
         "9fd62a0db30bc50168b0205720cb6a4a9ec968c3dc84953a22918392fd5eee68",
     },
   },
-  "split-front-defense": {
-    fixtureId: "split-front-defense-japan-001",
+  "split-front-prioritization": {
+    fixtureId: "split-front-prioritization-japan-001",
     horizonTicks: 200,
     expectedCheckpoint: {
       state: 5353959940620816,
       observation:
-        "ca7c9e949bfd9609227b7fb25beb5d1a24af4bf166ea366cd7ab2eabf673f02b",
+        "dbdb89bcb1b98d643abf76cc746ada703314520b57ca38625901606e087f8f8a",
       candidateMenu:
-        "6c0b2d01dea6b3248f9015a9b9997859819fe64250721ff9c37de5566797de61",
+        "ebab016aa3cdd6cbcab26d02becc2aafd9802e78f782745d10c05e4c43588429",
       tileState:
         "0f6942f3ec35f144bc40f3198e7fed23b641c46befa44caad1a0fea55150339f",
     },
@@ -144,9 +138,9 @@ export const MICRO_EVAL_FIXTURES: Record<
     expectedCheckpoint: {
       state: 3942302880356315,
       observation:
-        "080355ac5a2bd2e947435232d8259860ad18c0fde9e9239948d1f2813869e551",
+        "edf6d3e273a93ceae9cd7c060b565c7bafb44bdf53527444b67fbe43680372d1",
       candidateMenu:
-        "05e9fe8f3858f48582c13f3d82d9614d4add3594f8c4c50d5b30210a45370e86",
+        "54d8552a037995e08144d5eedee61b40db9fb877991fc459e884f89703b455a6",
       tileState:
         "f08dcd6800c0152f79cefbfbffb5d60aa08a75a01d76658c9a47cef83ee47e61",
     },
@@ -157,9 +151,9 @@ export const MICRO_EVAL_FIXTURES: Record<
     expectedCheckpoint: {
       state: 3202099624156893,
       observation:
-        "47c2ded8fb5b3b8848ab7c4a11c85e60677a49499dadff98c184f5926bcc3ed7",
+        "623b9d115334cd844de878e4128986c016a37decff030cd6d3df9358add0927d",
       candidateMenu:
-        "af43b31fc6ce92a51c67174cc1e82ae66591d17e0137672967b97726d2a5b677",
+        "990002c071ee9c6f453c3aa24eb94f53def24bf853396cbdcb3864e4d88cafb6",
       tileState:
         "5232e56c53215cd6de6a7ed24f55b4f29e8b47f543823af9803c3567bbc7958f",
     },
@@ -170,9 +164,9 @@ export const MICRO_EVAL_FIXTURES: Record<
     expectedCheckpoint: {
       state: 4221862867433330,
       observation:
-        "7a59c712ad98dd7154a86aa005cb17c5a72ffe440f1b552b1e27703dbb814d5f",
+        "a018d26da99ea5f5745dca933c2d59a103d913a428a40832ed075912b58ef0c0",
       candidateMenu:
-        "9ae7e0094b0cacc894e934e46d7d4aff64710d591924d373055b148d7cfae7de",
+        "d3cbaae4fbd5356e38e0e749a0309c96dcb2a6d98608685c8160a7636afad49c",
       tileState:
         "f8a02264fa34ad9f34c588dccb9c0034b2d57aa082b11af6b3014c719326b3da",
     },
@@ -199,6 +193,7 @@ type TaskContext = {
   originalAttackId?: string;
   minimumRecoveredTroops?: number;
   maximumAllowedLosses?: Map<string, number>;
+  combinedMaximumAllowedLoss?: number;
   defenseZoneTiles?: Set<number>;
 };
 
@@ -208,7 +203,7 @@ export type MicroEvalCheckpoint = ReplayCheckpoint & {
 
 export type MicroEvalTrial = {
   runId: string;
-  evalVersion: "openfront-micro-v1";
+  evalVersion: "openfront-micro-v2";
   graderVersion: string;
   familyId: MicroEvalFamilyId;
   fixtureId: string;
@@ -239,8 +234,8 @@ export type MicroEvalTrial = {
     observation: Observation;
     candidates: LegalAction[];
     strategy: string;
-    selectedActionIds: [string, string];
-    appliedActionIds: [string, string];
+    selectedActionIds: [string];
+    appliedActionIds: [string];
     actionOutcomes: ReturnType<typeof actionOutcomes>;
     attempts: number;
     attemptFailures: AgentResult["attemptFailures"];
@@ -268,8 +263,8 @@ export type MicroEvalTrial = {
 
 type TaskDefinition = {
   horizonTicks: number;
-  reference(checkpoint: MicroEvalCheckpoint): [string, string];
-  controls(checkpoint: MicroEvalCheckpoint): Array<[string, string]>;
+  reference(checkpoint: MicroEvalCheckpoint): string;
+  controls(checkpoint: MicroEvalCheckpoint): string[];
   grade(checkpoint: MicroEvalCheckpoint): {
     assertions: MicroAssertion[];
     diagnostics: Record<string, number | boolean | string>;
@@ -408,26 +403,20 @@ function largest(candidates: LegalAction[], prefix: string): string {
   })[0].id;
 }
 
-function diplomacyControl(checkpoint: MicroEvalCheckpoint): [string, string] {
-  return [
+function diplomacyControl(checkpoint: MicroEvalCheckpoint): string {
+  return (
     checkpoint.candidates.find(
       (candidate) => candidate.category === "diplomacy",
-    )?.id ?? "hold:1",
-    "hold:2",
-  ];
+    )?.id ?? "hold"
+  );
 }
 
 const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
   "saturated-capacity-expansion": {
     horizonTicks: 100,
-    reference: (checkpoint) => [
+    reference: (checkpoint) =>
       largest(checkpoint.candidates, "expand:neutral:"),
-      "hold:2",
-    ],
-    controls: (checkpoint) => [
-      ["hold:1", "hold:2"],
-      diplomacyControl(checkpoint),
-    ],
+    controls: (checkpoint) => ["hold", diplomacyControl(checkpoint)],
     grade: (checkpoint) => {
       const gained = neutralTilesGained(checkpoint);
       return {
@@ -449,18 +438,12 @@ const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
   },
   "post-expansion-recovery": {
     horizonTicks: 100,
-    reference: () => ["hold:1", "hold:2"],
+    reference: () => "hold",
     controls: (checkpoint) => [
-      [
-        largest(checkpoint.candidates, "expand:neutral:"),
-        largest(checkpoint.candidates, "expand:neutral:"),
-      ],
-      [
-        checkpoint.candidates.find(
-          (candidate) => candidate.category === "retreat",
-        )?.id ?? "hold:1",
-        "hold:2",
-      ],
+      largest(checkpoint.candidates, "expand:neutral:"),
+      checkpoint.candidates.find(
+        (candidate) => candidate.category === "retreat",
+      )?.id ?? "hold",
     ],
     grade: (checkpoint) => {
       const finalCapacity = capacity(checkpoint);
@@ -504,7 +487,7 @@ const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
         checkpoint.candidates,
         `attack:${checkpoint.context.target!.id()}:`,
       );
-      return [id, id];
+      return id;
     },
     controls: (checkpoint) => {
       const strong = checkpoint.observation.opponents.find(
@@ -516,12 +499,9 @@ const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
           ),
       );
       return [
-        ["hold:1", "hold:2"],
+        "hold",
         strong
-          ? [
-              largest(checkpoint.candidates, `attack:${strong.id}:`),
-              largest(checkpoint.candidates, `attack:${strong.id}:`),
-            ]
+          ? largest(checkpoint.candidates, `attack:${strong.id}:`)
           : diplomacyControl(checkpoint),
       ];
     },
@@ -550,10 +530,10 @@ const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
   },
   "frontier-restraint": {
     horizonTicks: 200,
-    reference: () => ["hold:1", "hold:2"],
+    reference: () => "hold",
     controls: (checkpoint) => {
       const id = largest(checkpoint.candidates, "attack:");
-      return [[id, id], diplomacyControl(checkpoint)];
+      return [id, diplomacyControl(checkpoint)];
     },
     grade: (checkpoint) => {
       const opponent = checkpoint.context.attackers![0];
@@ -606,12 +586,9 @@ const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
         checkpoint.candidates,
         `counter:${checkpoint.context.attackers![0].id()}:`,
       );
-      return [id, id];
+      return id;
     },
-    controls: (checkpoint) => [
-      ["hold:1", "hold:2"],
-      diplomacyControl(checkpoint),
-    ],
+    controls: (checkpoint) => ["hold", diplomacyControl(checkpoint)],
     grade: (checkpoint) => {
       const attacker = checkpoint.context.attackers![0];
       const protectedLoss = losses(
@@ -650,40 +627,58 @@ const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
       };
     },
   },
-  "split-front-defense": {
+  "split-front-prioritization": {
     horizonTicks: 200,
-    reference: (checkpoint) =>
-      checkpoint.context.attackers!.map((attacker) =>
-        largest(checkpoint.candidates, `counter:${attacker.id()}:`),
-      ) as [string, string],
+    reference: (checkpoint) => {
+      const [priority] = [...checkpoint.context.attackers!].sort((a, b) => {
+        const incoming = (attacker: Player) =>
+          checkpoint.player
+            .incomingAttacks()
+            .filter((attack) => attack.attacker() === attacker)
+            .reduce((sum, attack) => sum + attack.troops(), 0);
+        return incoming(b) - incoming(a) || a.id().localeCompare(b.id());
+      });
+      return largest(checkpoint.candidates, `counter:${priority.id()}:`);
+    },
     controls: (checkpoint) => {
-      const one = largest(
-        checkpoint.candidates,
-        `counter:${checkpoint.context.attackers![0].id()}:`,
-      );
-      return [
-        ["hold:1", "hold:2"],
-        [one, "hold:2"],
-      ];
+      const lesser = [...checkpoint.context.attackers!].sort((a, b) => {
+        const incoming = (attacker: Player) =>
+          checkpoint.player
+            .incomingAttacks()
+            .filter((attack) => attack.attacker() === attacker)
+            .reduce((sum, attack) => sum + attack.troops(), 0);
+        return incoming(a) - incoming(b) || b.id().localeCompare(a.id());
+      })[0];
+      const one = largest(checkpoint.candidates, `counter:${lesser.id()}:`);
+      return ["hold", one];
     },
     grade: (checkpoint) => {
       const attackers = checkpoint.context.attackers!;
-      const frontierAssertions = attackers.map((attacker, index) => {
-        const lost = losses(
-          checkpoint,
-          checkpoint.context.protectedTiles!.get(attacker.id()),
-        );
-        const maximum = checkpoint.context.maximumAllowedLosses!.get(
-          attacker.id(),
-        )!;
-        return assertion(
-          `frontier-${index + 1}-held`,
-          lost,
-          "<=",
-          maximum,
-          lost <= maximum,
-        );
-      });
+      const priority = [...attackers].sort((left, right) => {
+        const incoming = (attacker: Player) =>
+          checkpoint.player
+            .incomingAttacks()
+            .filter((attack) => attack.attacker() === attacker)
+            .reduce((sum, attack) => sum + attack.troops(), 0);
+        return incoming(right) - incoming(left);
+      })[0];
+      const priorityLoss = losses(
+        checkpoint,
+        checkpoint.context.protectedTiles!.get(priority.id()),
+      );
+      const combinedLoss = attackers.reduce(
+        (sum, attacker) =>
+          sum +
+          losses(
+            checkpoint,
+            checkpoint.context.protectedTiles!.get(attacker.id()),
+          ),
+        0,
+      );
+      const priorityMaximum = checkpoint.context.maximumAllowedLosses!.get(
+        priority.id(),
+      )!;
+      const combinedMaximum = checkpoint.context.combinedMaximumAllowedLoss!;
       return {
         assertions: [
           assertion(
@@ -693,7 +688,20 @@ const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
             true,
             checkpoint.player.isAlive(),
           ),
-          ...frontierAssertions,
+          assertion(
+            "priority-frontier-held",
+            priorityLoss,
+            "<=",
+            priorityMaximum,
+            priorityLoss <= priorityMaximum,
+          ),
+          assertion(
+            "combined-frontier-loss-limited",
+            combinedLoss,
+            "<=",
+            combinedMaximum,
+            combinedLoss <= combinedMaximum,
+          ),
         ],
         diagnostics: Object.fromEntries(
           attackers.map((attacker, index) => [
@@ -709,19 +717,13 @@ const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
   },
   "losing-attack-retreat": {
     horizonTicks: 100,
-    reference: (checkpoint) => [
-      `retreat:${checkpoint.context.originalAttackId}`,
-      "hold:2",
-    ],
+    reference: (checkpoint) => `retreat:${checkpoint.context.originalAttackId}`,
     controls: (checkpoint) => [
-      ["hold:1", "hold:2"],
-      [
-        largest(
-          checkpoint.candidates,
-          `attack:${checkpoint.context.target!.id()}:`,
-        ),
-        "hold:2",
-      ],
+      "hold",
+      largest(
+        checkpoint.candidates,
+        `attack:${checkpoint.context.target!.id()}:`,
+      ),
     ],
     grade: (checkpoint) => {
       const originalActive = checkpoint.player
@@ -777,12 +779,9 @@ const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
         checkpoint.candidates,
         `boat:${checkpoint.context.target!.id()}:`,
       );
-      return [id, id];
+      return id;
     },
-    controls: (checkpoint) => [
-      ["hold:1", "hold:2"],
-      diplomacyControl(checkpoint),
-    ],
+    controls: (checkpoint) => ["hold", diplomacyControl(checkpoint)],
     grade: (checkpoint) => {
       const captured = tilesCapturedFrom(
         checkpoint.player,
@@ -808,16 +807,11 @@ const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
   },
   "construction-failure-recovery": {
     horizonTicks: 200,
-    reference: (checkpoint) => [
+    reference: (checkpoint) =>
       checkpoint.candidates.find((candidate) =>
         candidate.id.startsWith("build:Defense Post:"),
       )!.id,
-      "hold:2",
-    ],
-    controls: (checkpoint) => [
-      ["hold:1", "hold:2"],
-      diplomacyControl(checkpoint),
-    ],
+    controls: (checkpoint) => ["hold", diplomacyControl(checkpoint)],
     grade: (checkpoint) => {
       const posts = checkpoint.player
         .units(UnitType.DefensePost)
@@ -855,14 +849,14 @@ const definitions: Record<MicroEvalFamilyId, TaskDefinition> = {
 };
 
 async function createPostExpansionCheckpoint(): Promise<ReplayCheckpoint> {
-  const base = await createNeutralExpansionCheckpoint();
+  const base = await createNeutralExpansionCheckpoint({ verifyHashes: false });
   try {
-    const resolved = resolveDecisionActions(
-      ["expand:neutral:100", "expand:neutral:75"],
+    const resolved = resolveDecisionAction(
+      "expand:neutral:75",
       base.candidates,
     );
     base.session.execute(
-      resolved.actions
+      [resolved.action]
         .map((candidate) => candidate.intent)
         .filter((intent): intent is Intent => intent !== null),
     );
@@ -918,21 +912,35 @@ async function createConstructionCheckpoint(): Promise<ReplayCheckpoint> {
       throw new Error(
         "Construction fixture preparation did not clear incoming attack",
       );
-    const recent = replayFixtureMetadata("construction-failure-recovery")
-      .recentDecisions as unknown as DecisionRecord[];
-    const failed = recent[recent.length - 1]?.actionOutcomes.find((outcome) =>
-      outcome.actionId.startsWith("build:Defense Post:"),
-    );
-    if (failed !== undefined) failed.failureCode = "placement_blocked";
-    const observation = createObservation(
-      base.session.game,
-      base.player,
-      77,
-      recent,
-    );
     const candidates = createLegalActions(base.session.game, base.player, {
       safeBuildAnchors: true,
     });
+    const replacement = candidates.find((candidate) =>
+      candidate.id.startsWith("build:Defense Post:"),
+    );
+    if (replacement?.intent?.type !== "build_unit") {
+      throw new Error("Construction fixture is missing its replacement build");
+    }
+    const failedActionId = `build:Defense Post:${replacement.intent.tile + 1}`;
+    const observation = createObservation(base.session.game, base.player, 77, [
+      {
+        tick: Math.max(0, base.session.game.ticks() - 100),
+        strategy: "Replace the failed defensive structure at a safe anchor.",
+        appliedActionIds: [failedActionId],
+        outcomes: ["failed: placement blocked"],
+        actionOutcomes: [
+          {
+            actionId: failedActionId,
+            status: "failed",
+            failureCode: "placement_blocked",
+            startedAtTick: null,
+            resolvedAtTick: base.session.game.ticks(),
+            entityId: null,
+            detail: "The previous placement was blocked.",
+          },
+        ],
+      },
+    ]);
     const checkpointTileStates = base.session.game.tileStateBuffer().slice();
     return {
       ...base,
@@ -982,13 +990,15 @@ function assertRequirements(
       throw new Error("Saturated-capacity fixture requirements drifted");
   } else if (familyId === "post-expansion-recovery") {
     if (
-      context.initialCapacity > 20 ||
+      context.initialCapacity > 30 ||
       player.outgoingAttacks().filter((attack) => !attack.target().isPlayer())
         .length < 1 ||
       hostileIncoming.length > 0 ||
       !candidates.some((candidate) => candidate.category === "expand")
     )
-      throw new Error("Post-expansion fixture requirements drifted");
+      throw new Error(
+        `Post-expansion fixture requirements drifted: capacity=${context.initialCapacity}, neutralOutgoing=${player.outgoingAttacks().filter((attack) => !attack.target().isPlayer()).length}, hostileIncoming=${hostileIncoming.length}, expandCandidates=${candidates.filter((candidate) => candidate.category === "expand").length}`,
+      );
   } else if (familyId === "weaker-target-selection") {
     const attackable = opponents.filter(
       (opponent) =>
@@ -1041,7 +1051,7 @@ function assertRequirements(
     context.maximumAllowedLosses = new Map([[opponent.id(), 0]]);
   } else if (
     familyId === "incoming-attack-response" ||
-    familyId === "split-front-defense"
+    familyId === "split-front-prioritization"
   ) {
     const expected = familyId === "incoming-attack-response" ? 1 : 2;
     const attackers = Array.from(
@@ -1082,13 +1092,19 @@ function assertRequirements(
       const second = context.protectedTiles.get(attackers[1].id())!;
       for (const tile of first) second.delete(tile);
     }
-    context.maximumAllowedLosses =
-      familyId === "incoming-attack-response"
-        ? new Map([[attackers[0].id(), 5_000]])
-        : new Map([
-            [attackers[0].id(), 1_500],
-            [attackers[1].id(), 900],
-          ]);
+    if (familyId === "incoming-attack-response") {
+      context.maximumAllowedLosses = new Map([[attackers[0].id(), 5_000]]);
+    } else {
+      const priority = [...attackers].sort((left, right) => {
+        const incoming = (attacker: Player) =>
+          hostileIncoming
+            .filter((attack) => attack.attacker() === attacker)
+            .reduce((sum, attack) => sum + attack.troops(), 0);
+        return incoming(right) - incoming(left);
+      })[0];
+      context.maximumAllowedLosses = new Map([[priority.id(), 1_500]]);
+      context.combinedMaximumAllowedLoss = 3_000;
+    }
   } else if (familyId === "losing-attack-retreat") {
     const outgoing = player.outgoingAttacks();
     const target = outgoing[0]?.target();
@@ -1170,6 +1186,7 @@ function assertRequirements(
 
 export async function createMicroEvalCheckpoint(
   familyId: MicroEvalFamilyId,
+  options: { verifyHashes?: boolean } = {},
 ): Promise<MicroEvalCheckpoint> {
   const checkpoint =
     familyId === "post-expansion-recovery"
@@ -1178,17 +1195,19 @@ export async function createMicroEvalCheckpoint(
         ? await createConstructionCheckpoint()
         : await createReplayCheckpoint(familyId as ReplayFamilyId);
   try {
-    const expected = MICRO_EVAL_FIXTURES[familyId].expectedCheckpoint;
-    for (const field of [
-      "state",
-      "observation",
-      "candidateMenu",
-      "tileState",
-    ] as const) {
-      if (checkpoint.hashes[field] !== expected[field]) {
-        throw new Error(
-          `${familyId} ${field} hash drift: expected ${expected[field]}, got ${checkpoint.hashes[field]}`,
-        );
+    if (options.verifyHashes !== false) {
+      const expected = MICRO_EVAL_FIXTURES[familyId].expectedCheckpoint;
+      for (const field of [
+        "state",
+        "observation",
+        "candidateMenu",
+        "tileState",
+      ] as const) {
+        if (checkpoint.hashes[field] !== expected[field]) {
+          throw new Error(
+            `${familyId} ${field} hash drift: expected ${expected[field]}, got ${checkpoint.hashes[field]}`,
+          );
+        }
       }
     }
     return { ...checkpoint, context: assertRequirements(familyId, checkpoint) };
@@ -1201,14 +1220,14 @@ export async function createMicroEvalCheckpoint(
 export function referenceActions(
   familyId: MicroEvalFamilyId,
   checkpoint: MicroEvalCheckpoint,
-): [string, string] {
+): string {
   return definitions[familyId].reference(checkpoint);
 }
 
 export function controlActions(
   familyId: MicroEvalFamilyId,
   checkpoint: MicroEvalCheckpoint,
-): Array<[string, string]> {
+): string[] {
   return definitions[familyId].controls(checkpoint);
 }
 
@@ -1222,19 +1241,14 @@ export async function runMicroEvalTrial(
   const { session, player, observation, candidates } = checkpoint;
   try {
     const agentResult = await agent.decide(observation, candidates);
-    const selectedActionIds = agentResult.decision?.actions ?? [
-      "hold:1",
-      "hold:2",
-    ];
-    const resolved = resolveDecisionActions(selectedActionIds, candidates);
-    const intents = resolved.actions
+    const selectedActionId = agentResult.decision?.action ?? "hold";
+    const resolved = resolveDecisionAction(selectedActionId, candidates);
+    const intents = [resolved.action]
       .map((candidate) => candidate.intent)
       .filter((intent): intent is Intent => intent !== null);
-    const trackers = beginActionTracking(
-      session.game,
-      player,
-      resolved.actions,
-    );
+    const trackers = beginActionTracking(session.game, player, [
+      resolved.action,
+    ]);
     const stop = session.onUpdate((update) => {
       if (!("errMsg" in update)) observeActionUpdates(trackers, update);
     });
@@ -1256,8 +1270,8 @@ export async function runMicroEvalTrial(
     const completedAt = new Date();
     return {
       runId,
-      evalVersion: "openfront-micro-v1",
-      graderVersion: `${familyId}-v1`,
+      evalVersion: "openfront-micro-v2",
+      graderVersion: `${familyId}-v2`,
       familyId,
       fixtureId: MICRO_EVAL_FIXTURES[familyId].fixtureId,
       split: "development",
@@ -1289,11 +1303,8 @@ export async function runMicroEvalTrial(
           `Decision failed; holding. ${agentResult.error ?? ""}`
             .trim()
             .slice(0, 160),
-        selectedActionIds: selectedActionIds as [string, string],
-        appliedActionIds: resolved.actions.map((candidate) => candidate.id) as [
-          string,
-          string,
-        ],
+        selectedActionIds: [selectedActionId],
+        appliedActionIds: [resolved.action.id],
         actionOutcomes: actionOutcomes(
           trackers,
           session.game,

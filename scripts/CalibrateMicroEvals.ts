@@ -18,17 +18,14 @@ function referenceAgent(family: string): MicroEvalAgent {
     requestedModel: "reference-policy",
     async decide(observation, candidates) {
       const ids = candidates.map((candidate) => candidate.id);
-      let actions: [string, string];
+      let action: string;
       if (family === "saturated-capacity-expansion") {
-        actions = [
-          maximum(ids.filter((id) => id.startsWith("expand:"))),
-          "hold:2",
-        ];
+        action = maximum(ids.filter((id) => id.startsWith("expand:")));
       } else if (
         family === "post-expansion-recovery" ||
         family === "frontier-restraint"
       ) {
-        actions = ["hold:1", "hold:2"];
+        action = "hold";
       } else if (family === "weaker-target-selection") {
         const target = observation.opponents
           .map(
@@ -46,25 +43,25 @@ function referenceAgent(family: string): MicroEvalAgent {
             candidate.startsWith(`attack:${target.id}:`),
           ),
         );
-        actions = [id, id];
+        action = id;
       } else if (family === "incoming-attack-response") {
         const id = maximum(
           ids.filter((candidate) => candidate.startsWith("counter:")),
         );
-        actions = [id, id];
-      } else if (family === "split-front-defense") {
-        const targets = Array.from(
+        action = id;
+      } else if (family === "split-front-prioritization") {
+        const target = Array.from(
           new Set(
             ids
               .filter((id) => id.startsWith("counter:"))
               .map((id) => id.split(":")[1]),
           ),
+        )[0];
+        action = maximum(
+          ids.filter((id) => id.startsWith(`counter:${target}:`)),
         );
-        actions = targets.map((target) =>
-          maximum(ids.filter((id) => id.startsWith(`counter:${target}:`))),
-        ) as [string, string];
       } else if (family === "losing-attack-retreat") {
-        actions = [ids.find((id) => id.startsWith("retreat:"))!, "hold:2"];
+        action = ids.find((id) => id.startsWith("retreat:"))!;
       } else if (family === "naval-target-recognition") {
         const target = observation.opponents
           .map(
@@ -83,17 +80,14 @@ function referenceAgent(family: string): MicroEvalAgent {
         const id = maximum(
           ids.filter((candidate) => candidate.startsWith(`boat:${target.id}:`)),
         );
-        actions = [id, id];
+        action = id;
       } else {
-        actions = [
-          ids.find((id) => id.startsWith("build:Defense Post:"))!,
-          "hold:2",
-        ];
+        action = ids.find((id) => id.startsWith("build:Defense Post:"))!;
       }
       return scriptedAgentResult(
         "reference-policy",
         "Reference policy",
-        actions,
+        action,
       );
     },
   };
@@ -102,10 +96,7 @@ function referenceAgent(family: string): MicroEvalAgent {
 const holdAgent: MicroEvalAgent = {
   requestedModel: "hold-control",
   async decide() {
-    return scriptedAgentResult("hold-control", "Hold control", [
-      "hold:1",
-      "hold:2",
-    ]);
+    return scriptedAgentResult("hold-control", "Hold control", "hold");
   },
 };
 
@@ -114,19 +105,19 @@ function primaryControlAgent(family: string): MicroEvalAgent {
     requestedModel: "primary-control",
     async decide(_observation, candidates) {
       const ids = candidates.map((candidate) => candidate.id);
-      let actions: [string, string] = ["hold:1", "hold:2"];
+      let action = "hold";
       if (family === "post-expansion-recovery") {
         const id = maximum(
           ids.filter((candidate) => candidate.startsWith("expand:")),
         );
-        actions = [id, id];
+        action = id;
       } else if (family === "frontier-restraint") {
         const id = maximum(
           ids.filter((candidate) => candidate.startsWith("attack:")),
         );
-        actions = [id, id];
+        action = id;
       }
-      return scriptedAgentResult("primary-control", "Primary control", actions);
+      return scriptedAgentResult("primary-control", "Primary control", action);
     },
   };
 }

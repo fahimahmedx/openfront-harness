@@ -1,99 +1,39 @@
-import { promises as fs } from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import { promisify } from "util";
-import { gunzip, gzip } from "zlib";
-import { replacer } from "../OpenFrontIO/src/core/Util";
-import { AgentPolicy, HarnessRunner } from "./HarnessRunner";
-import { RunStore } from "./RunStore";
-import { RunArtifactSchema } from "./Types";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
+import { gunzip } from "node:zlib";
+import { ReplayRunArtifactSchema } from "./Types";
 
 const gunzipAsync = promisify(gunzip);
-const gzipAsync = promisify(gzip);
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const projectRoot = path.resolve(__dirname, "..");
+const projectRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 const samplePath = path.join(
   projectRoot,
   "resources/harness/sample-run.json.gz",
 );
 
-const source = RunArtifactSchema.parse(
+const sample = ReplayRunArtifactSchema.parse(
   JSON.parse((await gunzipAsync(await fs.readFile(samplePath))).toString()),
 );
-let decisionIndex = 0;
-const recordedPolicy: AgentPolicy = {
-  requestedModel: source.model.requested,
-  provider: source.model.provider ?? undefined,
-  promptVersion: source.model.promptVersion,
-  recordedDecisions: source.decisions,
-  async estimateNextCost() {
-    return 0;
-  },
-  async decide() {
-    const record = source.decisions[decisionIndex++];
-    if (!record) throw new Error("Recorded sample ran out of decisions");
-    const errorPrefix = "Decision failed; holding. ";
-    return {
-      decision: record.fallback
-        ? null
-        : {
-            strategy: record.strategy,
-            actions: record.selectedActionIds as [string, string],
-          },
-      attempts: record.attempts,
-      attemptFailures: record.attemptFailures,
-      attemptTimings: record.attemptTimings,
-      latencyMs: record.latencyMs,
-      promptTokens: record.promptTokens,
-      completionTokens: record.completionTokens,
-      costUsd: record.costUsd,
-      model: record.model,
-      provider: record.provider,
-      error: record.fallback
-        ? record.strategy.replace(errorPrefix, "")
-        : undefined,
-    };
-  },
-};
 
-const store = new RunStore(path.join(projectRoot, "data/sample-verification"));
-await store.init();
-const replayed = await new HarnessRunner(store, recordedPolicy).run(
-  source.runId,
-);
-const winnerMatches = source.outcome.llmWon
-  ? replayed.outcome.llmWon
-  : !replayed.outcome.llmWon &&
-    replayed.outcome.winner === source.outcome.winner;
-if (!winnerMatches) {
+if (sample.status !== "sample")
+  throw new Error("Bundled sample is not marked sample");
+if (sample.replay.info.num_turns !== sample.outcome.ticks) {
   throw new Error(
-    `Sample mismatch for winner: expected ${source.outcome.winner}, got ${replayed.outcome.winner}`,
+    `Sample replay length ${sample.replay.info.num_turns} does not match outcome tick ${sample.outcome.ticks}`,
   );
 }
-for (const field of ["ticks", "finalHash"] as const) {
-  if (replayed.outcome[field] !== source.outcome[field]) {
-    throw new Error(
-      `Sample mismatch for ${field}: expected ${source.outcome[field]}, got ${replayed.outcome[field]}`,
-    );
-  }
-}
-
+if (sample.decisions.length === 0)
+  throw new Error("Bundled sample has no trace");
 if (process.env.REFRESH_SAMPLE === "true") {
-  const refreshed = RunArtifactSchema.parse({
-    ...replayed,
-    status: "sample",
-    // Verification runs execute without network latency. Preserve the live
-    // generation timestamps so refreshing derived replay metadata does not
-    // misrepresent the sample as a four-second model run.
-    startedAt: process.env.SAMPLE_STARTED_AT ?? source.startedAt,
-    completedAt: process.env.SAMPLE_COMPLETED_AT ?? source.completedAt,
-  });
-  await fs.writeFile(
-    samplePath,
-    await gzipAsync(JSON.stringify(refreshed, replacer)),
+  throw new Error(
+    "Legacy samples are immutable replay fixtures; generate a new one-action sample instead",
   );
 }
 
 console.log(
-  `Verified sample hash ${replayed.outcome.finalHash} at tick ${replayed.outcome.ticks}; LLM placement ${replayed.outcome.finalPlacement}, ${replayed.decisions.length} decisions`,
+  `Verified replay-compatible sample ${sample.runId} at tick ${sample.outcome.ticks}; ${sample.decisions.length} recorded decisions`,
 );

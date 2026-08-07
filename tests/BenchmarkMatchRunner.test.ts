@@ -25,7 +25,7 @@ describe("benchmark match runner", () => {
     const agent: AgentPolicy = {
       requestedModel: "test/failing-agent",
       provider: "test",
-      promptVersion: "agent-v12",
+      promptVersion: "agent-v13",
       async estimateNextCost() {
         return 0;
       },

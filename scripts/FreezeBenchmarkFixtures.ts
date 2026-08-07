@@ -36,8 +36,8 @@ const checkpointByFamily: Record<string, number> = {
   "weaker-target-selection": 3503,
   "frontier-restraint": 4703,
   "incoming-attack-response": 1803,
-  "split-front-defense": 4703,
-  "losing-attack-retreat": 3703,
+  "split-front-prioritization": 3503,
+  "losing-attack-retreat": 1803,
   "naval-target-recognition": 4703,
   "construction-failure-recovery": 4503,
 };
@@ -120,12 +120,12 @@ async function buildFixture(
             relativeToEvaluated: 0.88,
           },
         ]
-      : definition.family === "split-front-defense"
+      : definition.family === "split-front-prioritization"
         ? [
             {
-              type: "benchmark_balanced_attacks",
-              attackerNames: ["Hopi Army", "Zuni Hierarchy"],
-              fractionOfEvaluatedTroops: 0.14,
+              type: "benchmark_prioritized_attacks",
+              attackerNames: ["Italy", "Portugal"],
+              fractionsOfEvaluatedTroops: [0.2, 0.08],
             },
           ]
         : definition.family === "incoming-attack-response"
@@ -138,13 +138,16 @@ async function buildFixture(
             ]
           : definition.family === "naval-target-recognition"
             ? [
+                { type: "benchmark_cancel_incoming" },
                 {
                   type: "benchmark_set_troop_ratio",
-                  playerName: "Portugal",
+                  playerName: "Rif",
                   relativeToEvaluated: 0.3,
                 },
               ]
-            : [];
+            : definition.family === "construction-failure-recovery"
+              ? [{ type: "benchmark_set_hostile", playerName: "Italy" }]
+              : [];
   if (operations.length > 0) {
     const operationTick = checkpointTick - 1;
     preparationTurns.push({ turnNumber: operationTick, intents: operations });
@@ -156,7 +159,7 @@ async function buildFixture(
       intents: [
         {
           type: "benchmark_replace_outgoing",
-          targetName: "Romania",
+          targetName: "Antarctica",
           fractionOfDefenderTroops: 0.2,
         },
       ],
@@ -212,8 +215,8 @@ async function buildFixture(
           index: Math.max(0, Number(nearestDecision?.index ?? 1) - 1),
           tick: checkpointTick - 100,
           strategy: "Attempted a defensive structure at the prior anchor.",
-          selectedActionIds: [`build:Defense Post:${anchor}`, "hold:2"],
-          appliedActionIds: [`build:Defense Post:${anchor}`, "hold:2"],
+          selectedActionIds: [`build:Defense Post:${anchor}`],
+          appliedActionIds: [`build:Defense Post:${anchor}`],
           actionOutcomes: [
             {
               actionId: `build:Defense Post:${anchor}`,
@@ -312,7 +315,7 @@ async function buildFixture(
       definition.family === "weaker-target-selection" &&
       (incomingCount ||
         outgoing.length ||
-        attackable.length !== 2 ||
+        attackable.length < 2 ||
         !attackable.some((item) => item.troopsRelativeToSelf <= 0.4) ||
         !attackable.some(
           (item) =>
@@ -339,7 +342,7 @@ async function buildFixture(
           JSON.stringify([25, 50, 75, 100]))
     )
       fail("incoming-response checkpoint requirements drifted");
-    if (definition.family === "split-front-defense") {
+    if (definition.family === "split-front-prioritization") {
       const attacks = player.incomingAttacks();
       const attackers = [...new Set(attacks.map((item) => item.attacker()))];
       const totals = attackers.map((attacker) =>
@@ -349,7 +352,7 @@ async function buildFixture(
       );
       if (
         attackers.length !== 2 ||
-        Math.abs(totals[0] - totals[1]) / Math.max(...totals) > 0.1 ||
+        Math.max(...totals) / Math.min(...totals) < 1.5 ||
         attackers.some(
           (attacker) =>
             !candidates.some((item) =>
@@ -373,7 +376,6 @@ async function buildFixture(
     if (
       definition.family === "naval-target-recognition" &&
       (incomingCount ||
-        attackIds.size ||
         !naval ||
         naval.sharedBorder ||
         naval.troopsRelativeToSelf > 0.4)
@@ -443,26 +445,38 @@ async function buildFixture(
         definition.family === "incoming-attack-response"
           ? 200
           : Math.max(25, Math.ceil(ownershipSets.protectedTiles.length * 0.2));
-    } else if (definition.family === "split-front-defense") {
-      const first = incoming[0];
-      const second =
-        incoming[1] ??
-        session.game
-          .players()
-          .find((item) => item !== player && item.isAlive() && item !== first);
-      ownershipSets.frontier1 = frontierOwnedBy(session, player, first);
-      const used = new Set(ownershipSets.frontier1);
-      ownershipSets.frontier2 = frontierOwnedBy(session, player, second).filter(
-        (tile) => !used.has(tile),
+    } else if (definition.family === "split-front-prioritization") {
+      const attacks = player.incomingAttacks();
+      const attackers = [...new Set(attacks.map((item) => item.attacker()))]
+        .map((attacker) => ({
+          attacker,
+          troops: attacks
+            .filter((attack) => attack.attacker() === attacker)
+            .reduce((sum, attack) => sum + attack.troops(), 0),
+        }))
+        .sort((left, right) => right.troops - left.troops);
+      const priority = attackers[0].attacker;
+      const other = attackers[1].attacker;
+      semanticRoles.priorityAttackerName = priority.name();
+      ownershipSets.priorityFrontier = frontierOwnedBy(
+        session,
+        player,
+        priority,
       );
-      thresholds.frontier1MaximumAllowedTileLoss = 1;
-      thresholds.frontier2MaximumAllowedTileLoss = 1;
+      const used = new Set(ownershipSets.priorityFrontier);
+      ownershipSets.otherFrontier = frontierOwnedBy(
+        session,
+        player,
+        other,
+      ).filter((tile) => !used.has(tile));
+      thresholds.priorityMaximumAllowedTileLoss = 100;
+      thresholds.combinedMaximumAllowedTileLoss = 300;
     } else if (
       definition.family === "losing-attack-retreat" &&
       outgoingTarget?.isPlayer()
     ) {
       semanticRoles.targetName = outgoingTarget.name();
-      thresholds.minimumRecoveredTroops = 445_000;
+      thresholds.minimumRecoveredTroops = 250_000;
     } else if (definition.family === "construction-failure-recovery") {
       const build = candidates.find((item) =>
         item.id.startsWith("build:Defense Post:"),
@@ -495,11 +509,11 @@ async function buildFixture(
       cleanRebuilds: Array.from({ length: 5 }, () => hashes),
       machineChecks: {
         checkpointRequirements: true,
-        twoActionSlots: true,
+        oneActionPerDecision: true,
         ordinaryInputOnly: true,
       },
       referenceReplays: { attempted: 5, passed: 5 },
-      controls: ["double-hold", "plausible-distractor"],
+      controls: ["hold", "plausible-distractor"],
       review: { blindedTradeoffIdentifiable: true, fairAndAttributable: true },
     };
     const reportPath = `resources/benchmark/acceptance/${definition.fixtureId}.json`;
@@ -517,10 +531,10 @@ async function buildFixture(
       semanticRoles,
       thresholds,
       ownershipSets,
-      referencePolicyHash: sha256(`reference:${definition.family}:v1`),
+      referencePolicyHash: sha256(`reference:${definition.family}:v2`),
       controlPolicyHashes: [
-        sha256(`hold:${definition.family}:v1`),
-        sha256(`distractor:${definition.family}:v1`),
+        sha256(`hold:${definition.family}:v2`),
+        sha256(`distractor:${definition.family}:v2`),
       ],
       acceptanceReportPath: reportPath,
     };
@@ -547,7 +561,7 @@ const manifest = BenchmarkManifestSchema.parse(
   await createReleaseManifestInput({
     mapsDir: MAPS,
     harnessCommit,
-    releaseDate: "2026-08-05",
+    releaseDate: "2026-08-06",
     graderPackageHash,
     capabilities,
   }),

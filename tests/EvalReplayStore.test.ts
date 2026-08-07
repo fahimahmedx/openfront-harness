@@ -29,17 +29,18 @@ describe("eval replay store", () => {
     const trial = await runNeutralExpansionTrial({
       requestedModel: "eval-replay-test",
       provider: "local",
-      promptVersion: "agent-v12",
+      promptVersion: "agent-v13",
       async decide() {
-        return scriptedAgentResult("eval-replay-test", "Expand safely", [
+        return scriptedAgentResult(
+          "eval-replay-test",
+          "Expand safely",
           "expand:neutral:100",
-          "hold:2",
-        ]);
+        );
       },
     });
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "eval-replay-"));
     temporaryDirectories.push(directory);
-    const nested = path.join(directory, "openfront-micro-v1", "neutral");
+    const nested = path.join(directory, "openfront-micro-v2", "neutral");
     await fs.mkdir(nested, { recursive: true });
     await fs.writeFile(
       path.join(nested, "report.json"),
@@ -53,7 +54,7 @@ describe("eval replay store", () => {
     );
     expect(evalTrialDecision(loaded!)).toMatchObject({
       tick: trial.checkpoint.tick,
-      appliedActionIds: ["expand:neutral:100", "hold:2"],
+      appliedActionIds: ["expand:neutral:100"],
       model: "eval-replay-test",
     });
     expect(evalTrialSummary(loaded!)).toMatchObject({

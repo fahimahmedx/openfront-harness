@@ -12,7 +12,7 @@ import { AgentPolicy } from "../HarnessRunner";
 import {
   createLegalActions,
   createObservation,
-  resolveDecisionActions,
+  resolveDecisionAction,
 } from "../ObservationActions";
 import { DecisionRecord } from "../Types";
 import { EvalGameSession } from "../evals/EvalGameSession";
@@ -181,27 +181,41 @@ function grade(
         ),
       ];
     }
-    case "split-front-defense":
+    case "split-front-prioritization": {
+      const priorityLoss = losses(
+        fixture.ownershipSets.priorityFrontier ?? [],
+        player,
+      );
+      const otherLoss = losses(
+        fixture.ownershipSets.otherFrontier ?? [],
+        player,
+      );
+      const priorityMaximum = numeric(
+        fixture.thresholds,
+        "priorityMaximumAllowedTileLoss",
+      );
+      const combinedMaximum = numeric(
+        fixture.thresholds,
+        "combinedMaximumAllowedTileLoss",
+      );
       return [
         aliveAssertion(),
-        ...([1, 2] as const).map((index) => {
-          const lost = losses(
-            fixture.ownershipSets[`frontier${index}`] ?? [],
-            player,
-          );
-          const maximum = numeric(
-            fixture.thresholds,
-            `frontier${index}MaximumAllowedTileLoss`,
-          );
-          return assertion(
-            `frontier-${index}-held`,
-            lost,
-            "<=",
-            maximum,
-            lost <= maximum,
-          );
-        }),
+        assertion(
+          "priority-frontier-held",
+          priorityLoss,
+          "<=",
+          priorityMaximum,
+          priorityLoss <= priorityMaximum,
+        ),
+        assertion(
+          "combined-frontier-loss-limited",
+          priorityLoss + otherLoss,
+          "<=",
+          combinedMaximum,
+          priorityLoss + otherLoss <= combinedMaximum,
+        ),
       ];
+    }
     case "losing-attack-retreat": {
       const targetName = fixture.semanticRoles.targetName;
       const originalActive = player.outgoingAttacks().some((attack) => {
@@ -333,18 +347,16 @@ export async function runBenchmarkCapabilityTrial(
             error: "model cost limit",
           }
         : await agent.decide(observation, candidates);
-    const selected = result.decision?.actions ?? ["hold:1", "hold:2"];
-    const resolved = resolveDecisionActions(selected, candidates);
-    const tracking = beginActionTracking(
-      session.game,
-      player,
-      resolved.actions,
-    );
+    const selected = result.decision?.action ?? "hold";
+    const resolved = resolveDecisionAction(selected, candidates);
+    const tracking = beginActionTracking(session.game, player, [
+      resolved.action,
+    ]);
     const stop = session.onUpdate((update) => {
       if (!("errMsg" in update)) observeActionUpdates(tracking, update);
     });
     session.execute(
-      resolved.actions
+      [resolved.action]
         .map((action) => action.intent)
         .filter((intent): intent is Intent => intent !== null),
     );
@@ -363,8 +375,8 @@ export async function runBenchmarkCapabilityTrial(
     return {
       observation,
       candidates,
-      selectedActionIds: selected,
-      appliedActionIds: resolved.actions.map((action) => action.id),
+      selectedActionIds: [selected],
+      appliedActionIds: [resolved.action.id],
       actionOutcomes: actionOutcomes(
         tracking,
         session.game,

@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { Intent } from "../../OpenFrontIO/src/core/Schemas";
 import { createLegalActions, createObservation } from "../ObservationActions";
 import { SCENARIO } from "../Scenario";
-import { DecisionRecord, LegalAction, Observation } from "../Types";
+import { LegalAction, Observation } from "../Types";
 import { EvalGameSession } from "./EvalGameSession";
 import replayPrefixes from "./fixtures/replay-prefixes.json";
 
@@ -88,7 +88,7 @@ export async function createReplayCheckpoint(
       session.game,
       player,
       fixture.sourceDecisionIndex,
-      fixture.recentDecisions as DecisionRecord[],
+      [],
     );
     const candidates = createLegalActions(session.game, player, {
       safeBuildAnchors: true,

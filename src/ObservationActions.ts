@@ -10,10 +10,7 @@ import { canBuildTransportShip } from "../OpenFrontIO/src/core/game/TransportShi
 import { Intent } from "../OpenFrontIO/src/core/Schemas";
 import { SCENARIO } from "./Scenario";
 import {
-  areConflictingLegalActions,
   DecisionRecord,
-  isGoldSpendingLegalAction,
-  isRepeatableLegalAction,
   LegalAction,
   Observation,
   ObservationSchema,
@@ -30,7 +27,7 @@ export type TroopBudget = {
   reserveRatio: number;
   reserveFloorTroops: number;
   spendableTroops: number;
-  perActionTroopBudget: number;
+  actionTroopBudget: number;
 };
 
 export function relationStatus(
@@ -143,7 +140,12 @@ export function createObservation(
   game: Game,
   player: Player,
   decision: number,
-  recent: DecisionRecord[],
+  recent: Array<
+    Pick<
+      DecisionRecord,
+      "tick" | "strategy" | "appliedActionIds" | "outcomes" | "actionOutcomes"
+    >
+  >,
 ): Observation {
   const elapsedSeconds = game.elapsedGameSeconds();
   const policy = troopPolicyState(game, player);
@@ -266,7 +268,7 @@ export function createObservation(
       reserveFloorTroops: policy.reserveFloorTroops,
       reserveFloorPercent: Number((policy.reserveRatio * 100).toFixed(1)),
       spendableTroops: policy.spendableTroops,
-      perActionTroopBudget: policy.perActionTroopBudget,
+      actionTroopBudget: policy.actionTroopBudget,
     },
     opponents,
     recentDecisions: recent.slice(-3).map((record) => ({
@@ -292,7 +294,6 @@ export function calculateTroopBudget(
   currentTroops: number,
   maxTroops: number,
   mode: TroopPolicyMode,
-  actionSlots: number = SCENARIO.actionSlots,
 ): TroopBudget {
   const reserveRatio =
     mode === "combat"
@@ -310,7 +311,7 @@ export function calculateTroopBudget(
     reserveRatio,
     reserveFloorTroops,
     spendableTroops,
-    perActionTroopBudget: Math.floor(spendableTroops / actionSlots),
+    actionTroopBudget: spendableTroops,
   };
 }
 
@@ -493,7 +494,7 @@ export function budgetedTroopAmounts(
   const seen = new Set<number>();
   for (const fraction of TROOP_BUDGET_FRACTIONS) {
     const troops = Math.min(
-      Math.floor((budget.perActionTroopBudget * fraction) / 100),
+      Math.floor((budget.actionTroopBudget * fraction) / 100),
       Math.floor(maximum),
     );
     if (troops < 1 || seen.has(troops)) continue;
@@ -503,14 +504,8 @@ export function budgetedTroopAmounts(
   return amounts;
 }
 
-export function counterTroopCap(
-  incomingFromAttacker: number,
-  totalHostileIncoming: number,
-  actionSlots: number = SCENARIO.actionSlots,
-): number {
-  return Math.floor(
-    Math.min(incomingFromAttacker, totalHostileIncoming / actionSlots),
-  );
+export function counterTroopCap(incomingFromAttacker: number): number {
+  return Math.floor(incomingFromAttacker);
 }
 
 function budgetLabel(
@@ -518,7 +513,7 @@ function budgetLabel(
   fraction: number,
   budget: TroopBudget,
 ): string {
-  return `${troops.toLocaleString("en-US")} troops (${fraction}% of this slot's safe budget; ${Math.round(budget.reserveRatio * 100)}% capacity reserve)`;
+  return `${troops.toLocaleString("en-US")} troops (${fraction}% of the safe action budget; ${Math.round(budget.reserveRatio * 100)}% capacity reserve)`;
 }
 
 export function createLegalActions(
@@ -527,8 +522,7 @@ export function createLegalActions(
   options: { safeBuildAnchors?: boolean } = {},
 ): LegalAction[] {
   const actions: LegalAction[] = [
-    action("hold:1", "hold", "Hold the first action slot", null),
-    action("hold:2", "hold", "Hold the second action slot", null),
+    action("hold", "hold", "Take no action this decision", null),
   ];
 
   if (!player.isAlive()) return actions;
@@ -537,11 +531,6 @@ export function createLegalActions(
     .filter((candidate) => candidate !== player && candidate.isAlive())
     .sort((a, b) => a.id().localeCompare(b.id()));
   const policy = troopPolicyState(game, player);
-  const totalHostileIncoming = player
-    .incomingAttacks()
-    .filter((attack) => !player.isFriendly(attack.attacker()))
-    .reduce((sum, attack) => sum + attack.troops(), 0);
-
   if (policy.mode !== "emergency" && hasUnownedLandBorder(game, player)) {
     for (const { fraction, troops } of budgetedTroopAmounts(policy)) {
       actions.push(
@@ -575,9 +564,9 @@ export function createLegalActions(
     const troopAmounts = countering
       ? budgetedTroopAmounts({
           ...policy,
-          perActionTroopBudget: Math.min(
-            policy.perActionTroopBudget,
-            counterTroopCap(incomingTroops, totalHostileIncoming),
+          actionTroopBudget: Math.min(
+            policy.actionTroopBudget,
+            counterTroopCap(incomingTroops),
           ),
         })
       : ordinaryOffense
@@ -811,40 +800,15 @@ export function createLegalActions(
   return selected;
 }
 
-export function resolveDecisionActions(
-  selectedIds: string[],
+export function resolveDecisionAction(
+  selectedId: string,
   candidates: LegalAction[],
-): { actions: LegalAction[]; fallback: boolean } {
+): { action: LegalAction; fallback: boolean } {
   const byId = new Map(
     candidates.map((candidate) => [candidate.id, candidate]),
   );
-  const uses = new Map<string, number>();
-  let fallback = false;
-  const resolved = [0, 1].map((slot) => {
-    const id = selectedIds[slot];
-    const candidate = id === undefined ? undefined : byId.get(id);
-    const slotHoldId = `hold:${slot + 1}`;
-    const allowedInSlot =
-      candidate !== undefined &&
-      (candidate.category !== "hold" || candidate.id === slotHoldId) &&
-      (slot === 0 || !isGoldSpendingLegalAction(candidate));
-    const priorUses = id === undefined ? 0 : (uses.get(id) ?? 0);
-    const repeatAllowed =
-      candidate !== undefined &&
-      (priorUses === 0 || isRepeatableLegalAction(candidate));
-    if (!allowedInSlot || !repeatAllowed) {
-      fallback = true;
-      return byId.get(slotHoldId)!;
-    }
-    uses.set(id!, priorUses + 1);
-    return candidate;
-  });
-  if (areConflictingLegalActions(resolved[0], resolved[1])) {
-    return {
-      actions: [byId.get("hold:1")!, byId.get("hold:2")!],
-      fallback: true,
-    };
-  }
-
-  return { actions: resolved, fallback };
+  const selected = byId.get(selectedId);
+  return selected === undefined
+    ? { action: byId.get("hold")!, fallback: true }
+    : { action: selected, fallback: false };
 }

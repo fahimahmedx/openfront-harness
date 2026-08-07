@@ -10,6 +10,7 @@ export type BenchmarkPreparationOperation =
     }
   | { type: "benchmark_cancel_incoming" }
   | { type: "benchmark_cancel_outgoing" }
+  | { type: "benchmark_set_hostile"; playerName: string }
   | { type: "benchmark_set_evaluated_capacity"; percent: number }
   | {
       type: "benchmark_replace_incoming";
@@ -22,9 +23,9 @@ export type BenchmarkPreparationOperation =
       fractionOfDefenderTroops: number;
     }
   | {
-      type: "benchmark_balanced_attacks";
+      type: "benchmark_prioritized_attacks";
       attackerNames: [string, string];
-      fractionOfEvaluatedTroops: number;
+      fractionsOfEvaluatedTroops: [number, number];
     };
 
 export function applyBenchmarkPreparation(
@@ -54,6 +55,14 @@ export function applyBenchmarkPreparation(
     } else if (value.type === "benchmark_cancel_outgoing") {
       for (const attack of player.outgoingAttacks())
         (attack as unknown as { delete(): void }).delete();
+    } else if (value.type === "benchmark_set_hostile") {
+      const opponent = session.game
+        .players()
+        .find((item) => item.name() === value.playerName);
+      if (!opponent)
+        throw new Error(`Preparation player not found: ${value.playerName}`);
+      opponent.updateRelation(player, -100);
+      player.updateRelation(opponent, -100);
     } else if (value.type === "benchmark_replace_incoming") {
       for (const attack of player.incomingAttacks())
         (attack as unknown as { delete(): void }).delete();
@@ -91,12 +100,12 @@ export function applyBenchmarkPreparation(
       session.game.addExecution(
         new AttackExecution(troops, player, target.id(), null),
       );
-    } else if (value.type === "benchmark_balanced_attacks") {
-      const troops = Math.max(
-        1,
-        Math.floor(player.troops() * value.fractionOfEvaluatedTroops),
-      );
-      for (const name of value.attackerNames) {
+    } else if (value.type === "benchmark_prioritized_attacks") {
+      for (const [index, name] of value.attackerNames.entries()) {
+        const troops = Math.max(
+          1,
+          Math.floor(player.troops() * value.fractionsOfEvaluatedTroops[index]),
+        );
         const attacker = session.game
           .players()
           .find((item) => item.name() === name);

@@ -79,7 +79,8 @@ function scenarioLabel(scenarioId: string): string {
   if (
     scenarioId === "japan-v2" ||
     scenarioId === "japan-v3" ||
-    scenarioId === "japan-v5"
+    scenarioId === "japan-v5" ||
+    scenarioId === "japan-v6"
   )
     return "Japan";
 

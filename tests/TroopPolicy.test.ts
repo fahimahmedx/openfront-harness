@@ -25,25 +25,21 @@ function troopCommitment(candidate: LegalAction): number {
 }
 
 describe("troop policy", () => {
-  test("allocates a shared two-slot budget above the mode reserve", () => {
+  test("allocates the full safe budget to the one action", () => {
     const budget = calculateTroopBudget(100_000, 200_000, "expansion");
     expect(budget.reserveFloorTroops).toBe(30_000);
     expect(budget.spendableTroops).toBe(70_000);
-    expect(budget.perActionTroopBudget).toBe(35_000);
+    expect(budget.actionTroopBudget).toBe(70_000);
 
     const amounts = budgetedTroopAmounts(budget);
-    for (const first of amounts) {
-      for (const second of amounts) {
-        expect(first.troops + second.troops).toBeLessThanOrEqual(
-          budget.spendableTroops,
-        );
-      }
+    for (const amount of amounts) {
+      expect(amount.troops).toBeLessThanOrEqual(budget.spendableTroops);
     }
 
     expect(calculateTroopBudget(20_000, 200_000, "combat")).toMatchObject({
       reserveFloorTroops: 70_000,
       spendableTroops: 0,
-      perActionTroopBudget: 0,
+      actionTroopBudget: 0,
     });
   });
 
@@ -77,13 +73,13 @@ describe("troop policy", () => {
 
   test("caps bounded counters by the incoming force", () => {
     const budget = calculateTroopBudget(100_000, 200_000, "emergency");
-    const cap = counterTroopCap(12_000, 12_000);
+    const cap = counterTroopCap(12_000);
     const amounts = budgetedTroopAmounts(budget, cap);
-    expect(Math.max(...amounts.map((item) => item.troops))).toBe(6_000);
+    expect(Math.max(...amounts.map((item) => item.troops))).toBe(12_000);
     expect(
-      amounts.every((item) => item.troops <= 6_000 && item.troops <= 35_000),
+      amounts.every((item) => item.troops <= 12_000 && item.troops <= 70_000),
     ).toBe(true);
-    expect(counterTroopCap(8_000, 20_000)).toBe(8_000);
+    expect(counterTroopCap(8_000)).toBe(8_000);
   });
 
   test("repeated maximum expansion cannot spend through the reserve", async () => {
@@ -132,29 +128,20 @@ describe("troop policy", () => {
         (candidate) => troopCommitment(candidate) > 0,
       );
 
-      for (let first = 0; first < troopCandidates.length; first++) {
-        for (let second = first; second < troopCandidates.length; second++) {
-          expect(
-            troopCommitment(troopCandidates[first]) +
-              troopCommitment(troopCandidates[second]),
-          ).toBeLessThanOrEqual(spendable);
-        }
+      for (const candidate of troopCandidates) {
+        expect(troopCommitment(candidate)).toBeLessThanOrEqual(spendable);
       }
 
       const selected = candidates
         .filter((candidate) => candidate.category === "expand")
         .sort((a, b) => troopCommitment(b) - troopCommitment(a))
-        .slice(0, 2);
+        .slice(0, 1);
       const intents = selected
         .map((candidate) => candidate.intent)
         .filter((intent): intent is Intent => intent !== null);
       if (selected.length > 0) {
         expect(
-          currentTroops -
-            selected.reduce(
-              (sum, candidate) => sum + troopCommitment(candidate),
-              0,
-            ),
+          currentTroops - troopCommitment(selected[0]),
         ).toBeGreaterThanOrEqual(reserveFloor);
       }
       execute(intents);

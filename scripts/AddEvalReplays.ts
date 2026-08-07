@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { replacer } from "../OpenFrontIO/src/core/Util";
 import { Intent } from "../OpenFrontIO/src/core/Schemas";
-import { resolveDecisionActions } from "../src/ObservationActions";
+import { resolveDecisionAction } from "../src/ObservationActions";
 import {
   createMicroEvalCheckpoint,
   MICRO_EVAL_FIXTURES,
@@ -19,7 +19,7 @@ type StoredTrial = {
   familyId: string;
   startedAt: string;
   checkpoint: { stateHash: number; tileStateHash: string };
-  trace: { appliedActionIds: [string, string] };
+  trace: { appliedActionIds: [string] };
   outcome: {
     finalTick: number;
     finalStateHash: number | null;
@@ -62,19 +62,17 @@ for (const trial of report.trials) {
     ) {
       throw new Error(`${trial.runId} checkpoint no longer reproduces`);
     }
-    const resolved = resolveDecisionActions(
-      trial.trace.appliedActionIds,
+    const resolved = resolveDecisionAction(
+      trial.trace.appliedActionIds[0],
       checkpoint.candidates,
     );
     if (
       resolved.fallback ||
-      resolved.actions.some(
-        (action, index) => action.id !== trial.trace.appliedActionIds[index],
-      )
+      resolved.action.id !== trial.trace.appliedActionIds[0]
     ) {
       throw new Error(`${trial.runId} stored actions no longer resolve`);
     }
-    const intents = resolved.actions
+    const intents = [resolved.action]
       .map((action) => action.intent)
       .filter((intent): intent is Intent => intent !== null);
     const horizon = isNeutral

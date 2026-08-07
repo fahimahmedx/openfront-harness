@@ -22,7 +22,7 @@ export const BENCHMARK_CLIENT_ID = "LLMAGENT";
 
 export const BENCHMARK_LIMITS = Object.freeze({
   decisionIntervalTicks: 100,
-  actionSlots: 2,
+  actionsPerDecision: 1,
   maxCandidates: 64,
   maxDecisionCount: 120,
   maxSimulatedMinutes: 20,

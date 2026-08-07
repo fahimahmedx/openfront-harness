@@ -3,14 +3,13 @@ import { Relation, UnitType } from "../OpenFrontIO/src/core/game/Game";
 import {
   allianceRequestHistory,
   relationStatus,
-  resolveDecisionActions,
+  resolveDecisionAction,
   selectSafestBuildAnchor,
 } from "../src/ObservationActions";
 import { LegalAction } from "../src/Types";
 
 const candidates: LegalAction[] = [
-  { id: "hold:1", category: "hold", label: "Hold one", intent: null },
-  { id: "hold:2", category: "hold", label: "Hold two", intent: null },
+  { id: "hold", category: "hold", label: "Hold", intent: null },
   {
     id: "expand:neutral:25",
     category: "expand",
@@ -107,7 +106,7 @@ const candidates: LegalAction[] = [
   },
 ];
 
-describe("fixed action slots", () => {
+describe("single-action decisions", () => {
   test("exposes semantic relations and persistent alliance request history", () => {
     expect([
       relationStatus(Relation.Hostile),
@@ -128,14 +127,6 @@ describe("fixed action slots", () => {
                 resolvedAtTick: 110,
                 entityId: null,
                 detail: "Alliance request to Opponent was rejected",
-              },
-              {
-                actionId: "hold:2",
-                status: "completed",
-                startedAtTick: 100,
-                resolvedAtTick: 100,
-                entityId: null,
-                detail: "Held intentionally",
               },
             ],
           },
@@ -177,125 +168,21 @@ describe("fixed action slots", () => {
     ).toBe(20);
   });
 
-  test("keeps two distinct legal actions", () => {
-    const result = resolveDecisionActions(
-      ["expand:neutral:25", "hold:2"],
-      candidates,
-    );
-    expect(result.actions.map((action) => action.id)).toEqual([
-      "expand:neutral:25",
-      "hold:2",
-    ]);
+  test("keeps one legal action", () => {
+    const result = resolveDecisionAction("expand:neutral:25", candidates);
+    expect(result.action.id).toBe("expand:neutral:25");
     expect(result.fallback).toBe(false);
   });
 
-  test("allows the same repeatable troop action in both slots", () => {
-    const result = resolveDecisionActions(
-      ["expand:neutral:25", "expand:neutral:25"],
-      candidates,
-    );
-    expect(result.actions.map((action) => action.id)).toEqual([
-      "expand:neutral:25",
-      "expand:neutral:25",
-    ]);
+  test("keeps gold-spending actions without slot rules", () => {
+    const result = resolveDecisionAction("build:City:123", candidates);
+    expect(result.action.id).toBe("build:City:123");
     expect(result.fallback).toBe(false);
   });
 
-  test("replaces repeated non-repeatable and unknown selections with slot holds", () => {
-    const repeatedDiplomacy = resolveDecisionActions(
-      ["alliance:request:opponent", "alliance:request:opponent"],
-      candidates,
-    );
-    expect(repeatedDiplomacy.actions.map((action) => action.id)).toEqual([
-      "alliance:request:opponent",
-      "hold:2",
-    ]);
-    expect(repeatedDiplomacy.fallback).toBe(true);
-
-    expect(
-      resolveDecisionActions(["unknown", "hold:2"], candidates).actions.map(
-        (action) => action.id,
-      ),
-    ).toEqual(["hold:1", "hold:2"]);
-  });
-
-  test("allows a build only in the first action slot", () => {
-    const result = resolveDecisionActions(
-      ["build:City:123", "build:Factory:456"],
-      candidates,
-    );
-
-    expect(result.actions.map((action) => action.id)).toEqual([
-      "build:City:123",
-      "hold:2",
-    ]);
+  test("replaces an unknown selection with the one hold", () => {
+    const result = resolveDecisionAction("unknown", candidates);
+    expect(result.action.id).toBe("hold");
     expect(result.fallback).toBe(true);
-
-    const wrongSlot = resolveDecisionActions(
-      ["expand:neutral:25", "build:Port:789"],
-      candidates,
-    );
-    expect(wrongSlot.actions.map((action) => action.id)).toEqual([
-      "expand:neutral:25",
-      "hold:2",
-    ]);
-    expect(wrongSlot.fallback).toBe(true);
-  });
-
-  test.each([
-    ["alliance:request:opponent", "embargo:start:opponent"],
-    ["attack:opponent:25", "alliance:request:opponent"],
-    ["alliance:request:opponent", "boat:opponent:25"],
-    ["alliance:extend:opponent", "alliance:break:opponent"],
-  ])(
-    "replaces conflicting same-target actions %s and %s with holds",
-    (action1, action2) => {
-      const result = resolveDecisionActions([action1, action2], candidates);
-
-      expect(result.actions.map((action) => action.id)).toEqual([
-        "hold:1",
-        "hold:2",
-      ]);
-      expect(result.fallback).toBe(true);
-    },
-  );
-
-  test("allows different postures toward different opponents", () => {
-    const result = resolveDecisionActions(
-      ["alliance:request:opponent", "embargo:start:other"],
-      candidates,
-    );
-
-    expect(result.actions.map((action) => action.id)).toEqual([
-      "alliance:request:opponent",
-      "embargo:start:other",
-    ]);
-    expect(result.fallback).toBe(false);
-  });
-
-  test("rejects proactive attacks against two different opponents", () => {
-    const result = resolveDecisionActions(
-      ["attack:opponent:25", "attack:other:25"],
-      candidates,
-    );
-
-    expect(result.actions.map((action) => action.id)).toEqual([
-      "hold:1",
-      "hold:2",
-    ]);
-    expect(result.fallback).toBe(true);
-  });
-
-  test("allows counters against two different incoming attackers", () => {
-    const result = resolveDecisionActions(
-      ["counter:opponent:25", "counter:other:25"],
-      candidates,
-    );
-
-    expect(result.actions.map((action) => action.id)).toEqual([
-      "counter:opponent:25",
-      "counter:other:25",
-    ]);
-    expect(result.fallback).toBe(false);
   });
 });

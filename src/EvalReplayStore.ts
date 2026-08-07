@@ -8,11 +8,14 @@ import {
   AgentAttemptTimingSchema,
   DecisionRecord,
   DecisionRecordSchema,
+  LegacyDecisionRecord,
+  LegacyDecisionRecordSchema,
+  LegacyObservationSchema,
   LegalActionSchema,
   ObservationSchema,
 } from "./Types";
 
-const EvalReplayTrialSchema = z.object({
+const EvalReplayTrialBase = {
   runId: z.uuid(),
   evalVersion: z.string(),
   graderVersion: z.string(),
@@ -30,25 +33,50 @@ const EvalReplayTrialSchema = z.object({
     promptVersion: z.string().nullable(),
   }),
   checkpoint: z.record(z.string(), z.unknown()),
+  outcome: z.record(z.string(), z.unknown()),
+  replay: GameRecordSchema,
+} as const;
+
+const EvalTraceBase = {
+  observation: ObservationSchema,
+  candidates: z.array(LegalActionSchema),
+  strategy: z.string(),
+  attempts: z.number().int().positive(),
+  attemptFailures: z.array(AgentAttemptFailureSchema),
+  attemptTimings: z.array(AgentAttemptTimingSchema),
+  fallback: z.boolean(),
+  latencyMs: z.number().nonnegative(),
+  promptTokens: z.number().int().nonnegative(),
+  completionTokens: z.number().int().nonnegative(),
+  costUsd: z.number().nonnegative(),
+} as const;
+
+const CurrentEvalReplayTrialSchema = z.object({
+  ...EvalReplayTrialBase,
   trace: z.object({
-    observation: ObservationSchema,
-    candidates: z.array(LegalActionSchema),
-    strategy: z.string(),
+    ...EvalTraceBase,
+    selectedActionIds: z.tuple([z.string()]),
+    appliedActionIds: z.tuple([z.string()]),
+    actionOutcomes: z.array(ActionOutcomeSchema).length(1),
+  }),
+});
+
+const LegacyEvalReplayTrialSchema = z.object({
+  ...EvalReplayTrialBase,
+  trace: z.object({
+    ...EvalTraceBase,
+    observation: LegacyObservationSchema,
     selectedActionIds: z.tuple([z.string(), z.string()]),
     appliedActionIds: z.tuple([z.string(), z.string()]),
     actionOutcomes: z.array(ActionOutcomeSchema).length(2),
-    attempts: z.number().int().positive(),
-    attemptFailures: z.array(AgentAttemptFailureSchema),
-    attemptTimings: z.array(AgentAttemptTimingSchema),
-    fallback: z.boolean(),
-    latencyMs: z.number().nonnegative(),
-    promptTokens: z.number().int().nonnegative(),
-    completionTokens: z.number().int().nonnegative(),
-    costUsd: z.number().nonnegative(),
+    attemptFailures: z.array(z.record(z.string(), z.unknown())),
   }),
-  outcome: z.record(z.string(), z.unknown()),
-  replay: GameRecordSchema,
 });
+
+const EvalReplayTrialSchema = z.union([
+  CurrentEvalReplayTrialSchema,
+  LegacyEvalReplayTrialSchema,
+]);
 
 export type EvalReplayTrial = z.infer<typeof EvalReplayTrialSchema>;
 
@@ -58,8 +86,10 @@ function winnerLabel(trial: EvalReplayTrial): string {
   return winner[1] ?? winner[0];
 }
 
-export function evalTrialDecision(trial: EvalReplayTrial): DecisionRecord {
-  return DecisionRecordSchema.parse({
+export function evalTrialDecision(
+  trial: EvalReplayTrial,
+): DecisionRecord | LegacyDecisionRecord {
+  const value = {
     index: 0,
     tick: trial.trace.observation.tick,
     observation: trial.trace.observation,
@@ -81,7 +111,10 @@ export function evalTrialDecision(trial: EvalReplayTrial): DecisionRecord {
     costUsd: trial.trace.costUsd,
     model: trial.configuration.resolvedModel,
     provider: trial.configuration.provider,
-  });
+  };
+  return trial.trace.appliedActionIds.length === 1
+    ? DecisionRecordSchema.parse(value)
+    : LegacyDecisionRecordSchema.parse(value);
 }
 
 export function evalTrialSummary(trial: EvalReplayTrial) {

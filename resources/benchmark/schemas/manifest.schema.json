@@ -40,10 +40,10 @@
       "additionalProperties": { "$ref": "#/$defs/sha256" }
     },
     "harnessCommit": { "type": "string", "minLength": 7 },
-    "promptVersion": { "type": "string", "minLength": 1 },
+    "promptVersion": { "const": "agent-v13" },
     "promptHash": { "$ref": "#/$defs/sha256" },
     "schemaVersions": { "type": "object" },
-    "resolverVersion": { "type": "string", "minLength": 1 },
+    "resolverVersion": { "const": "single-action-v1" },
     "troopPolicy": { "type": "object" },
     "graderPackageHash": { "$ref": "#/$defs/sha256" },
     "taskOrder": { "type": "object" },
@@ -61,14 +61,74 @@
           "map",
           "seed",
           "spawn",
-          "resolvedConfigHash"
+          "resolvedConfigHash",
+          "ceilings"
         ],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
           "suite": { "enum": ["match", "capability"] },
           "split": { "const": "scored" },
-          "resolvedConfigHash": { "$ref": "#/$defs/sha256" }
-        }
+          "resolvedConfigHash": { "$ref": "#/$defs/sha256" },
+          "ceilings": {
+            "type": "object",
+            "required": ["actionsPerDecision"],
+            "properties": { "actionsPerDecision": { "const": 1 } },
+            "not": { "required": ["actionSlots"] }
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "suite": { "const": "capability" } } },
+            "then": {
+              "required": ["family", "graderVersion", "recentDecisions"],
+              "properties": {
+                "family": {
+                  "enum": [
+                    "neutral-expansion",
+                    "saturated-capacity-expansion",
+                    "post-expansion-recovery",
+                    "weaker-target-selection",
+                    "frontier-restraint",
+                    "incoming-attack-response",
+                    "split-front-prioritization",
+                    "losing-attack-retreat",
+                    "naval-target-recognition",
+                    "construction-failure-recovery"
+                  ]
+                },
+                "graderVersion": { "const": "capability-grader-v2" },
+                "recentDecisions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "selectedActionIds",
+                      "appliedActionIds",
+                      "actionOutcomes"
+                    ],
+                    "properties": {
+                      "selectedActionIds": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 1
+                      },
+                      "appliedActionIds": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 1
+                      },
+                      "actionOutcomes": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       }
     }
   },

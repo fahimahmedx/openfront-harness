@@ -28,7 +28,7 @@ import { NodeGameMapLoader } from "./NodeGameMapLoader";
 import {
   createLegalActions,
   createObservation,
-  resolveDecisionActions,
+  resolveDecisionAction,
 } from "./ObservationActions";
 import { OpenRouterAgent } from "./OpenRouterAgent";
 import { RunStore } from "./RunStore";
@@ -62,7 +62,6 @@ export interface AgentPolicy {
   requestedModel: string;
   provider?: string;
   promptVersion?: string;
-  recordedDecisions?: readonly DecisionRecord[];
   estimateNextCost(
     observation: ReturnType<typeof createObservation>,
     candidates: ReturnType<typeof createLegalActions>,
@@ -295,17 +294,9 @@ export class HarnessRunner {
           decisionIndex,
           decisions,
         );
-        const promptVersion =
-          this.agent.promptVersion ?? OpenRouterAgent.promptVersion();
-        const recordedDecision = this.agent.recordedDecisions?.[decisionIndex];
-        const candidates =
-          recordedDecision?.candidates ??
-          createLegalActions(game, player, {
-            safeBuildAnchors:
-              promptVersion === "agent-v10" ||
-              promptVersion === "agent-v11" ||
-              promptVersion === "agent-v12",
-          });
+        const candidates = createLegalActions(game, player, {
+          safeBuildAnchors: true,
+        });
         const estimate = await this.agent.estimateNextCost(
           observation,
           candidates,
@@ -323,26 +314,8 @@ export class HarnessRunner {
         }
 
         const agentResult = await this.agent.decide(observation, candidates);
-        const selectedIds = agentResult.decision?.actions ?? [
-          "hold:1",
-          "hold:2",
-        ];
-        const resolved = recordedDecision
-          ? {
-              actions: recordedDecision.appliedActionIds.map((id) => {
-                const candidate = recordedDecision.candidates.find(
-                  (item) => item.id === id,
-                );
-                if (!candidate) {
-                  throw new Error(
-                    `Recorded decision ${decisionIndex} is missing applied action ${id}`,
-                  );
-                }
-                return candidate;
-              }),
-              fallback: recordedDecision.fallback,
-            }
-          : resolveDecisionActions(selectedIds, candidates);
+        const selectedId = agentResult.decision?.action ?? "hold";
+        const resolved = resolveDecisionAction(selectedId, candidates);
         const completeFailure = agentResult.decision === null;
         consecutiveFailures = completeFailure ? consecutiveFailures + 1 : 0;
         const strategy = completeFailure
@@ -350,10 +323,10 @@ export class HarnessRunner {
               .trim()
               .slice(0, 160)
           : agentResult.decision!.strategy;
-        const appliedIntents = resolved.actions
+        const appliedIntents = [resolved.action]
           .map((candidate) => candidate.intent)
           .filter((intent): intent is Intent => intent !== null);
-        const lifecycle = beginActionTracking(game, player, resolved.actions);
+        const lifecycle = beginActionTracking(game, player, [resolved.action]);
         lifecycleGroups.add(lifecycle);
         executeTurn(appliedIntents);
         updateActionTracking(lifecycle, game, game.ticks());
@@ -378,7 +351,7 @@ export class HarnessRunner {
           tracked.record.actionOutcomes = updated;
           tracked.record.outcomes = updated.map(
             (item) => `${item.status}: ${item.detail}`,
-          ) as [string, string];
+          ) as [string];
           if (!hasUnresolvedActions(tracked.trackers)) {
             lifecycleGroups.delete(tracked.trackers);
             openActionLifecycles.splice(index, 1);
@@ -392,17 +365,12 @@ export class HarnessRunner {
           observation,
           candidates,
           strategy,
-          selectedActionIds: selectedIds as [string, string],
-          appliedActionIds: resolved.actions.map(
-            (candidate) => candidate.id,
-          ) as [string, string],
+          selectedActionIds: [selectedId],
+          appliedActionIds: [resolved.action.id],
           outcomes: trackedOutcomes.map(
             (item) => `${item.status}: ${item.detail}`,
-          ) as [string, string],
-          actionOutcomes: trackedOutcomes as [
-            (typeof trackedOutcomes)[number],
-            (typeof trackedOutcomes)[number],
-          ],
+          ) as [string],
+          actionOutcomes: trackedOutcomes as [(typeof trackedOutcomes)[number]],
           attempts: agentResult.attempts,
           attemptFailures: agentResult.attemptFailures,
           attemptTimings: agentResult.attemptTimings,
@@ -478,7 +446,7 @@ export class HarnessRunner {
       tracked.record.actionOutcomes = updated;
       tracked.record.outcomes = updated.map(
         (item) => `${item.status}: ${item.detail}`,
-      ) as [string, string];
+      );
     }
 
     const completedAt = new Date();
@@ -547,7 +515,7 @@ export class HarnessRunner {
       JSON.parse(
         JSON.stringify(
           {
-            schemaVersion: 2,
+            schemaVersion: 3,
             runId,
             status,
             scenario: this.benchmarkTask

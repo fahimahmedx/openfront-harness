@@ -2,42 +2,42 @@
   "schemaVersion": "benchmark-fixture-acceptance-v1",
   "fixtureId": "cap-losing-attack-retreat-scored-world-001",
   "status": "accepted",
-  "sourceArtifact": "data/benchmark-fixture-sources/match-12/2848745f-8b4e-4233-9fa9-e40d61eb8b2e.json.gz",
+  "sourceArtifact": "data/benchmark-fixture-sources/match-12/0847e54a-a795-423b-b15b-29c76ae34062.json.gz",
   "cleanRebuilds": [
     {
-      "state": 8047701585045727,
-      "observation": "4bb6069f532c5f0ecb570d1367e5bf04ed2ee40d735a2376c853de7d97370019",
-      "candidateMenu": "18fbc2ad4fc394c585a22d7b422cdda90f3dc3547f7485256e696abb0946e43f",
-      "tileState": "cca1fe286cebb703bed7765063d355bdce8c53540d0e21e9e0cfc5e2aeca74af"
+      "state": 6485841698171295,
+      "observation": "26b3957b2aa12562d9830b73def8cc091fbde40f59536410b9f2200e806cdaed",
+      "candidateMenu": "a2ddeebbf8770da35ab68274a8a8ce111aeb86c97dd74809c6b5ef9eed13e4a8",
+      "tileState": "36513fef8b7493e071a043134725becd40b8de1134b7c434489ddfbabe959478"
     },
     {
-      "state": 8047701585045727,
-      "observation": "4bb6069f532c5f0ecb570d1367e5bf04ed2ee40d735a2376c853de7d97370019",
-      "candidateMenu": "18fbc2ad4fc394c585a22d7b422cdda90f3dc3547f7485256e696abb0946e43f",
-      "tileState": "cca1fe286cebb703bed7765063d355bdce8c53540d0e21e9e0cfc5e2aeca74af"
+      "state": 6485841698171295,
+      "observation": "26b3957b2aa12562d9830b73def8cc091fbde40f59536410b9f2200e806cdaed",
+      "candidateMenu": "a2ddeebbf8770da35ab68274a8a8ce111aeb86c97dd74809c6b5ef9eed13e4a8",
+      "tileState": "36513fef8b7493e071a043134725becd40b8de1134b7c434489ddfbabe959478"
     },
     {
-      "state": 8047701585045727,
-      "observation": "4bb6069f532c5f0ecb570d1367e5bf04ed2ee40d735a2376c853de7d97370019",
-      "candidateMenu": "18fbc2ad4fc394c585a22d7b422cdda90f3dc3547f7485256e696abb0946e43f",
-      "tileState": "cca1fe286cebb703bed7765063d355bdce8c53540d0e21e9e0cfc5e2aeca74af"
+      "state": 6485841698171295,
+      "observation": "26b3957b2aa12562d9830b73def8cc091fbde40f59536410b9f2200e806cdaed",
+      "candidateMenu": "a2ddeebbf8770da35ab68274a8a8ce111aeb86c97dd74809c6b5ef9eed13e4a8",
+      "tileState": "36513fef8b7493e071a043134725becd40b8de1134b7c434489ddfbabe959478"
     },
     {
-      "state": 8047701585045727,
-      "observation": "4bb6069f532c5f0ecb570d1367e5bf04ed2ee40d735a2376c853de7d97370019",
-      "candidateMenu": "18fbc2ad4fc394c585a22d7b422cdda90f3dc3547f7485256e696abb0946e43f",
-      "tileState": "cca1fe286cebb703bed7765063d355bdce8c53540d0e21e9e0cfc5e2aeca74af"
+      "state": 6485841698171295,
+      "observation": "26b3957b2aa12562d9830b73def8cc091fbde40f59536410b9f2200e806cdaed",
+      "candidateMenu": "a2ddeebbf8770da35ab68274a8a8ce111aeb86c97dd74809c6b5ef9eed13e4a8",
+      "tileState": "36513fef8b7493e071a043134725becd40b8de1134b7c434489ddfbabe959478"
     },
     {
-      "state": 8047701585045727,
-      "observation": "4bb6069f532c5f0ecb570d1367e5bf04ed2ee40d735a2376c853de7d97370019",
-      "candidateMenu": "18fbc2ad4fc394c585a22d7b422cdda90f3dc3547f7485256e696abb0946e43f",
-      "tileState": "cca1fe286cebb703bed7765063d355bdce8c53540d0e21e9e0cfc5e2aeca74af"
+      "state": 6485841698171295,
+      "observation": "26b3957b2aa12562d9830b73def8cc091fbde40f59536410b9f2200e806cdaed",
+      "candidateMenu": "a2ddeebbf8770da35ab68274a8a8ce111aeb86c97dd74809c6b5ef9eed13e4a8",
+      "tileState": "36513fef8b7493e071a043134725becd40b8de1134b7c434489ddfbabe959478"
     }
   ],
   "machineChecks": {
     "checkpointRequirements": true,
-    "twoActionSlots": true,
+    "oneActionPerDecision": true,
     "ordinaryInputOnly": true
   },
   "referenceReplays": {
@@ -45,7 +45,7 @@
     "passed": 5
   },
   "controls": [
-    "double-hold",
+    "hold",
     "plausible-distractor"
   ],
   "review": {

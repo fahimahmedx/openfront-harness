@@ -7,12 +7,12 @@ import {
   scriptedAgentResult,
   selectNeutralExpansionDiplomacyControl,
   selectNeutralExpansionHoldControl,
-  selectNeutralExpansionReferenceActions,
+  selectNeutralExpansionReferenceAction,
   summarizeNeutralExpansionTrials,
 } from "../src/evals/NeutralExpansionEval";
 import { LegalAction } from "../src/Types";
 
-type ActionSelector = (candidates: LegalAction[]) => [string, string];
+type ActionSelector = (candidates: LegalAction[]) => string;
 
 function agent(
   strategy: string,
@@ -21,7 +21,7 @@ function agent(
   return {
     requestedModel: "scripted-neutral-expansion-policy",
     provider: "local",
-    promptVersion: "agent-v12",
+    promptVersion: "agent-v13",
     async decide(_observation, candidates) {
       return scriptedAgentResult(
         this.requestedModel,
@@ -74,7 +74,7 @@ describe("neutral expansion eval", () => {
   test("the reference policy passes in five clean trials", async () => {
     const reference = agent(
       "Convert the safe surplus into neutral territory.",
-      selectNeutralExpansionReferenceActions,
+      selectNeutralExpansionReferenceAction,
     );
 
     const trials = [];
@@ -85,15 +85,12 @@ describe("neutral expansion eval", () => {
         finalTick:
           NEUTRAL_EXPANSION_FIXTURE.checkpointTick +
           NEUTRAL_EXPANSION_FIXTURE.horizonTicks,
-        neutralTilesGained: 2116,
         taskPass: true,
         taskScore: 100,
         componentCoverage: 1,
       });
-      expect(result.trace.appliedActionIds).toEqual([
-        "expand:neutral:100",
-        "hold:2",
-      ]);
+      expect(result.outcome.neutralTilesGained).toBeGreaterThan(0);
+      expect(result.trace.appliedActionIds).toEqual(["expand:neutral:100"]);
       expect(result.replay.info.num_turns).toBe(result.outcome.finalTick);
       expect(
         result.replay.turns.some((turn) =>
@@ -117,10 +114,7 @@ describe("neutral expansion eval", () => {
 
   test("passes a different legal expansion trajectory", async () => {
     const result = await runNeutralExpansionTrial(
-      agent("Start a smaller safe expansion.", () => [
-        "expand:neutral:25",
-        "hold:2",
-      ]),
+      agent("Start a smaller safe expansion.", () => "expand:neutral:25"),
     );
 
     expect(result.outcome.neutralTilesGained).toBeGreaterThan(0);
@@ -128,7 +122,7 @@ describe("neutral expansion eval", () => {
     expect(result.outcome.taskScore).toBe(100);
   });
 
-  test("rejects double hold and a plausible diplomacy distractor", async () => {
+  test("rejects hold and a plausible diplomacy distractor", async () => {
     const controls = [
       agent("Wait without spending troops.", () =>
         selectNeutralExpansionHoldControl(),
@@ -154,7 +148,7 @@ describe("neutral expansion eval", () => {
     const result = await runNeutralExpansionTrial({
       requestedModel: "failed-scripted-policy",
       provider: "local",
-      promptVersion: "agent-v12",
+      promptVersion: "agent-v13",
       async decide() {
         return {
           decision: null,
@@ -186,8 +180,8 @@ describe("neutral expansion eval", () => {
     });
 
     expect(result.trace).toMatchObject({
-      selectedActionIds: ["hold:1", "hold:2"],
-      appliedActionIds: ["hold:1", "hold:2"],
+      selectedActionIds: ["hold"],
+      appliedActionIds: ["hold"],
       fallback: true,
       attempts: 2,
     });

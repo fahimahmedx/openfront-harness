@@ -21,98 +21,9 @@ export const LegalActionSchema = z.object({
 });
 export type LegalAction = z.infer<typeof LegalActionSchema>;
 
-export function isRepeatableLegalAction(action: LegalAction): boolean {
-  return (
-    action.category === "expand" ||
-    action.category === "attack" ||
-    action.category === "boat"
-  );
-}
-
-export function isGoldSpendingLegalAction(action: LegalAction): boolean {
-  return (
-    action.intent?.type === "build_unit" ||
-    action.intent?.type === "upgrade_structure"
-  );
-}
-
-type PlayerInteraction = {
-  targetID: string;
-  posture: "cooperate" | "oppose";
-};
-
-function playerInteraction(action: LegalAction): PlayerInteraction | null {
-  const intent = action.intent;
-  if (intent === null) return null;
-
-  switch (intent.type) {
-    case "allianceRequest":
-    case "allianceExtension":
-      return { targetID: intent.recipient, posture: "cooperate" };
-    case "breakAlliance":
-      return { targetID: intent.recipient, posture: "oppose" };
-    case "embargo":
-      return intent.action === "start"
-        ? { targetID: intent.targetID, posture: "oppose" }
-        : null;
-    case "attack":
-      return intent.targetID === null
-        ? null
-        : { targetID: intent.targetID, posture: "oppose" };
-    case "boat": {
-      const match = /^(?:counter-)?boat:([^:]+):/.exec(action.id);
-      return match?.[1] ? { targetID: match[1], posture: "oppose" } : null;
-    }
-    default:
-      return null;
-  }
-}
-
-export function legalActionConflictReason(
-  first: LegalAction,
-  second: LegalAction,
-): "mixed_posture_same_target" | "multi_front_proactive_offense" | null {
-  const firstInteraction = playerInteraction(first);
-  const secondInteraction = playerInteraction(second);
-  const conflictingPostures =
-    firstInteraction !== null &&
-    secondInteraction !== null &&
-    firstInteraction.targetID === secondInteraction.targetID &&
-    firstInteraction.posture !== secondInteraction.posture;
-  if (conflictingPostures) return "mixed_posture_same_target";
-
-  const proactiveAttackTarget = (action: LegalAction): string | null => {
-    if (
-      action.intent?.type === "attack" &&
-      action.intent.targetID !== null &&
-      action.id.startsWith("attack:")
-    ) {
-      return action.intent.targetID;
-    }
-    if (action.intent?.type === "boat" && action.id.startsWith("boat:")) {
-      return /^boat:([^:]+):/.exec(action.id)?.[1] ?? null;
-    }
-    return null;
-  };
-  const firstTarget = proactiveAttackTarget(first);
-  const secondTarget = proactiveAttackTarget(second);
-  return firstTarget !== null &&
-    secondTarget !== null &&
-    firstTarget !== secondTarget
-    ? "multi_front_proactive_offense"
-    : null;
-}
-
-export function areConflictingLegalActions(
-  first: LegalAction,
-  second: LegalAction,
-): boolean {
-  return legalActionConflictReason(first, second) !== null;
-}
-
 export const AgentDecisionSchema = z.object({
   strategy: z.string().trim().max(160),
-  actions: z.array(z.string().min(1).max(160)).length(2),
+  action: z.string().min(1).max(160),
 });
 export type AgentDecision = z.infer<typeof AgentDecisionSchema>;
 
@@ -123,8 +34,6 @@ export const AgentAttemptFailureSchema = z.object({
     "invalid_json",
     "invalid_shape",
     "unknown_action_id",
-    "duplicate_action_id",
-    "conflicting_action_ids",
     "truncated_response",
     "refusal",
     "request_error",
@@ -244,46 +153,49 @@ function legacyObservationFields(value: unknown): unknown {
   };
 }
 
-export const ObservationSchema = z.preprocess(
+const CurrentObservationSchema = z
+  .object({
+    scenarioId: z.string(),
+    decision: z.number().int().nonnegative(),
+    tick: z.number().int().nonnegative(),
+    elapsedSeconds: z.number().nonnegative(),
+    timeRemainingSeconds: z.number().nonnegative(),
+    instantVictoryTerritoryPercent: z.number(),
+    currentRank: z.number().int().positive(),
+    territoryLeader: TerritoryLeaderSchema,
+    isTerritoryLeader: z.boolean(),
+    territoryLeadPercent: z.number().nonnegative(),
+    territoryDeficitPercent: z.number().nonnegative(),
+    timerVictoryRule: z.literal(TIMER_VICTORY_RULE),
+    landTiles: z.number().int().nonnegative(),
+    self: z.record(z.string(), z.unknown()),
+    opponents: z.array(z.record(z.string(), z.unknown())),
+    recentDecisions: z.array(z.record(z.string(), z.unknown())),
+  })
+  .refine(
+    (observation) =>
+      observation.isTerritoryLeader === (observation.currentRank === 1),
+    {
+      message: "isTerritoryLeader must agree with currentRank",
+      path: ["isTerritoryLeader"],
+    },
+  )
+  .refine(
+    (observation) =>
+      observation.isTerritoryLeader
+        ? observation.territoryDeficitPercent === 0
+        : observation.territoryLeadPercent === 0,
+    {
+      message:
+        "territoryLeadPercent and territoryDeficitPercent must be mutually exclusive",
+      path: ["territoryLeadPercent"],
+    },
+  );
+
+export const ObservationSchema = CurrentObservationSchema;
+export const LegacyObservationSchema = z.preprocess(
   legacyObservationFields,
-  z
-    .object({
-      scenarioId: z.string(),
-      decision: z.number().int().nonnegative(),
-      tick: z.number().int().nonnegative(),
-      elapsedSeconds: z.number().nonnegative(),
-      timeRemainingSeconds: z.number().nonnegative(),
-      instantVictoryTerritoryPercent: z.number(),
-      currentRank: z.number().int().positive(),
-      territoryLeader: TerritoryLeaderSchema,
-      isTerritoryLeader: z.boolean(),
-      territoryLeadPercent: z.number().nonnegative(),
-      territoryDeficitPercent: z.number().nonnegative(),
-      timerVictoryRule: z.literal(TIMER_VICTORY_RULE),
-      landTiles: z.number().int().nonnegative(),
-      self: z.record(z.string(), z.unknown()),
-      opponents: z.array(z.record(z.string(), z.unknown())),
-      recentDecisions: z.array(z.record(z.string(), z.unknown())),
-    })
-    .refine(
-      (observation) =>
-        observation.isTerritoryLeader === (observation.currentRank === 1),
-      {
-        message: "isTerritoryLeader must agree with currentRank",
-        path: ["isTerritoryLeader"],
-      },
-    )
-    .refine(
-      (observation) =>
-        observation.isTerritoryLeader
-          ? observation.territoryDeficitPercent === 0
-          : observation.territoryLeadPercent === 0,
-      {
-        message:
-          "territoryLeadPercent and territoryDeficitPercent must be mutually exclusive",
-        path: ["territoryLeadPercent"],
-      },
-    ),
+  CurrentObservationSchema,
 );
 export type Observation = z.infer<typeof ObservationSchema>;
 
@@ -347,31 +259,54 @@ function legacyActionOutcomes(value: unknown): unknown {
   };
 }
 
-export const DecisionRecordSchema = z.preprocess(
+const DecisionRecordFields = {
+  index: z.number().int().nonnegative(),
+  tick: z.number().int().nonnegative(),
+  observation: ObservationSchema,
+  candidates: z.array(LegalActionSchema),
+  strategy: z.string().max(160),
+  selectedActionIds: z.array(z.string()).length(1),
+  appliedActionIds: z.array(z.string()).length(1),
+  outcomes: z.array(z.string()).length(1),
+  actionOutcomes: z.array(ActionOutcomeSchema).length(1),
+  attempts: z.number().int().min(1).max(2),
+  attemptFailures: z.array(AgentAttemptFailureSchema).default([]),
+  attemptTimings: z.array(AgentAttemptTimingSchema).max(2).default([]),
+  fallback: z.boolean(),
+  latencyMs: z.number().nonnegative(),
+  promptTokens: z.number().int().nonnegative(),
+  completionTokens: z.number().int().nonnegative(),
+  costUsd: z.number().nonnegative(),
+  model: z.string(),
+  provider: z.string().nullable(),
+} as const;
+
+export const DecisionRecordSchema = z.object(DecisionRecordFields);
+export type DecisionRecord = z.infer<typeof DecisionRecordSchema>;
+
+const LegacyFailureCodeSchema = z.enum([
+  ...AgentAttemptFailureSchema.shape.code.options,
+  "duplicate_action_id",
+  "conflicting_action_ids",
+]);
+
+const LegacyAttemptFailureSchema = AgentAttemptFailureSchema.extend({
+  code: LegacyFailureCodeSchema,
+});
+
+export const LegacyDecisionRecordSchema = z.preprocess(
   legacyActionOutcomes,
   z.object({
-    index: z.number().int().nonnegative(),
-    tick: z.number().int().nonnegative(),
-    observation: ObservationSchema,
-    candidates: z.array(LegalActionSchema),
-    strategy: z.string().max(160),
+    ...DecisionRecordFields,
+    observation: LegacyObservationSchema,
     selectedActionIds: z.array(z.string()).length(2),
     appliedActionIds: z.array(z.string()).length(2),
     outcomes: z.array(z.string()).length(2),
     actionOutcomes: z.array(ActionOutcomeSchema).length(2),
-    attempts: z.number().int().min(1).max(2),
-    attemptFailures: z.array(AgentAttemptFailureSchema).default([]),
-    attemptTimings: z.array(AgentAttemptTimingSchema).max(2).default([]),
-    fallback: z.boolean(),
-    latencyMs: z.number().nonnegative(),
-    promptTokens: z.number().int().nonnegative(),
-    completionTokens: z.number().int().nonnegative(),
-    costUsd: z.number().nonnegative(),
-    model: z.string(),
-    provider: z.string().nullable(),
+    attemptFailures: z.array(LegacyAttemptFailureSchema).default([]),
   }),
 );
-export type DecisionRecord = z.infer<typeof DecisionRecordSchema>;
+export type LegacyDecisionRecord = z.infer<typeof LegacyDecisionRecordSchema>;
 
 export const RunStatusSchema = z.enum([
   "sample",
@@ -382,8 +317,7 @@ export const RunStatusSchema = z.enum([
 ]);
 export type RunStatus = z.infer<typeof RunStatusSchema>;
 
-export const RunArtifactSchema = z.object({
-  schemaVersion: z.union([z.literal(1), z.literal(2)]),
+const RunArtifactFields = {
   runId: z.uuid(),
   status: RunStatusSchema,
   scenario: z.record(z.string(), z.unknown()),
@@ -391,23 +325,7 @@ export const RunArtifactSchema = z.object({
     requested: z.string(),
     resolved: z.string(),
     provider: z.string().nullable(),
-    promptVersion: z.enum([
-      "agent-v1",
-      "agent-v2",
-      "agent-v3",
-      "agent-v4",
-      "agent-v5",
-      "agent-v6",
-      "agent-v7",
-      "agent-v8",
-      "agent-v9",
-      "agent-v10",
-      "agent-v11",
-      "agent-v12",
-    ]),
-    // Retained only for parsing artifacts created before model seeding was
-    // removed. New runs omit this field.
-    seed: z.literal(3209).optional(),
+    promptVersion: z.literal("agent-v13"),
     reasoningEffort: z
       .enum(["none", "minimal", "low", "medium", "high", "xhigh", "max"])
       .optional(),
@@ -435,8 +353,51 @@ export const RunArtifactSchema = z.object({
   }),
   decisions: z.array(DecisionRecordSchema),
   replay: GameRecordSchema,
+} as const;
+
+export const RunArtifactSchema = z.object({
+  schemaVersion: z.literal(3),
+  ...RunArtifactFields,
 });
 export type RunArtifact = z.infer<typeof RunArtifactSchema>;
+
+const LegacyPromptVersionSchema = z.enum([
+  "agent-v1",
+  "agent-v2",
+  "agent-v3",
+  "agent-v4",
+  "agent-v5",
+  "agent-v6",
+  "agent-v7",
+  "agent-v8",
+  "agent-v9",
+  "agent-v10",
+  "agent-v11",
+  "agent-v12",
+]);
+
+export const LegacyRunArtifactSchema = z.object({
+  schemaVersion: z.union([z.literal(1), z.literal(2)]),
+  ...RunArtifactFields,
+  model: z.object({
+    requested: z.string(),
+    resolved: z.string(),
+    provider: z.string().nullable(),
+    promptVersion: LegacyPromptVersionSchema,
+    seed: z.literal(3209).optional(),
+    reasoningEffort: z
+      .enum(["none", "minimal", "low", "medium", "high", "xhigh", "max"])
+      .optional(),
+  }),
+  decisions: z.array(LegacyDecisionRecordSchema),
+});
+export type LegacyRunArtifact = z.infer<typeof LegacyRunArtifactSchema>;
+
+export const ReplayRunArtifactSchema = z.union([
+  RunArtifactSchema,
+  LegacyRunArtifactSchema,
+]);
+export type ReplayRunArtifact = z.infer<typeof ReplayRunArtifactSchema>;
 
 export interface RunProgress {
   runId: string;

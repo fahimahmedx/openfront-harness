@@ -54,7 +54,7 @@ describe("action lifecycle tracking", () => {
     const player = runner.game.playerByClientID(SCENARIO.clientID)!;
 
     const hold = createLegalActions(runner.game, player).find(
-      (candidate) => candidate.id === "hold:1",
+      (candidate) => candidate.id === "hold",
     )!;
     const holdTracking = beginActionTracking(runner.game, player, [hold]);
     execute();

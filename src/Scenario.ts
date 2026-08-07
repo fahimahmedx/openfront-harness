@@ -38,14 +38,13 @@ function configuredModel(): string {
 }
 
 export const SCENARIO = {
-  id: "japan-v5",
+  id: "japan-v6",
   seed: "JAPAN01A",
   clientID: "LLMAGENT",
   playerName: modelPlayerName(configuredModel()),
   spawn: { x: 1613, y: 1133, label: "Kanto" },
   expectedNations: ["Hokkaido", "Shikoku", "Kansai"],
   decisionIntervalTicks: 100,
-  actionSlots: 2,
   maxDecisionCount: 120,
   maxSimulatedMinutes: 20,
   maxWallClockMs: 10 * 60 * 1000,

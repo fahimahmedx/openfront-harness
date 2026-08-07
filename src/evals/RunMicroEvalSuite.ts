@@ -248,7 +248,7 @@ for (const family of schedule) {
 
 const completedAt = new Date();
 const report = {
-  evalVersion: "openfront-micro-v1",
+  evalVersion: "openfront-micro-v2",
   split: "development",
   completedAt: completedAt.toISOString(),
   requestedTrialsPerFamily: requestedTrials,
@@ -262,7 +262,7 @@ const output = path.resolve(
   option("output") ??
     path.join(
       PROJECT_ROOT,
-      "data/evals/openfront-micro-v1",
+      "data/evals/openfront-micro-v2",
       `${completedAt.toISOString().replace(/[:.]/g, "-")}-${agent.requestedModel.replace(/[^a-zA-Z0-9._-]+/g, "-")}.json`,
     ),
 );

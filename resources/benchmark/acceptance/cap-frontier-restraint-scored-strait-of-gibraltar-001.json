@@ -2,42 +2,42 @@
   "schemaVersion": "benchmark-fixture-acceptance-v1",
   "fixtureId": "cap-frontier-restraint-scored-strait-of-gibraltar-001",
   "status": "accepted",
-  "sourceArtifact": "data/benchmark-fixture-sources/match-10/34b9112f-d06a-4b19-9e03-5ad0da6730dc.json.gz",
+  "sourceArtifact": "data/benchmark-fixture-sources/match-10/59e577f3-645b-40b7-baf9-a578f2ee8396.json.gz",
   "cleanRebuilds": [
     {
-      "state": 8981880362868571,
-      "observation": "a59475de4c3d6c73a4a6575cdb1cfd74a94bd1a9bc3dbfe5eab90b0dd283c17f",
-      "candidateMenu": "ce0cdf3baa9f073b3379eb0159d1c302b733a32ee0bdf4c7cba3c73de5ab1fc8",
-      "tileState": "d51fe7299eda64bd87ab0be8ffa5218bed591b1534d773936377d6558d4ca606"
+      "state": 8643128218501628,
+      "observation": "82a8ffef6e6e8ac190fabfbfed8f8b8a52a9c2b0ac8faaf8aaa28b2e2791cbff",
+      "candidateMenu": "0e4d99e860731dd88d19dbddb5f9c9da74886d09fadd49c9aa9cf15e0dd77f03",
+      "tileState": "d08b79c252fe3cc378916fab783c6642ac7ddfe7ecb695575db9673f93344770"
     },
     {
-      "state": 8981880362868571,
-      "observation": "a59475de4c3d6c73a4a6575cdb1cfd74a94bd1a9bc3dbfe5eab90b0dd283c17f",
-      "candidateMenu": "ce0cdf3baa9f073b3379eb0159d1c302b733a32ee0bdf4c7cba3c73de5ab1fc8",
-      "tileState": "d51fe7299eda64bd87ab0be8ffa5218bed591b1534d773936377d6558d4ca606"
+      "state": 8643128218501628,
+      "observation": "82a8ffef6e6e8ac190fabfbfed8f8b8a52a9c2b0ac8faaf8aaa28b2e2791cbff",
+      "candidateMenu": "0e4d99e860731dd88d19dbddb5f9c9da74886d09fadd49c9aa9cf15e0dd77f03",
+      "tileState": "d08b79c252fe3cc378916fab783c6642ac7ddfe7ecb695575db9673f93344770"
     },
     {
-      "state": 8981880362868571,
-      "observation": "a59475de4c3d6c73a4a6575cdb1cfd74a94bd1a9bc3dbfe5eab90b0dd283c17f",
-      "candidateMenu": "ce0cdf3baa9f073b3379eb0159d1c302b733a32ee0bdf4c7cba3c73de5ab1fc8",
-      "tileState": "d51fe7299eda64bd87ab0be8ffa5218bed591b1534d773936377d6558d4ca606"
+      "state": 8643128218501628,
+      "observation": "82a8ffef6e6e8ac190fabfbfed8f8b8a52a9c2b0ac8faaf8aaa28b2e2791cbff",
+      "candidateMenu": "0e4d99e860731dd88d19dbddb5f9c9da74886d09fadd49c9aa9cf15e0dd77f03",
+      "tileState": "d08b79c252fe3cc378916fab783c6642ac7ddfe7ecb695575db9673f93344770"
     },
     {
-      "state": 8981880362868571,
-      "observation": "a59475de4c3d6c73a4a6575cdb1cfd74a94bd1a9bc3dbfe5eab90b0dd283c17f",
-      "candidateMenu": "ce0cdf3baa9f073b3379eb0159d1c302b733a32ee0bdf4c7cba3c73de5ab1fc8",
-      "tileState": "d51fe7299eda64bd87ab0be8ffa5218bed591b1534d773936377d6558d4ca606"
+      "state": 8643128218501628,
+      "observation": "82a8ffef6e6e8ac190fabfbfed8f8b8a52a9c2b0ac8faaf8aaa28b2e2791cbff",
+      "candidateMenu": "0e4d99e860731dd88d19dbddb5f9c9da74886d09fadd49c9aa9cf15e0dd77f03",
+      "tileState": "d08b79c252fe3cc378916fab783c6642ac7ddfe7ecb695575db9673f93344770"
     },
     {
-      "state": 8981880362868571,
-      "observation": "a59475de4c3d6c73a4a6575cdb1cfd74a94bd1a9bc3dbfe5eab90b0dd283c17f",
-      "candidateMenu": "ce0cdf3baa9f073b3379eb0159d1c302b733a32ee0bdf4c7cba3c73de5ab1fc8",
-      "tileState": "d51fe7299eda64bd87ab0be8ffa5218bed591b1534d773936377d6558d4ca606"
+      "state": 8643128218501628,
+      "observation": "82a8ffef6e6e8ac190fabfbfed8f8b8a52a9c2b0ac8faaf8aaa28b2e2791cbff",
+      "candidateMenu": "0e4d99e860731dd88d19dbddb5f9c9da74886d09fadd49c9aa9cf15e0dd77f03",
+      "tileState": "d08b79c252fe3cc378916fab783c6642ac7ddfe7ecb695575db9673f93344770"
     }
   ],
   "machineChecks": {
     "checkpointRequirements": true,
-    "twoActionSlots": true,
+    "oneActionPerDecision": true,
     "ordinaryInputOnly": true
   },
   "referenceReplays": {
@@ -45,7 +45,7 @@
     "passed": 5
   },
   "controls": [
-    "double-hold",
+    "hold",
     "plausible-distractor"
   ],
   "review": {

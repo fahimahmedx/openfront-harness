@@ -3,12 +3,18 @@ import path from "path";
 import { promisify } from "util";
 import { gunzip, gzip } from "zlib";
 import { replacer } from "../OpenFrontIO/src/core/Util";
-import { RunArtifact, RunArtifactSchema, RunProgress } from "./Types";
+import {
+  ReplayRunArtifact,
+  ReplayRunArtifactSchema,
+  RunArtifact,
+  RunArtifactSchema,
+  RunProgress,
+} from "./Types";
 
 const gzipAsync = promisify(gzip);
 const gunzipAsync = promisify(gunzip);
 
-export function artifactSummary(artifact: RunArtifact) {
+export function artifactSummary(artifact: ReplayRunArtifact) {
   return {
     runId: artifact.runId,
     scenarioId:
@@ -89,7 +95,7 @@ export class RunStore {
       .catch(() => undefined);
   }
 
-  async getArtifact(runId: string): Promise<RunArtifact | null> {
+  async getArtifact(runId: string): Promise<ReplayRunArtifact | null> {
     const activeFile = path.join(this.dataDir, `${runId}.json.gz`);
     const local = await this.readArtifact(activeFile);
     if (local) return local;
@@ -108,12 +114,12 @@ export class RunStore {
     return null;
   }
 
-  async listArtifacts(): Promise<RunArtifact[]> {
+  async listArtifacts(): Promise<ReplayRunArtifact[]> {
     const files = await this.findArtifactFiles();
     const discovered = (
       await Promise.all(files.map((file) => this.readArtifact(file)))
-    ).filter((artifact): artifact is RunArtifact => artifact !== null);
-    const artifactsById = new Map<string, RunArtifact>();
+    ).filter((artifact): artifact is ReplayRunArtifact => artifact !== null);
+    const artifactsById = new Map<string, ReplayRunArtifact>();
     for (const artifact of discovered) {
       if (!artifactsById.has(artifact.runId)) {
         artifactsById.set(artifact.runId, artifact);
@@ -161,11 +167,11 @@ export class RunStore {
     });
   }
 
-  private async readArtifact(file: string): Promise<RunArtifact | null> {
+  private async readArtifact(file: string): Promise<ReplayRunArtifact | null> {
     try {
       const compressed = await fs.readFile(file);
       const json = await gunzipAsync(compressed);
-      return RunArtifactSchema.parse(JSON.parse(json.toString("utf8")));
+      return ReplayRunArtifactSchema.parse(JSON.parse(json.toString("utf8")));
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
         console.warn(`Ignoring unreadable run artifact ${file}`, error);

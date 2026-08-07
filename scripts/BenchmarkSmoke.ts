@@ -45,7 +45,7 @@ class OneDecisionSmokeAgent implements AgentPolicy {
     return {
       decision: {
         strategy: "Smoke rollout hold.",
-        actions: ["hold:1", "hold:2"],
+        action: "hold",
       },
       attempts: 1,
       attemptFailures: [],

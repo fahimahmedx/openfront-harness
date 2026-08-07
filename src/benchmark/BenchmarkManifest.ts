@@ -119,7 +119,7 @@ export async function createReleaseManifestInput(options: {
       trial: "benchmark-trial-v1",
       report: "benchmark-run-v1",
     },
-    resolverVersion: "simultaneous-two-slot-v1",
+    resolverVersion: "single-action-v1",
     troopPolicy: BENCHMARK_LIMITS.troopPolicy,
     graderPackageHash: options.graderPackageHash,
     taskOrder: {
