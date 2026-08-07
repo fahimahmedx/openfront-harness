@@ -1,5 +1,7 @@
 # OpenFront Harness
 
+<img width="1890" height="1146" alt="image" src="https://github.com/user-attachments/assets/c611ed89-b1e1-4f8a-aaca-34c4898aac9d" />
+
 A deterministic, inspectable harness in which one LLM plays a fixed OpenFront match on Japan against three built-in medium-difficulty nations. Every run produces a complete OpenFront replay plus a decision-by-decision trace of observations, legal actions, selected intents, latency, tokens, cost, hashes, and outcome.
 
 The harness is a separate project. `OpenFrontIO/` stays at the pristine `v0.32.9` tag and is treated as a read-only source dependency; the harness imports its core and builds its renderer without patching tracked game files.
