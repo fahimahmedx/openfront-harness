@@ -164,6 +164,31 @@ h1 span {
   font-size: 17px;
   line-height: 1.55;
 }
+.release-notice {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  align-items: start;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding: 18px 22px;
+  border: 1px solid #cddbd3;
+  border-left: 3px solid var(--green);
+  border-radius: 9px;
+  background: #f3f7f4;
+}
+.release-notice strong {
+  color: var(--green);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  line-height: 1.55;
+  text-transform: uppercase;
+}
+.release-notice p {
+  margin: 0;
+  color: #4d534f;
+  font-size: 13px;
+  line-height: 1.55;
+}
 
 .leaderboard {
   border: 1px solid var(--line);
@@ -592,6 +617,11 @@ footer a {
   }
   h1 {
     font-size: 46px;
+  }
+  .release-notice {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 16px 18px;
   }
   .leaderboard-bar {
     align-items: stretch;
