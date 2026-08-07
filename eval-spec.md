@@ -141,7 +141,7 @@ infrastructure-invalid trials.
 | Candidate ceiling    | 64 candidates, including the single `hold` entry                                                                          |
 | Decision ceiling     | 120 while the LLM player is alive                                                                                         |
 | Match ceiling        | 20 simulated minutes                                                                                                      |
-| Wall-clock ceiling   | 10 minutes per match, 2 minutes per capability trial                                                                      |
+| Wall-clock ceiling   | 15 minutes per match, 2 minutes per capability trial                                                                      |
 | Model-cost ceiling   | USD 1 per match and USD 0.10 per capability trial                                                                         |
 | Response handling    | Strict schema, one corrective retry, then one hold                                                                        |
 | Failure abort        | Five consecutive complete decision failures in a match                                                                    |

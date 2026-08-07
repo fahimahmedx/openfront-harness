@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "41cf072f-c069-4d7a-be63-3af8c3890c2a",
+  "trialId": "5a25c3ef-2518-4d97-a58d-fec2004f9021",
+  "taskId": "cap-saturated-capacity-expansion-scored-world-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "openai/gpt-5.6-luna",
+    "resolved": "openai/gpt-5.6-luna",
+    "provider": "OpenAI",
+    "requestedProvider": "OpenAI",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T11:42:08.077Z",
+  "completedAt": "2026-08-07T11:42:10.716Z",
+  "hashes": {
+    "checkpoint": 1433033086910016,
+    "final": 1558841707493609
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 2018.3558749999997,
+        "timeToFirstTokenMs": 1609.5977079999998,
+        "generationMs": 408.75816699999996,
+        "completionTokens": 45,
+        "timePerOutputTokenMs": 9.28995834090909,
+        "queueMs": null,
+        "generationId": "gen-1786102928-ikagtCkcGJLvQRCGZqHv"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2860,
+    "completionTokens": 45,
+    "costUsd": 0.00005587
+  },
+  "assertions": [
+    {
+      "id": "owns-checkpoint-neutral-tile",
+      "observed": 0,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 1103,
+    "finalTileCount": 52,
+    "finalTroops": 121318,
+    "finalTroopCapacityPercent": 99.92360151241783,
+    "initialTileCount": 52,
+    "initialTroops": 121318,
+    "initialTroopCapacityPercent": 99.92360151241783,
+    "territoryChange": 0,
+    "terminal": false
+  },
+  "componentCoverage": 0,
+  "taskScore": 0,
+  "artifactPath": "artifacts/5a25c3ef-2518-4d97-a58d-fec2004f9021.capability.json.gz"
+}

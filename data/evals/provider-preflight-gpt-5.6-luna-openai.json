@@ -1,0 +1,463 @@
+{
+  "evalVersion": "openfront-micro-v2",
+  "split": "development",
+  "completedAt": "2026-08-07T11:13:07.989Z",
+  "requestedTrialsPerFamily": 1,
+  "requestedFamilies": [
+    "neutral-expansion"
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "invalidTrials": [],
+  "summary": {
+    "microEvalScore": 100,
+    "macroPassAt1Bootstrap95": {
+      "lower": 1,
+      "upper": 1
+    },
+    "familyResults": {
+      "neutral-expansion": {
+        "validTrials": 1,
+        "successes": 1,
+        "passAt1": 1,
+        "estimatedPassPower3": 1,
+        "passAt1Wilson95Lower": 0.20654329147389294,
+        "passAt1Wilson95Upper": 1,
+        "meanComponentCoverage": 1
+      }
+    },
+    "validTrials": 1,
+    "totalCostUsd": 0.000227225,
+    "meanCostUsd": 0.000227225,
+    "firstAttemptValidityRate": 1,
+    "retryRate": 0,
+    "fallbackRate": 0,
+    "medianLatencyMs": 1697.227375,
+    "p95LatencyMs": 1697.227375,
+    "meanPromptTokens": 1636,
+    "meanCompletionTokens": 38
+  },
+  "trials": [
+    {
+      "runId": "1523d828-d5be-42d9-84bc-217db69a4a0b",
+      "evalVersion": "openfront-micro-v2",
+      "graderVersion": "neutral-expansion-v2",
+      "familyId": "neutral-expansion",
+      "fixtureId": "neutral-expansion-japan-kanto-001",
+      "split": "development",
+      "startedAt": "2026-08-07T11:13:06.023Z",
+      "completedAt": "2026-08-07T11:13:07.937Z",
+      "configuration": {
+        "scenarioId": "japan-v6",
+        "openfrontCommit": "dcc18d5231af6253b0e991bf04a4c764982fe262",
+        "model": "openai/gpt-5.6-luna",
+        "resolvedModel": "openai/gpt-5.6-luna",
+        "provider": "OpenAI",
+        "promptVersion": "agent-v13"
+      },
+      "checkpoint": {
+        "tick": 171,
+        "stateHash": 184348445389306,
+        "observationHash": "f3ab5a2a72a73829d55e2b13fa663fa3cc650d443666116f96d83c725a8a55c5",
+        "candidateMenuHash": "13af39ec5bbcfcedc9ffb983ee543705d1ff1350ac35e48e953d827ff5bb6ae2",
+        "tileStateHash": "582f6a2a5816d5ba1a0a07f4d40c7ae66de145b4cff6fed60b68652ac5a0b84f",
+        "initialTileCount": 52,
+        "troopCapacityPercent": 71.65
+      },
+      "trace": {
+        "observation": {
+          "scenarioId": "japan-v6",
+          "decision": 0,
+          "tick": 171,
+          "elapsedSeconds": 17,
+          "timeRemainingSeconds": 1183,
+          "instantVictoryTerritoryPercent": 80,
+          "currentRank": 4,
+          "territoryLeader": {
+            "id": "jld9qemv",
+            "name": "Kansai",
+            "territoryPercent": 0.408
+          },
+          "isTerritoryLeader": false,
+          "territoryLeadPercent": 0,
+          "territoryDeficitPercent": 0.397,
+          "timerVictoryRule": "When the timer expires, the living player with the most land tiles wins.",
+          "landTiles": 478894,
+          "self": {
+            "id": "7skzti8f",
+            "name": "neutral expansion eval",
+            "type": "HUMAN",
+            "alive": true,
+            "tiles": 52,
+            "territoryPercent": 0.011,
+            "troops": 86985,
+            "maxTroops": 121410,
+            "troopCapacityPercent": 71.65,
+            "troopGrowthPerSecond": 2888.3,
+            "totalIncomingTroops": 0,
+            "totalOutgoingTroops": 0,
+            "gold": "16900",
+            "units": {},
+            "incomingAttacks": [],
+            "outgoingAttacks": [],
+            "spawn": {
+              "x": 1613,
+              "y": 1133
+            },
+            "allies": [],
+            "diplomacy": {
+              "earlyAllianceWindowOpen": true,
+              "hostileOpponentCount": 0,
+              "hostileSharedBorderCount": 0
+            },
+            "traitor": false,
+            "immune": false,
+            "troopPolicyMode": "expansion",
+            "reserveFloorTroops": 18212,
+            "reserveFloorPercent": 15,
+            "spendableTroops": 68773,
+            "actionTroopBudget": 68773
+          },
+          "opponents": [
+            {
+              "id": "d8c1rits",
+              "name": "Shikoku",
+              "type": "NATION",
+              "alive": true,
+              "tiles": 1739,
+              "territoryPercent": 0.363,
+              "troops": 45045,
+              "maxTroops": 206907,
+              "troopCapacityPercent": 21.77,
+              "troopGrowthPerSecond": 4710.9,
+              "totalIncomingTroops": 0,
+              "totalOutgoingTroops": 0,
+              "gold": "16800",
+              "units": {},
+              "incomingAttacks": [],
+              "outgoingAttacks": [],
+              "sharedBorder": false,
+              "allied": false,
+              "relation": "neutral",
+              "allianceRequest": {
+                "available": true,
+                "history": {
+                  "sentCount": 0,
+                  "lastResult": null
+                }
+              },
+              "canAttack": true,
+              "troopsRelativeToSelf": 0.518
+            },
+            {
+              "id": "jld9qemv",
+              "name": "Kansai",
+              "type": "NATION",
+              "alive": true,
+              "tiles": 1955,
+              "territoryPercent": 0.408,
+              "troops": 41107,
+              "maxTroops": 216507,
+              "troopCapacityPercent": 18.99,
+              "troopGrowthPerSecond": 4568.3,
+              "totalIncomingTroops": 0,
+              "totalOutgoingTroops": 178,
+              "gold": "16800",
+              "units": {},
+              "incomingAttacks": [],
+              "outgoingAttacks": [
+                {
+                  "id": "70w0tbfs",
+                  "target": null,
+                  "troops": 178,
+                  "naval": false
+                }
+              ],
+              "sharedBorder": false,
+              "allied": false,
+              "relation": "neutral",
+              "allianceRequest": {
+                "available": true,
+                "history": {
+                  "sentCount": 0,
+                  "lastResult": null
+                }
+              },
+              "canAttack": true,
+              "troopsRelativeToSelf": 0.473
+            },
+            {
+              "id": "mx6susv9",
+              "name": "Hokkaido",
+              "type": "NATION",
+              "alive": true,
+              "tiles": 1655,
+              "territoryPercent": 0.346,
+              "troops": 43528,
+              "maxTroops": 203047,
+              "troopCapacityPercent": 21.44,
+              "troopGrowthPerSecond": 4615.9,
+              "totalIncomingTroops": 0,
+              "totalOutgoingTroops": 0,
+              "gold": "16800",
+              "units": {},
+              "incomingAttacks": [],
+              "outgoingAttacks": [],
+              "sharedBorder": false,
+              "allied": false,
+              "relation": "neutral",
+              "allianceRequest": {
+                "available": true,
+                "history": {
+                  "sentCount": 0,
+                  "lastResult": null
+                }
+              },
+              "canAttack": true,
+              "troopsRelativeToSelf": 0.5
+            }
+          ],
+          "recentDecisions": []
+        },
+        "candidates": [
+          {
+            "id": "hold",
+            "category": "hold",
+            "label": "Take no action this decision",
+            "intent": null
+          },
+          {
+            "id": "expand:neutral:100",
+            "category": "expand",
+            "label": "Expand into neutral land with 68,773 troops (100% of the safe action budget; 15% capacity reserve)",
+            "intent": {
+              "type": "attack",
+              "targetID": null,
+              "troops": 68773
+            }
+          },
+          {
+            "id": "expand:neutral:25",
+            "category": "expand",
+            "label": "Expand into neutral land with 17,193 troops (25% of the safe action budget; 15% capacity reserve)",
+            "intent": {
+              "type": "attack",
+              "targetID": null,
+              "troops": 17193
+            }
+          },
+          {
+            "id": "expand:neutral:50",
+            "category": "expand",
+            "label": "Expand into neutral land with 34,386 troops (50% of the safe action budget; 15% capacity reserve)",
+            "intent": {
+              "type": "attack",
+              "targetID": null,
+              "troops": 34386
+            }
+          },
+          {
+            "id": "expand:neutral:75",
+            "category": "expand",
+            "label": "Expand into neutral land with 51,579 troops (75% of the safe action budget; 15% capacity reserve)",
+            "intent": {
+              "type": "attack",
+              "targetID": null,
+              "troops": 51579
+            }
+          },
+          {
+            "id": "alliance:request:d8c1rits",
+            "category": "diplomacy",
+            "label": "Request an alliance with Shikoku",
+            "intent": {
+              "type": "allianceRequest",
+              "recipient": "d8c1rits"
+            }
+          },
+          {
+            "id": "alliance:request:jld9qemv",
+            "category": "diplomacy",
+            "label": "Request an alliance with Kansai",
+            "intent": {
+              "type": "allianceRequest",
+              "recipient": "jld9qemv"
+            }
+          },
+          {
+            "id": "alliance:request:mx6susv9",
+            "category": "diplomacy",
+            "label": "Request an alliance with Hokkaido",
+            "intent": {
+              "type": "allianceRequest",
+              "recipient": "mx6susv9"
+            }
+          },
+          {
+            "id": "embargo:start:d8c1rits",
+            "category": "diplomacy",
+            "label": "Start an embargo against Shikoku",
+            "intent": {
+              "type": "embargo",
+              "targetID": "d8c1rits",
+              "action": "start"
+            }
+          },
+          {
+            "id": "embargo:start:jld9qemv",
+            "category": "diplomacy",
+            "label": "Start an embargo against Kansai",
+            "intent": {
+              "type": "embargo",
+              "targetID": "jld9qemv",
+              "action": "start"
+            }
+          },
+          {
+            "id": "embargo:start:mx6susv9",
+            "category": "diplomacy",
+            "label": "Start an embargo against Hokkaido",
+            "intent": {
+              "type": "embargo",
+              "targetID": "mx6susv9",
+              "action": "start"
+            }
+          }
+        ],
+        "strategy": "Build territory safely while neutral; preserve diplomacy and avoid provoking the much larger leaders.",
+        "selectedActionIds": [
+          "expand:neutral:100"
+        ],
+        "appliedActionIds": [
+          "expand:neutral:100"
+        ],
+        "actionOutcomes": [
+          {
+            "actionId": "expand:neutral:100",
+            "status": "completed",
+            "startedAtTick": 172,
+            "resolvedAtTick": 258,
+            "entityId": "kk367xk4",
+            "detail": "Attack kk367xk4 ended after capturing territory"
+          }
+        ],
+        "attempts": 1,
+        "attemptFailures": [],
+        "attemptTimings": [
+          {
+            "attempt": 1,
+            "totalMs": 1693.9217500000002,
+            "timeToFirstTokenMs": 1428.568625,
+            "generationMs": 265.3531250000001,
+            "completionTokens": 38,
+            "timePerOutputTokenMs": 7.1717060810810835,
+            "queueMs": null,
+            "generationId": "gen-1786101186-5yOqP8DRoMQgBPd60feh"
+          }
+        ],
+        "fallback": false,
+        "latencyMs": 1697.227375,
+        "promptTokens": 1636,
+        "completionTokens": 38,
+        "costUsd": 0.000227225
+      },
+      "outcome": {
+        "finalTick": 271,
+        "finalStateHash": 209552206758751,
+        "finalTileCount": 4292,
+        "neutralTilesGained": 4240,
+        "assertion": {
+          "id": "owns-checkpoint-neutral-tile",
+          "observed": 4240,
+          "operator": ">=",
+          "expected": 1,
+          "passed": true
+        },
+        "componentCoverage": 1,
+        "taskPass": true,
+        "taskScore": 100
+      },
+      "replay": {
+        "info": {
+          "gameID": "JAPAN01A",
+          "lobbyCreatedAt": 0,
+          "config": {
+            "gameMap": "Japan",
+            "difficulty": "Medium",
+            "donateGold": false,
+            "donateTroops": false,
+            "gameType": "Singleplayer",
+            "gameMode": "Free For All",
+            "gameMapSize": "Normal",
+            "nations": 3,
+            "bots": 0,
+            "infiniteGold": false,
+            "infiniteTroops": false,
+            "instantBuild": false,
+            "randomSpawn": false,
+            "maxTimerValue": 20
+          },
+          "players": [
+            {
+              "clientID": "LLMAGENT",
+              "username": "neutral expansion eval",
+              "clanTag": null,
+              "isLobbyCreator": true,
+              "persistentID": null,
+              "stats": {
+                "attacks": [
+                  "68773"
+                ],
+                "gold": [
+                  "26900"
+                ]
+              }
+            }
+          ],
+          "start": 1786101186023,
+          "end": 1786101213023,
+          "duration": 27,
+          "num_turns": 271,
+          "lobbyFillTime": 0
+        },
+        "version": "v0.0.2",
+        "gitCommit": "dcc18d5231af6253b0e991bf04a4c764982fe262",
+        "subdomain": "harness-eval",
+        "domain": "openfront-harness",
+        "turns": [
+          {
+            "turnNumber": 0,
+            "intents": [
+              {
+                "type": "spawn",
+                "tile": 2834113,
+                "clientID": "LLMAGENT"
+              }
+            ],
+            "hash": 67503080743751
+          },
+          {
+            "turnNumber": 100,
+            "intents": [],
+            "hash": 140030915336695
+          },
+          {
+            "turnNumber": 171,
+            "intents": [
+              {
+                "type": "attack",
+                "targetID": null,
+                "troops": 68773,
+                "clientID": "LLMAGENT"
+              }
+            ]
+          },
+          {
+            "turnNumber": 200,
+            "intents": [],
+            "hash": 139722713324333
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "dbdeb06c-7f67-4387-b755-77e9a11e5ae0",
+  "trialId": "567bf0cb-2ebb-4e9c-953f-3832ce62a1c2",
+  "taskId": "cap-neutral-expansion-scored-great-lakes-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "z-ai/glm-5.2",
+    "resolved": "z-ai/glm-5.2",
+    "provider": "Baidu",
+    "requestedProvider": "Baidu",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T09:54:19.289Z",
+  "completedAt": "2026-08-07T09:54:22.237Z",
+  "hashes": {
+    "checkpoint": 408768051800988,
+    "final": 544547431992735
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 2564.226458,
+        "timeToFirstTokenMs": 1892.205916,
+        "generationMs": 672.0205420000002,
+        "completionTokens": 35,
+        "timePerOutputTokenMs": 19.765310058823534,
+        "queueMs": null,
+        "generationId": "gen-1786096459-tg1wbTQWxMSqCtgYfWCM"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2558,
+    "completionTokens": 35,
+    "costUsd": 0.0010318056
+  },
+  "assertions": [
+    {
+      "id": "owns-checkpoint-neutral-tile",
+      "observed": 0,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 353,
+    "finalTileCount": 52,
+    "finalTroops": 115402,
+    "finalTroopCapacityPercent": 95.05088660986864,
+    "initialTileCount": 52,
+    "initialTroops": 105064,
+    "initialTroopCapacityPercent": 86.53599028421725,
+    "territoryChange": 0,
+    "terminal": false
+  },
+  "componentCoverage": 0,
+  "taskScore": 0,
+  "artifactPath": "artifacts/567bf0cb-2ebb-4e9c-953f-3832ce62a1c2.capability.json.gz"
+}

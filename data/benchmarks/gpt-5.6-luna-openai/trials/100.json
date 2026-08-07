@@ -1,0 +1,980 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "41cf072f-c069-4d7a-be63-3af8c3890c2a",
+  "trialId": "2eee1781-9853-4ce0-9a49-c467dd0b01ed",
+  "taskId": "match-11",
+  "suite": "match",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "openai/gpt-5.6-luna",
+    "resolved": "openai/gpt-5.6-luna",
+    "provider": "OpenAI",
+    "requestedProvider": "OpenAI",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T12:34:34.880Z",
+  "completedAt": "2026-08-07T12:37:30.468Z",
+  "hashes": {
+    "final": 4785137969070775
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1786.5015830000002,
+        "timeToFirstTokenMs": 1550.27025,
+        "generationMs": 236.23133300000018,
+        "completionTokens": 39,
+        "timePerOutputTokenMs": 6.216614026315794,
+        "queueMs": null,
+        "generationId": "gen-1786106075-PwwlIf7F9pryXDXD57H3"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 2239.458,
+        "timeToFirstTokenMs": 1448.0665830000003,
+        "generationMs": 791.3914169999998,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 16.838115255319146,
+        "queueMs": null,
+        "generationId": "gen-1786106077-Qk2YTdfuENt4DRozqXj8"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1409.179,
+        "timeToFirstTokenMs": 1080.3227080000006,
+        "generationMs": 328.8562919999995,
+        "completionTokens": 38,
+        "timePerOutputTokenMs": 8.888007891891878,
+        "queueMs": null,
+        "generationId": "gen-1786106079-qcGP6laA09NnjioGZI6R"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1344.0577080000003,
+        "timeToFirstTokenMs": 993.4013750000004,
+        "generationMs": 350.6563329999999,
+        "completionTokens": 45,
+        "timePerOutputTokenMs": 7.969462113636362,
+        "queueMs": null,
+        "generationId": "gen-1786106080-MMZJaKiIv9vrNFwqQ8aJ"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1219.3734999999997,
+        "timeToFirstTokenMs": 876.4626659999994,
+        "generationMs": 342.91083400000025,
+        "completionTokens": 40,
+        "timePerOutputTokenMs": 8.792585487179494,
+        "queueMs": null,
+        "generationId": "gen-1786106082-EMalBQHOlcCdlSlDi0Ny"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1216.8448329999992,
+        "timeToFirstTokenMs": 904.0968329999996,
+        "generationMs": 312.7479999999996,
+        "completionTokens": 42,
+        "timePerOutputTokenMs": 7.62799999999999,
+        "queueMs": null,
+        "generationId": "gen-1786106083-6xeDrVWI9HR8M1SlcJdt"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1798.0953339999996,
+        "timeToFirstTokenMs": 1297.8888340000012,
+        "generationMs": 500.2064999999984,
+        "completionTokens": 41,
+        "timePerOutputTokenMs": 12.50516249999996,
+        "queueMs": null,
+        "generationId": "gen-1786106084-B7pZbXxdNCRT2lpSlnIs"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1304.2006249999995,
+        "timeToFirstTokenMs": 903.3537089999991,
+        "generationMs": 400.8469160000004,
+        "completionTokens": 42,
+        "timePerOutputTokenMs": 9.776754048780498,
+        "queueMs": null,
+        "generationId": "gen-1786106086-DMpYahwrDVC1JaDy9ZLB"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1146.202874999999,
+        "timeToFirstTokenMs": 917.7052499999991,
+        "generationMs": 228.49762499999997,
+        "completionTokens": 44,
+        "timePerOutputTokenMs": 5.313898255813953,
+        "queueMs": null,
+        "generationId": "gen-1786106088-TsnfJ6tiqu7KMzkJnnb5"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1630.2605409999996,
+        "timeToFirstTokenMs": 1330.9529999999995,
+        "generationMs": 299.3075410000001,
+        "completionTokens": 45,
+        "timePerOutputTokenMs": 6.8024441136363665,
+        "queueMs": null,
+        "generationId": "gen-1786106089-36IVxz8iuPBWZzIN8UFi"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1092.444790999998,
+        "timeToFirstTokenMs": 716.2982080000002,
+        "generationMs": 376.1465829999979,
+        "completionTokens": 42,
+        "timePerOutputTokenMs": 9.174306902438973,
+        "queueMs": null,
+        "generationId": "gen-1786106091-td27i6KnOF0E3Ro2qJ72"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1150.0545420000017,
+        "timeToFirstTokenMs": 875.0696669999998,
+        "generationMs": 274.9848750000019,
+        "completionTokens": 44,
+        "timePerOutputTokenMs": 6.3949970930233,
+        "queueMs": null,
+        "generationId": "gen-1786106092-ikXeEcmmsL4no93a8XB3"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1568.4724999999999,
+        "timeToFirstTokenMs": 877.7357499999998,
+        "generationMs": 690.73675,
+        "completionTokens": 44,
+        "timePerOutputTokenMs": 16.06364534883721,
+        "queueMs": null,
+        "generationId": "gen-1786106093-yAVGbfzCKDOA7jePOFaF"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1307.573375,
+        "timeToFirstTokenMs": 994.4733749999978,
+        "generationMs": 313.1000000000022,
+        "completionTokens": 45,
+        "timePerOutputTokenMs": 7.115909090909141,
+        "queueMs": null,
+        "generationId": "gen-1786106095-d2J4fGIdHDIcuOgusSIb"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1336.323209000002,
+        "timeToFirstTokenMs": 1155.0137090000026,
+        "generationMs": 181.3094999999994,
+        "completionTokens": 40,
+        "timePerOutputTokenMs": 4.648961538461522,
+        "queueMs": null,
+        "generationId": "gen-1786106096-oVmslCpwIxXmwcUEQXsk"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1374.8054169999996,
+        "timeToFirstTokenMs": 968.8273330000011,
+        "generationMs": 405.9780839999985,
+        "completionTokens": 43,
+        "timePerOutputTokenMs": 9.666144857142822,
+        "queueMs": null,
+        "generationId": "gen-1786106098-UfkRkhOSVEKHDQNWiMtS"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1127.2864169999993,
+        "timeToFirstTokenMs": 1124.8517500000016,
+        "generationMs": 2.4346669999977166,
+        "completionTokens": 44,
+        "timePerOutputTokenMs": 0.05662016279064457,
+        "queueMs": null,
+        "generationId": "gen-1786106099-677H2symCDhNvdI5ug7t"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 3294.6454999999987,
+        "timeToFirstTokenMs": 2653.7727080000004,
+        "generationMs": 640.8727919999983,
+        "completionTokens": 49,
+        "timePerOutputTokenMs": 13.351516499999965,
+        "queueMs": null,
+        "generationId": "gen-1786106100-KaYqdr1fYSaIt8attGd5"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1396.901833,
+        "timeToFirstTokenMs": 1045.7657500000023,
+        "generationMs": 351.1360829999976,
+        "completionTokens": 37,
+        "timePerOutputTokenMs": 9.753780083333266,
+        "queueMs": null,
+        "generationId": "gen-1786106104-hRMLcBC5Wtntv79Vusvj"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1029.536415999999,
+        "timeToFirstTokenMs": 770.5480409999982,
+        "generationMs": 258.9883750000008,
+        "completionTokens": 40,
+        "timePerOutputTokenMs": 6.640727564102585,
+        "queueMs": null,
+        "generationId": "gen-1786106105-L4qfR6E1tw4mrsO52Q1G"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 981.4163750000007,
+        "timeToFirstTokenMs": 709.5107910000006,
+        "generationMs": 271.9055840000001,
+        "completionTokens": 40,
+        "timePerOutputTokenMs": 6.971938051282054,
+        "queueMs": null,
+        "generationId": "gen-1786106107-s7AOVtdJb7xIEcnOpjkU"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1554.2175419999985,
+        "timeToFirstTokenMs": 1084.6517079999976,
+        "generationMs": 469.5658340000009,
+        "completionTokens": 40,
+        "timePerOutputTokenMs": 12.040149589743613,
+        "queueMs": null,
+        "generationId": "gen-1786106108-i1cOOn3OEqHXBQQJww0s"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1234.4202500000029,
+        "timeToFirstTokenMs": 809.2149579999968,
+        "generationMs": 425.205292000006,
+        "completionTokens": 37,
+        "timePerOutputTokenMs": 11.811258111111279,
+        "queueMs": null,
+        "generationId": "gen-1786106109-X2Rw3r6yH7KVydJ8GZOD"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 3906.561207999999,
+        "timeToFirstTokenMs": 3136.7634160000016,
+        "generationMs": 769.7977919999976,
+        "completionTokens": 38,
+        "timePerOutputTokenMs": 20.805345729729662,
+        "queueMs": null,
+        "generationId": "gen-1786106111-BRY0FLZdHQ3ikqo2Iybj"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1522.0117079999982,
+        "timeToFirstTokenMs": 1171.517832999998,
+        "generationMs": 350.4938750000001,
+        "completionTokens": 43,
+        "timePerOutputTokenMs": 8.345092261904764,
+        "queueMs": null,
+        "generationId": "gen-1786106115-St7Ydg45HNaMzmYmvckY"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1110.7159159999937,
+        "timeToFirstTokenMs": 765.5327909999978,
+        "generationMs": 345.1831249999959,
+        "completionTokens": 42,
+        "timePerOutputTokenMs": 8.419100609755999,
+        "queueMs": null,
+        "generationId": "gen-1786106117-OpBNNNX6yBc16lTiVFuK"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 945.5801250000004,
+        "timeToFirstTokenMs": 763.8035420000015,
+        "generationMs": 181.77658299999894,
+        "completionTokens": 39,
+        "timePerOutputTokenMs": 4.7835942894736565,
+        "queueMs": null,
+        "generationId": "gen-1786106118-mw1phI67R0TCtzL0irHd"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 2509.1046669999996,
+        "timeToFirstTokenMs": 971.5772499999948,
+        "generationMs": 1537.5274170000048,
+        "completionTokens": 50,
+        "timePerOutputTokenMs": 31.378110551020505,
+        "queueMs": null,
+        "generationId": "gen-1786106119-6TSzy9OqwpvcslygkFwP"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1409.175209000001,
+        "timeToFirstTokenMs": 1049.6377090000024,
+        "generationMs": 359.53749999999854,
+        "completionTokens": 44,
+        "timePerOutputTokenMs": 8.361337209302292,
+        "queueMs": null,
+        "generationId": "gen-1786106122-yuw62akYG9PB2Oxs8Bu5"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1232.0708749999976,
+        "timeToFirstTokenMs": 925.5431670000035,
+        "generationMs": 306.52770799999416,
+        "completionTokens": 37,
+        "timePerOutputTokenMs": 8.514658555555393,
+        "queueMs": null,
+        "generationId": "gen-1786106123-daRB9V8MTtOMTqsanxXK"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1593.5744159999958,
+        "timeToFirstTokenMs": 1091.4367500000008,
+        "generationMs": 502.1376659999951,
+        "completionTokens": 53,
+        "timePerOutputTokenMs": 9.656493576922982,
+        "queueMs": null,
+        "generationId": "gen-1786106125-qc82WYTc22bbrpb9oXHK"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1549.0772090000028,
+        "timeToFirstTokenMs": 1108.3885840000003,
+        "generationMs": 440.6886250000025,
+        "completionTokens": 41,
+        "timePerOutputTokenMs": 11.017215625000063,
+        "queueMs": null,
+        "generationId": "gen-1786106126-itOMAUyJiPONXeIPOgNk"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 2112.619209000004,
+        "timeToFirstTokenMs": 1687.2228340000001,
+        "generationMs": 425.3963750000039,
+        "completionTokens": 49,
+        "timePerOutputTokenMs": 8.862424479166748,
+        "queueMs": null,
+        "generationId": "gen-1786106128-Y9eayy8x5t8BRuK7g5Ps"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1226.854459000002,
+        "timeToFirstTokenMs": 736.2385000000068,
+        "generationMs": 490.6159589999952,
+        "completionTokens": 47,
+        "timePerOutputTokenMs": 10.665564326086852,
+        "queueMs": null,
+        "generationId": "gen-1786106130-DapdEN05BhjdSHtRTQwc"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1769.4316249999974,
+        "timeToFirstTokenMs": 1015.0359170000011,
+        "generationMs": 754.3957079999964,
+        "completionTokens": 41,
+        "timePerOutputTokenMs": 18.85989269999991,
+        "queueMs": null,
+        "generationId": "gen-1786106132-4nCzLJkpoDpkCYQ0voyl"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1190.1178750000036,
+        "timeToFirstTokenMs": 863.9930840000015,
+        "generationMs": 326.124791000002,
+        "completionTokens": 38,
+        "timePerOutputTokenMs": 8.814183540540595,
+        "queueMs": null,
+        "generationId": "gen-1786106134-afFzh8T68xJxXc881N2d"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1252.7274170000019,
+        "timeToFirstTokenMs": 955.7766670000055,
+        "generationMs": 296.95074999999633,
+        "completionTokens": 38,
+        "timePerOutputTokenMs": 8.025695945945847,
+        "queueMs": null,
+        "generationId": "gen-1786106135-DaEOoNNtp4A1ySsdE8ud"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1176.8676659999983,
+        "timeToFirstTokenMs": 955.8169160000034,
+        "generationMs": 221.05074999999488,
+        "completionTokens": 37,
+        "timePerOutputTokenMs": 6.1402986111109685,
+        "queueMs": null,
+        "generationId": "gen-1786106136-GbBSUu6tmdfFFKwiUcOj"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1002.976333999999,
+        "timeToFirstTokenMs": 778.4700840000005,
+        "generationMs": 224.50624999999854,
+        "completionTokens": 37,
+        "timePerOutputTokenMs": 6.236284722222182,
+        "queueMs": null,
+        "generationId": "gen-1786106138-27bs6oxrnbiC0rEPmdaT"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1216.8702909999993,
+        "timeToFirstTokenMs": 918.3268329999992,
+        "generationMs": 298.5434580000001,
+        "completionTokens": 47,
+        "timePerOutputTokenMs": 6.490075173913046,
+        "queueMs": null,
+        "generationId": "gen-1786106139-7roUrofM3q9FbFNyyYvz"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 2933.4862920000014,
+        "timeToFirstTokenMs": 2443.7491670000018,
+        "generationMs": 489.73712499999965,
+        "completionTokens": 42,
+        "timePerOutputTokenMs": 11.94480792682926,
+        "queueMs": null,
+        "generationId": "gen-1786106140-yGHFNXBvU32wKR4gHfNp"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1206.422584,
+        "timeToFirstTokenMs": 917.8324170000124,
+        "generationMs": 288.59016699998756,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 6.140216319148672,
+        "queueMs": null,
+        "generationId": "gen-1786106143-PgxAk8bG6r8HLamAQtY2"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1867.119458000001,
+        "timeToFirstTokenMs": 1144.1270000000077,
+        "generationMs": 722.9924579999933,
+        "completionTokens": 49,
+        "timePerOutputTokenMs": 15.062342874999862,
+        "queueMs": null,
+        "generationId": "gen-1786106145-xxRsY3u7O1RM7Kid8D18"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1841.8150000000023,
+        "timeToFirstTokenMs": 1365.340750000003,
+        "generationMs": 476.4742499999993,
+        "completionTokens": 50,
+        "timePerOutputTokenMs": 9.723964285714272,
+        "queueMs": null,
+        "generationId": "gen-1786106147-oWl5nc5ovgFNdbeKpbOb"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 3279.914875000002,
+        "timeToFirstTokenMs": 1621.9236250000104,
+        "generationMs": 1657.9912499999919,
+        "completionTokens": 50,
+        "timePerOutputTokenMs": 33.83655612244881,
+        "queueMs": null,
+        "generationId": "gen-1786106149-afh5BOBfptJxCkZrfIU3"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 968.3424999999988,
+        "timeToFirstTokenMs": 604.7990419999987,
+        "generationMs": 363.5434580000001,
+        "completionTokens": 45,
+        "timePerOutputTokenMs": 8.262351318181821,
+        "queueMs": null,
+        "generationId": "gen-1786106152-KbM4BrjS4OfYuWVqjAgz"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 958.7669170000008,
+        "timeToFirstTokenMs": 635.752250000005,
+        "generationMs": 323.0146669999958,
+        "completionTokens": 42,
+        "timePerOutputTokenMs": 7.87840651219502,
+        "queueMs": null,
+        "generationId": "gen-1786106153-5IZ3vqhYfZ3lq7NqTsXp"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1223.061459000004,
+        "timeToFirstTokenMs": 828.4311670000025,
+        "generationMs": 394.63029200000165,
+        "completionTokens": 37,
+        "timePerOutputTokenMs": 10.961952555555602,
+        "queueMs": null,
+        "generationId": "gen-1786106155-oWvZy0CzMw0dzksBkdsQ"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1180.3205420000013,
+        "timeToFirstTokenMs": 861.4243339999957,
+        "generationMs": 318.8962080000056,
+        "completionTokens": 46,
+        "timePerOutputTokenMs": 7.086582400000124,
+        "queueMs": null,
+        "generationId": "gen-1786106156-ufqRu8vo8xtqED6okZyv"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1053.7127499999915,
+        "timeToFirstTokenMs": 760.8019159999967,
+        "generationMs": 292.9108339999948,
+        "completionTokens": 40,
+        "timePerOutputTokenMs": 7.510534205128072,
+        "queueMs": null,
+        "generationId": "gen-1786106157-AWoQFB2CZ4v0CCaFmsKk"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1133.9569170000032,
+        "timeToFirstTokenMs": 803.9689170000056,
+        "generationMs": 329.98799999999756,
+        "completionTokens": 40,
+        "timePerOutputTokenMs": 8.461230769230706,
+        "queueMs": null,
+        "generationId": "gen-1786106158-FDawzvdR21dRztuUWsMl"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1312.9470839999994,
+        "timeToFirstTokenMs": 928.0253339999908,
+        "generationMs": 384.9217500000086,
+        "completionTokens": 39,
+        "timePerOutputTokenMs": 10.129519736842331,
+        "queueMs": null,
+        "generationId": "gen-1786106160-xx4KKgZJ4K0evuoMk5o9"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 3269.04187500001,
+        "timeToFirstTokenMs": 3158.935042000012,
+        "generationMs": 110.106832999998,
+        "completionTokens": 40,
+        "timePerOutputTokenMs": 2.823252128205077,
+        "queueMs": null,
+        "generationId": "gen-1786106161-k2JBWQiobKccrSLVFUkP"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1966.116458000004,
+        "timeToFirstTokenMs": 1272.887625000003,
+        "generationMs": 693.228833000001,
+        "completionTokens": 43,
+        "timePerOutputTokenMs": 16.50544840476193,
+        "queueMs": null,
+        "generationId": "gen-1786106165-ZLrnrYbnfjHWquNwsHK5"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1968.9978339999943,
+        "timeToFirstTokenMs": 1701.826583999995,
+        "generationMs": 267.1712499999994,
+        "completionTokens": 43,
+        "timePerOutputTokenMs": 6.361220238095224,
+        "queueMs": null,
+        "generationId": "gen-1786106167-dZdG1pWDeVanppfJvEFj"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1580.8821250000037,
+        "timeToFirstTokenMs": 1171.8962500000052,
+        "generationMs": 408.9858749999985,
+        "completionTokens": 49,
+        "timePerOutputTokenMs": 8.520539062499969,
+        "queueMs": null,
+        "generationId": "gen-1786106169-z5IjKaDhzMNGMx7yhIcK"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1194.9840840000106,
+        "timeToFirstTokenMs": 648.9311250000028,
+        "generationMs": 546.0529590000078,
+        "completionTokens": 51,
+        "timePerOutputTokenMs": 10.921059180000157,
+        "queueMs": null,
+        "generationId": "gen-1786106171-4Jr7lEruC5cP36VEmq8f"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1137.616875000007,
+        "timeToFirstTokenMs": 750.5607080000045,
+        "generationMs": 387.05616700000246,
+        "completionTokens": 51,
+        "timePerOutputTokenMs": 7.741123340000049,
+        "queueMs": null,
+        "generationId": "gen-1786106172-P9BkQ2p6fCqJ1qt5VOUk"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1233.1930830000056,
+        "timeToFirstTokenMs": 781.7955420000071,
+        "generationMs": 451.39754099999845,
+        "completionTokens": 43,
+        "timePerOutputTokenMs": 10.747560499999963,
+        "queueMs": null,
+        "generationId": "gen-1786106173-B1rbNr9QnixSrXT23Sax"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1239.989207999999,
+        "timeToFirstTokenMs": 811.9832080000051,
+        "generationMs": 428.00599999999395,
+        "completionTokens": 46,
+        "timePerOutputTokenMs": 9.51124444444431,
+        "queueMs": null,
+        "generationId": "gen-1786106175-GNiXxY92V4Mnd75eOSl7"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1362.3675409999996,
+        "timeToFirstTokenMs": 940.948000000004,
+        "generationMs": 421.41954099999566,
+        "completionTokens": 42,
+        "timePerOutputTokenMs": 10.278525390243797,
+        "queueMs": null,
+        "generationId": "gen-1786106176-PblWzEMm9DP29RZSWc5f"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1300.9319169999944,
+        "timeToFirstTokenMs": 936.6573749999952,
+        "generationMs": 364.2745419999992,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 7.750522170212749,
+        "queueMs": null,
+        "generationId": "gen-1786106178-vFZzYUGfLnkUuw3yjmo3"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1321.406541000004,
+        "timeToFirstTokenMs": 894.1993750000111,
+        "generationMs": 427.20716599999287,
+        "completionTokens": 39,
+        "timePerOutputTokenMs": 11.242293842105076,
+        "queueMs": null,
+        "generationId": "gen-1786106179-MkquOw4Isg9Wmacew0dg"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1200.7937079999974,
+        "timeToFirstTokenMs": 848.6784579999949,
+        "generationMs": 352.11525000000256,
+        "completionTokens": 39,
+        "timePerOutputTokenMs": 9.266190789473752,
+        "queueMs": null,
+        "generationId": "gen-1786106181-MJFBPXjQXIoNZUNjV1wr"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1910.452250000002,
+        "timeToFirstTokenMs": 1444.5662500000035,
+        "generationMs": 465.8859999999986,
+        "completionTokens": 47,
+        "timePerOutputTokenMs": 10.1279565217391,
+        "queueMs": null,
+        "generationId": "gen-1786106182-FBL0uu7x7VnPzZIA0pIY"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1013.0640839999978,
+        "timeToFirstTokenMs": 628.5484589999978,
+        "generationMs": 384.515625,
+        "completionTokens": 43,
+        "timePerOutputTokenMs": 9.155133928571429,
+        "queueMs": null,
+        "generationId": "gen-1786106184-91VVxeZE38jvBvWfSy5A"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1944.949833000006,
+        "timeToFirstTokenMs": 1502.8164580000011,
+        "generationMs": 442.1333750000049,
+        "completionTokens": 47,
+        "timePerOutputTokenMs": 9.611595108695758,
+        "queueMs": null,
+        "generationId": "gen-1786106185-VqQ1szwhp41n8z5zrApP"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1095.3014589999948,
+        "timeToFirstTokenMs": 774.7335420000018,
+        "generationMs": 320.56791699999303,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 6.820593978723256,
+        "queueMs": null,
+        "generationId": "gen-1786106187-lwPxFGW6uuBtwn0DkOZq"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1803.3348750000005,
+        "timeToFirstTokenMs": 1184.1778750000085,
+        "generationMs": 619.156999999992,
+        "completionTokens": 52,
+        "timePerOutputTokenMs": 12.140333333333176,
+        "queueMs": null,
+        "generationId": "gen-1786106189-LGotwux7g0XEGdCSKIaT"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 845.6987920000101,
+        "timeToFirstTokenMs": 533.309792,
+        "generationMs": 312.3890000000101,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 6.646574468085322,
+        "queueMs": null,
+        "generationId": "gen-1786106191-tAlJiIHeyBAcgNtdqQI0"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1120.4572920000064,
+        "timeToFirstTokenMs": 782.3778750000056,
+        "generationMs": 338.07941700000083,
+        "completionTokens": 44,
+        "timePerOutputTokenMs": 7.862312023255833,
+        "queueMs": null,
+        "generationId": "gen-1786106192-d8txkNhq8W1IVuZMX2jf"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1243.193333000003,
+        "timeToFirstTokenMs": 874.6621250000026,
+        "generationMs": 368.53120800000033,
+        "completionTokens": 47,
+        "timePerOutputTokenMs": 8.011548000000007,
+        "queueMs": null,
+        "generationId": "gen-1786106193-FG6ofA7SuXovPQIppZBS"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1516.6695829999953,
+        "timeToFirstTokenMs": 1197.7267079999874,
+        "generationMs": 318.9428750000079,
+        "completionTokens": 46,
+        "timePerOutputTokenMs": 7.087619444444621,
+        "queueMs": null,
+        "generationId": "gen-1786106194-NlkYriCc0qxinLbTqELQ"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 5055.078708000001,
+        "timeToFirstTokenMs": 3809.397708000004,
+        "generationMs": 1245.6809999999969,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 26.50385106382972,
+        "queueMs": null,
+        "generationId": "gen-1786106196-1DM9t4n7JPTn22FIe6hR"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1071.6007919999975,
+        "timeToFirstTokenMs": 682.4067500000092,
+        "generationMs": 389.19404199998826,
+        "completionTokens": 49,
+        "timePerOutputTokenMs": 8.108209208333088,
+        "queueMs": null,
+        "generationId": "gen-1786106201-5Atl7ftgpNcztdyYZvhK"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1166.1303749999934,
+        "timeToFirstTokenMs": 703.769082999992,
+        "generationMs": 462.3612920000014,
+        "completionTokens": 39,
+        "timePerOutputTokenMs": 12.16740242105267,
+        "queueMs": null,
+        "generationId": "gen-1786106202-4JNfbCGBBc9GQhhYXoRI"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1628.3765830000048,
+        "timeToFirstTokenMs": 1070.7877500000031,
+        "generationMs": 557.5888330000016,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 11.863592191489396,
+        "queueMs": null,
+        "generationId": "gen-1786106204-xclhSqe802jsW3c1ug1j"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1436.0812499999884,
+        "timeToFirstTokenMs": 1028.4509580000013,
+        "generationMs": 407.6302919999871,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 8.672984936169938,
+        "queueMs": null,
+        "generationId": "gen-1786106206-cU5XGJtL30xiScqdpzq1"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1547.8737499999988,
+        "timeToFirstTokenMs": 1293.1601249999949,
+        "generationMs": 254.71362500000396,
+        "completionTokens": 50,
+        "timePerOutputTokenMs": 5.19823724489804,
+        "queueMs": null,
+        "generationId": "gen-1786106207-wfyrto5M0HcE93aKpCLe"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1128.099499999982,
+        "timeToFirstTokenMs": 722.5314999999828,
+        "generationMs": 405.5679999999993,
+        "completionTokens": 46,
+        "timePerOutputTokenMs": 9.012622222222207,
+        "queueMs": null,
+        "generationId": "gen-1786106209-v07wiZiHVu0vgRIuFvDU"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 2556.292125000007,
+        "timeToFirstTokenMs": 1767.1317090000084,
+        "generationMs": 789.1604159999988,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 16.790647148936145,
+        "queueMs": null,
+        "generationId": "gen-1786106210-g1yZCJlGICAxVUkd7UzG"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1351.6178749999963,
+        "timeToFirstTokenMs": 991.8516669999808,
+        "generationMs": 359.76620800001547,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 7.6546001702130955,
+        "queueMs": null,
+        "generationId": "gen-1786106213-m5EOZ62oGZIAxq9Qoe7y"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1065.0358750000014,
+        "timeToFirstTokenMs": 788.5029170000053,
+        "generationMs": 276.53295799999614,
+        "completionTokens": 49,
+        "timePerOutputTokenMs": 5.761103291666586,
+        "queueMs": null,
+        "generationId": "gen-1786106215-IifX1uBqGIJIYy21augf"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1339.82491700002,
+        "timeToFirstTokenMs": 906.0597920000146,
+        "generationMs": 433.76512500000536,
+        "completionTokens": 51,
+        "timePerOutputTokenMs": 8.675302500000107,
+        "queueMs": null,
+        "generationId": "gen-1786106216-ntUhI1SFj7T8LebPPBFW"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1272.0439579999947,
+        "timeToFirstTokenMs": 951.1240000000107,
+        "generationMs": 320.91995799998404,
+        "completionTokens": 39,
+        "timePerOutputTokenMs": 8.44526205263116,
+        "queueMs": null,
+        "generationId": "gen-1786106217-zp3NsB3uQXf3ZUrebQUw"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1269.7482909999962,
+        "timeToFirstTokenMs": 789.3831659999851,
+        "generationMs": 480.3651250000112,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 10.220534574468322,
+        "queueMs": null,
+        "generationId": "gen-1786106219-ACiSBXXF8P9Kp6giCJRJ"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1099.574083000014,
+        "timeToFirstTokenMs": 874.5973750000121,
+        "generationMs": 224.97670800000196,
+        "completionTokens": 42,
+        "timePerOutputTokenMs": 5.487236780487852,
+        "queueMs": null,
+        "generationId": "gen-1786106220-W595i3b0oIIgAYRjZvEY"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 714.818499999994,
+        "timeToFirstTokenMs": 468.7190000000119,
+        "generationMs": 246.09949999998207,
+        "completionTokens": 39,
+        "timePerOutputTokenMs": 6.476302631578475,
+        "queueMs": null,
+        "generationId": "gen-1786106222-mH6DhXMmALWh1x6HCG5a"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1078.5191249999916,
+        "timeToFirstTokenMs": 780.8526659999916,
+        "generationMs": 297.66645900000003,
+        "completionTokens": 45,
+        "timePerOutputTokenMs": 6.765146795454546,
+        "queueMs": null,
+        "generationId": "gen-1786106222-AMvsFu96bTeYa5bWWorH"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1165.5250419999938,
+        "timeToFirstTokenMs": 852.9626669999852,
+        "generationMs": 312.5623750000086,
+        "completionTokens": 40,
+        "timePerOutputTokenMs": 8.014419871795093,
+        "queueMs": null,
+        "generationId": "gen-1786106224-ewO6dLt3L3GKa2w8FYux"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 1168.3787500000035,
+        "timeToFirstTokenMs": 791.0759169999801,
+        "generationMs": 377.3028330000234,
+        "completionTokens": 45,
+        "timePerOutputTokenMs": 8.575064386364168,
+        "queueMs": null,
+        "generationId": "gen-1786106225-gVuB80EUNb5gH1uQqgoC"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 983.3899580000143,
+        "timeToFirstTokenMs": 584.1126250000088,
+        "generationMs": 399.27733300000546,
+        "completionTokens": 48,
+        "timePerOutputTokenMs": 8.495262404255435,
+        "queueMs": null,
+        "generationId": "gen-1786106226-0u2NhESRN6o57ca8ZmRk"
+      },
+      {
+        "attempt": 1,
+        "totalMs": 22357.57475,
+        "timeToFirstTokenMs": 10066.979125000013,
+        "generationMs": 12290.595624999987,
+        "completionTokens": 49,
+        "timePerOutputTokenMs": 256.05407552083307,
+        "queueMs": null,
+        "generationId": "gen-1786106227-t16USKV1ccx7NcFZYmPg"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 297607,
+    "completionTokens": 4093,
+    "costUsd": 0.03936404
+  },
+  "assertions": [],
+  "diagnostics": {
+    "winner": "Peru",
+    "won": false,
+    "placement": 2,
+    "survived": true,
+    "finalLandShare": 0.0986800568991808,
+    "finalTroopShare": 0.4183872323902336,
+    "terminationReason": "OpenFront declared a winner",
+    "decisions": 93
+  },
+  "componentCoverage": null,
+  "taskScore": 85.71428571428571,
+  "artifactPath": "artifacts/2eee1781-9853-4ce0-9a49-c467dd0b01ed.json.gz"
+}

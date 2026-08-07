@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "49e3d63c-0c3c-48f0-92b2-570571df62d7",
+  "trialId": "01837c76-145f-491d-bbb2-1e8be25bbe3e",
+  "taskId": "cap-incoming-attack-response-scored-great-lakes-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "z-ai/glm-5.2",
+    "resolved": "z-ai/glm-5.2",
+    "provider": "Baidu",
+    "requestedProvider": "baidu",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T05:29:04.232Z",
+  "completedAt": "2026-08-07T05:29:08.117Z",
+  "hashes": {
+    "checkpoint": 3736637310375356,
+    "final": 3240562090638914
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 2653.0268750000005,
+        "timeToFirstTokenMs": 2017.9814589999999,
+        "generationMs": 635.0454160000004,
+        "completionTokens": 40,
+        "timePerOutputTokenMs": 16.283215794871804,
+        "queueMs": null,
+        "generationId": "gen-1786080545-Ku7HFhGPe7N5UWPtMxBc"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2444,
+    "completionTokens": 40,
+    "costUsd": 0.000939204
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "protected-frontier-held",
+      "observed": 218,
+      "operator": "<=",
+      "threshold": 200,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 2003,
+    "finalTileCount": 152802,
+    "finalTroops": 1249692,
+    "finalTroopCapacityPercent": 46.64190632493333,
+    "initialTileCount": 155072,
+    "initialTroops": 679890,
+    "initialTroopCapacityPercent": 25.16008790274085,
+    "territoryChange": -2270,
+    "terminal": false
+  },
+  "componentCoverage": 0.5,
+  "taskScore": 0,
+  "artifactPath": "artifacts/01837c76-145f-491d-bbb2-1e8be25bbe3e.capability.json.gz"
+}

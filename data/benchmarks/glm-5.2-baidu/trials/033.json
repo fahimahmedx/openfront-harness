@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "dbdeb06c-7f67-4387-b755-77e9a11e5ae0",
+  "trialId": "e0bc3d52-a1ba-40f3-aeb3-4b1a56a4f6e7",
+  "taskId": "cap-naval-target-recognition-scored-strait-of-gibraltar-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "z-ai/glm-5.2",
+    "resolved": "z-ai/glm-5.2",
+    "provider": "Baidu",
+    "requestedProvider": "Baidu",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T08:49:46.175Z",
+  "completedAt": "2026-08-07T08:49:51.959Z",
+  "hashes": {
+    "checkpoint": "11624210940139620",
+    "final": 9151510202852736
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 2792.269,
+        "timeToFirstTokenMs": 2064.3844169999998,
+        "generationMs": 727.884583,
+        "completionTokens": 53,
+        "timePerOutputTokenMs": 13.997780442307693,
+        "queueMs": null,
+        "generationId": "gen-1786092588-OGkkf7al4JF4iFGD7h4Y"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2251,
+    "completionTokens": 53,
+    "costUsd": 0.0010111752
+  },
+  "assertions": [
+    {
+      "id": "captures-target-tile",
+      "observed": 179312,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": true
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 5003,
+    "finalTileCount": 411690,
+    "finalTroops": 2524318,
+    "finalTroopCapacityPercent": 52.86642213181371,
+    "initialTileCount": 314238,
+    "initialTroops": 4009388,
+    "initialTroopCapacityPercent": 98.37926399977185,
+    "territoryChange": 97452,
+    "terminal": false
+  },
+  "componentCoverage": 1,
+  "taskScore": 100,
+  "artifactPath": "artifacts/e0bc3d52-a1ba-40f3-aeb3-4b1a56a4f6e7.capability.json.gz"
+}

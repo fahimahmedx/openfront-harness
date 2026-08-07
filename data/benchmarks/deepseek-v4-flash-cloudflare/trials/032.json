@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "75d8ce77-ea60-4565-b24a-4383325d5ae8",
+  "trialId": "634a9fcc-9cf6-42ef-888d-866094a8688a",
+  "taskId": "cap-naval-target-recognition-scored-strait-of-gibraltar-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "deepseek/deepseek-v4-flash-0731",
+    "resolved": "deepseek/deepseek-v4-flash-0731",
+    "provider": "Cloudflare",
+    "requestedProvider": "Cloudflare",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T13:24:35.848Z",
+  "completedAt": "2026-08-07T13:24:39.891Z",
+  "hashes": {
+    "checkpoint": "11624210940139620",
+    "final": 11517644514921448
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1296.6345410000004,
+        "timeToFirstTokenMs": 578.4324580000002,
+        "generationMs": 718.2020830000001,
+        "completionTokens": 41,
+        "timePerOutputTokenMs": 17.955052075000005,
+        "queueMs": null,
+        "generationId": "gen-1786109078-uRSsg3GDgs98kMQ5iAiI"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2275,
+    "completionTokens": 41,
+    "costUsd": 0.000301308
+  },
+  "assertions": [
+    {
+      "id": "captures-target-tile",
+      "observed": 0,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 5003,
+    "finalTileCount": 314238,
+    "finalTroops": 4055969,
+    "finalTroopCapacityPercent": 99.52223257661534,
+    "initialTileCount": 314238,
+    "initialTroops": 4009388,
+    "initialTroopCapacityPercent": 98.37926399977185,
+    "territoryChange": 0,
+    "terminal": false
+  },
+  "componentCoverage": 0,
+  "taskScore": 0,
+  "artifactPath": "artifacts/634a9fcc-9cf6-42ef-888d-866094a8688a.capability.json.gz"
+}

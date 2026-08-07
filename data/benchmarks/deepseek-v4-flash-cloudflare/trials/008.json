@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "75d8ce77-ea60-4565-b24a-4383325d5ae8",
+  "trialId": "184e3175-110b-43a9-918d-c6f98ade4f2a",
+  "taskId": "cap-neutral-expansion-scored-great-lakes-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "deepseek/deepseek-v4-flash-0731",
+    "resolved": "deepseek/deepseek-v4-flash-0731",
+    "provider": "Cloudflare",
+    "requestedProvider": "Cloudflare",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T13:07:15.207Z",
+  "completedAt": "2026-08-07T13:07:16.948Z",
+  "hashes": {
+    "checkpoint": 408768051800988,
+    "final": 544547431992735
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1354.87675,
+        "timeToFirstTokenMs": 727.060584,
+        "generationMs": 627.8161660000001,
+        "completionTokens": 38,
+        "timePerOutputTokenMs": 16.96800448648649,
+        "queueMs": null,
+        "generationId": "gen-1786108035-pDKGv1qYwWg2tlFfkjkp"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2665,
+    "completionTokens": 38,
+    "costUsd": 0.000355068
+  },
+  "assertions": [
+    {
+      "id": "owns-checkpoint-neutral-tile",
+      "observed": 0,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 353,
+    "finalTileCount": 52,
+    "finalTroops": 115402,
+    "finalTroopCapacityPercent": 95.05088660986864,
+    "initialTileCount": 52,
+    "initialTroops": 105064,
+    "initialTroopCapacityPercent": 86.53599028421725,
+    "territoryChange": 0,
+    "terminal": false
+  },
+  "componentCoverage": 0,
+  "taskScore": 0,
+  "artifactPath": "artifacts/184e3175-110b-43a9-918d-c6f98ade4f2a.capability.json.gz"
+}

@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "75d8ce77-ea60-4565-b24a-4383325d5ae8",
+  "trialId": "bbb1b587-0a8e-4a8b-8f4a-fc28fafe1fe6",
+  "taskId": "cap-incoming-attack-response-scored-great-lakes-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "deepseek/deepseek-v4-flash-0731",
+    "resolved": "deepseek/deepseek-v4-flash-0731",
+    "provider": "Cloudflare",
+    "requestedProvider": "Cloudflare",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T13:43:57.403Z",
+  "completedAt": "2026-08-07T13:44:00.071Z",
+  "hashes": {
+    "checkpoint": 3736637310375356,
+    "final": 2347420079613425
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1552.324042,
+        "timeToFirstTokenMs": 767.878792,
+        "generationMs": 784.44525,
+        "completionTokens": 40,
+        "timePerOutputTokenMs": 20.113980769230768,
+        "queueMs": null,
+        "generationId": "gen-1786110238-EySlVoBOyTluj8DUVqRv"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2515,
+    "completionTokens": 40,
+    "costUsd": 0.0003633
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "protected-frontier-held",
+      "observed": 331,
+      "operator": "<=",
+      "threshold": 200,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 2003,
+    "finalTileCount": 151734,
+    "finalTroops": 1398357,
+    "finalTroopCapacityPercent": 52.40234116920001,
+    "initialTileCount": 155072,
+    "initialTroops": 679890,
+    "initialTroopCapacityPercent": 25.16008790274085,
+    "territoryChange": -3338,
+    "terminal": false
+  },
+  "componentCoverage": 0.5,
+  "taskScore": 0,
+  "artifactPath": "artifacts/bbb1b587-0a8e-4a8b-8f4a-fc28fafe1fe6.capability.json.gz"
+}

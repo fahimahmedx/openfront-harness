@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "75d8ce77-ea60-4565-b24a-4383325d5ae8",
+  "trialId": "ae6ed9ce-d931-4cf5-bd8e-f6dfdee535b8",
+  "taskId": "cap-saturated-capacity-expansion-scored-world-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "deepseek/deepseek-v4-flash-0731",
+    "resolved": "deepseek/deepseek-v4-flash-0731",
+    "provider": "Cloudflare",
+    "requestedProvider": "Cloudflare",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T14:32:42.088Z",
+  "completedAt": "2026-08-07T14:32:43.875Z",
+  "hashes": {
+    "checkpoint": 1433033086910016,
+    "final": 1558841707493609
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1181.310708,
+        "timeToFirstTokenMs": 715.028416,
+        "generationMs": 466.28229199999987,
+        "completionTokens": 38,
+        "timePerOutputTokenMs": 12.602224108108105,
+        "queueMs": null,
+        "generationId": "gen-1786113162-F0Z2YbuFynOvGixLtRe7"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2769,
+    "completionTokens": 38,
+    "costUsd": 0.000369628
+  },
+  "assertions": [
+    {
+      "id": "owns-checkpoint-neutral-tile",
+      "observed": 0,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 1103,
+    "finalTileCount": 52,
+    "finalTroops": 121318,
+    "finalTroopCapacityPercent": 99.92360151241783,
+    "initialTileCount": 52,
+    "initialTroops": 121318,
+    "initialTroopCapacityPercent": 99.92360151241783,
+    "territoryChange": 0,
+    "terminal": false
+  },
+  "componentCoverage": 0,
+  "taskScore": 0,
+  "artifactPath": "artifacts/ae6ed9ce-d931-4cf5-bd8e-f6dfdee535b8.capability.json.gz"
+}

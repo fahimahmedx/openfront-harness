@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "dbdeb06c-7f67-4387-b755-77e9a11e5ae0",
+  "trialId": "9ef9ab50-61b2-4fee-83e7-d72930c118e4",
+  "taskId": "cap-split-front-prioritization-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "z-ai/glm-5.2",
+    "resolved": "z-ai/glm-5.2",
+    "provider": "Baidu",
+    "requestedProvider": "Baidu",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T10:41:13.675Z",
+  "completedAt": "2026-08-07T10:41:18.253Z",
+  "hashes": {
+    "checkpoint": 7085039232693999,
+    "final": 9209616320365674
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 2641.549958,
+        "timeToFirstTokenMs": 1945.9173329999999,
+        "generationMs": 695.6326250000002,
+        "completionTokens": 47,
+        "timePerOutputTokenMs": 15.122448369565221,
+        "queueMs": null,
+        "generationId": "gen-1786099275-6xiRX5aJAhbkKESqKQDv"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2774,
+    "completionTokens": 47,
+    "costUsd": 0.00115206
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "priority-frontier-held",
+      "observed": 699,
+      "operator": "<=",
+      "threshold": 100,
+      "passed": false
+    },
+    {
+      "id": "combined-frontier-loss-limited",
+      "observed": 880,
+      "operator": "<=",
+      "threshold": 300,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 3703,
+    "finalTileCount": 269249,
+    "finalTroops": 2947958,
+    "finalTroopCapacityPercent": 69.7997357369595,
+    "initialTileCount": 273309,
+    "initialTroops": 2393873,
+    "initialTroopCapacityPercent": 56.24521717560135,
+    "territoryChange": -4060,
+    "terminal": false
+  },
+  "componentCoverage": 0.3333333333333333,
+  "taskScore": 0,
+  "artifactPath": "artifacts/9ef9ab50-61b2-4fee-83e7-d72930c118e4.capability.json.gz"
+}

@@ -266,11 +266,25 @@ td small {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
 }
-.model-mark {
-  margin-right: 7px;
-  color: var(--green);
-  font-size: 17px;
-  vertical-align: -1px;
+.model-logo-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.model-logo {
+  width: 19px;
+  height: 19px;
+  margin-right: 8px;
+  fill: currentColor;
+  vertical-align: -5px;
+}
+.model-logo--openai,
+.model-logo--zai {
+  color: var(--ink);
+}
+.model-logo--deepseek {
+  color: #4d6bfe;
 }
 .positive {
   color: var(--green);

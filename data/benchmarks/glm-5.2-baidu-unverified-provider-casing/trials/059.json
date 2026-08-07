@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "49e3d63c-0c3c-48f0-92b2-570571df62d7",
+  "trialId": "d13d1dbc-195b-4f21-b3d6-6d35acc8e2da",
+  "taskId": "cap-naval-target-recognition-scored-strait-of-gibraltar-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "z-ai/glm-5.2",
+    "resolved": "z-ai/glm-5.2",
+    "provider": "Baidu",
+    "requestedProvider": "baidu",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T04:58:20.719Z",
+  "completedAt": "2026-08-07T04:58:26.861Z",
+  "hashes": {
+    "checkpoint": "11624210940139620",
+    "final": 9151510202852736
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 2750.8121250000004,
+        "timeToFirstTokenMs": 2189.0160000000005,
+        "generationMs": 561.7961249999998,
+        "completionTokens": 41,
+        "timePerOutputTokenMs": 14.044903124999996,
+        "queueMs": null,
+        "generationId": "gen-1786078703-0zgL3kjLsqMzDBMQkSD9"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2251,
+    "completionTokens": 41,
+    "costUsd": 0.000945756
+  },
+  "assertions": [
+    {
+      "id": "captures-target-tile",
+      "observed": 179312,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": true
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 5003,
+    "finalTileCount": 411690,
+    "finalTroops": 2524318,
+    "finalTroopCapacityPercent": 52.86642213181371,
+    "initialTileCount": 314238,
+    "initialTroops": 4009388,
+    "initialTroopCapacityPercent": 98.37926399977185,
+    "territoryChange": 97452,
+    "terminal": false
+  },
+  "componentCoverage": 1,
+  "taskScore": 100,
+  "artifactPath": "artifacts/d13d1dbc-195b-4f21-b3d6-6d35acc8e2da.capability.json.gz"
+}

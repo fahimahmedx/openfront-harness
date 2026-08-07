@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "dbdeb06c-7f67-4387-b755-77e9a11e5ae0",
+  "trialId": "7dc07b60-85d5-443a-95c5-ab23af1e40d7",
+  "taskId": "cap-weaker-target-selection-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "z-ai/glm-5.2",
+    "resolved": "z-ai/glm-5.2",
+    "provider": "Baidu",
+    "requestedProvider": "Baidu",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T10:30:28.407Z",
+  "completedAt": "2026-08-07T10:30:32.968Z",
+  "hashes": {
+    "checkpoint": 7085039232693999,
+    "final": 9133023458895224
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 2620.336625,
+        "timeToFirstTokenMs": 1848.067375,
+        "generationMs": 772.2692499999998,
+        "completionTokens": 44,
+        "timePerOutputTokenMs": 17.959749999999996,
+        "queueMs": null,
+        "generationId": "gen-1786098630-vIJ4N3ap39vcnMRH0FNW"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3178,
+    "completionTokens": 44,
+    "costUsd": 0.001161216
+  },
+  "assertions": [
+    {
+      "id": "captures-target-tile",
+      "observed": 1222,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": true
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 3703,
+    "finalTileCount": 296056,
+    "finalTroops": 2954806,
+    "finalTroopCapacityPercent": 66.61291406861204,
+    "initialTileCount": 273309,
+    "initialTroops": 2393873,
+    "initialTroopCapacityPercent": 56.24521717560135,
+    "territoryChange": 22747,
+    "terminal": false
+  },
+  "componentCoverage": 1,
+  "taskScore": 100,
+  "artifactPath": "artifacts/7dc07b60-85d5-443a-95c5-ab23af1e40d7.capability.json.gz"
+}

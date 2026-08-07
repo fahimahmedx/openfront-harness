@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "41cf072f-c069-4d7a-be63-3af8c3890c2a",
+  "trialId": "ede611a8-2ec6-4bf0-b3b6-e49c89e40b73",
+  "taskId": "cap-saturated-capacity-expansion-scored-world-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "openai/gpt-5.6-luna",
+    "resolved": "openai/gpt-5.6-luna",
+    "provider": "OpenAI",
+    "requestedProvider": "OpenAI",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T12:53:13.221Z",
+  "completedAt": "2026-08-07T12:53:15.439Z",
+  "hashes": {
+    "checkpoint": 1433033086910016,
+    "final": 1558841707493609
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1568.6191250000002,
+        "timeToFirstTokenMs": 1020.8437499999999,
+        "generationMs": 547.7753750000002,
+        "completionTokens": 42,
+        "timePerOutputTokenMs": 13.360375000000005,
+        "queueMs": null,
+        "generationId": "gen-1786107193-oeqE4Y0Aq6gXOOV9BFFN"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2860,
+    "completionTokens": 42,
+    "costUsd": 0.00005407
+  },
+  "assertions": [
+    {
+      "id": "owns-checkpoint-neutral-tile",
+      "observed": 0,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 1103,
+    "finalTileCount": 52,
+    "finalTroops": 121318,
+    "finalTroopCapacityPercent": 99.92360151241783,
+    "initialTileCount": 52,
+    "initialTroops": 121318,
+    "initialTroopCapacityPercent": 99.92360151241783,
+    "territoryChange": 0,
+    "terminal": false
+  },
+  "componentCoverage": 0,
+  "taskScore": 0,
+  "artifactPath": "artifacts/ede611a8-2ec6-4bf0-b3b6-e49c89e40b73.capability.json.gz"
+}

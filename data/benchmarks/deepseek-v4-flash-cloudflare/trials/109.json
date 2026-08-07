@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "75d8ce77-ea60-4565-b24a-4383325d5ae8",
+  "trialId": "2f11d7f0-231a-4a7f-939c-070e20f21e67",
+  "taskId": "cap-weaker-target-selection-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "deepseek/deepseek-v4-flash-0731",
+    "resolved": "deepseek/deepseek-v4-flash-0731",
+    "provider": "Cloudflare",
+    "requestedProvider": "Cloudflare",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T14:31:43.711Z",
+  "completedAt": "2026-08-07T14:31:46.907Z",
+  "hashes": {
+    "checkpoint": 7085039232693999,
+    "final": 9089539946928024
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1220.1849579999998,
+        "timeToFirstTokenMs": 565.6830829999999,
+        "generationMs": 654.5018749999999,
+        "completionTokens": 29,
+        "timePerOutputTokenMs": 23.37506696428571,
+        "queueMs": null,
+        "generationId": "gen-1786113105-RFgC2cpsD97AauIbarMd"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3242,
+    "completionTokens": 29,
+    "costUsd": 0.000462
+  },
+  "assertions": [
+    {
+      "id": "captures-target-tile",
+      "observed": 0,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 3703,
+    "finalTileCount": 281723,
+    "finalTroops": 2924340,
+    "finalTroopCapacityPercent": 67.64200905047049,
+    "initialTileCount": 273309,
+    "initialTroops": 2393873,
+    "initialTroopCapacityPercent": 56.24521717560135,
+    "territoryChange": 8414,
+    "terminal": false
+  },
+  "componentCoverage": 0,
+  "taskScore": 0,
+  "artifactPath": "artifacts/2f11d7f0-231a-4a7f-939c-070e20f21e67.capability.json.gz"
+}
