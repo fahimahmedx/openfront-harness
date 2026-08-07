@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "75d8ce77-ea60-4565-b24a-4383325d5ae8",
+  "trialId": "1bfbbd11-1e0d-433a-8f05-af5c85f5a3c9",
+  "taskId": "cap-saturated-capacity-expansion-scored-world-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "deepseek/deepseek-v4-flash-0731",
+    "resolved": "deepseek/deepseek-v4-flash-0731",
+    "provider": "Cloudflare",
+    "requestedProvider": "Cloudflare",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T13:37:19.174Z",
+  "completedAt": "2026-08-07T13:37:21.330Z",
+  "hashes": {
+    "checkpoint": 1433033086910016,
+    "final": 1558841707493609
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1533.3228750000003,
+        "timeToFirstTokenMs": 902.1645,
+        "generationMs": 631.1583750000002,
+        "completionTokens": 21,
+        "timePerOutputTokenMs": 31.55791875000001,
+        "queueMs": null,
+        "generationId": "gen-1786109839-BSEXdr9ibbED4Th9nAHy"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2769,
+    "completionTokens": 21,
+    "costUsd": 0.000364868
+  },
+  "assertions": [
+    {
+      "id": "owns-checkpoint-neutral-tile",
+      "observed": 0,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 1103,
+    "finalTileCount": 52,
+    "finalTroops": 121318,
+    "finalTroopCapacityPercent": 99.92360151241783,
+    "initialTileCount": 52,
+    "initialTroops": 121318,
+    "initialTroopCapacityPercent": 99.92360151241783,
+    "territoryChange": 0,
+    "terminal": false
+  },
+  "componentCoverage": 0,
+  "taskScore": 0,
+  "artifactPath": "artifacts/1bfbbd11-1e0d-433a-8f05-af5c85f5a3c9.capability.json.gz"
+}

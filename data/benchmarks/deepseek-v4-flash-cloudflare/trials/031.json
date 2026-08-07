@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "75d8ce77-ea60-4565-b24a-4383325d5ae8",
+  "trialId": "0ea8130e-cdde-4128-a77b-8b540b061a38",
+  "taskId": "cap-construction-failure-recovery-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "deepseek/deepseek-v4-flash-0731",
+    "resolved": "deepseek/deepseek-v4-flash-0731",
+    "provider": "Cloudflare",
+    "requestedProvider": "Cloudflare",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T13:24:31.264Z",
+  "completedAt": "2026-08-07T13:24:35.506Z",
+  "hashes": {
+    "checkpoint": "10050961651835828",
+    "final": 11623333986949920
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1694.2075419999996,
+        "timeToFirstTokenMs": 582.1748339999999,
+        "generationMs": 1112.0327079999997,
+        "completionTokens": 57,
+        "timePerOutputTokenMs": 19.857726928571424,
+        "queueMs": null,
+        "generationId": "gen-1786109073-WTixVorntJxaxNJKB0J0"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3087,
+    "completionTokens": 57,
+    "costUsd": 0.000419468
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "active-defense-post-in-zone",
+      "observed": false,
+      "operator": "=",
+      "threshold": true,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 4703,
+    "finalTileCount": 526554,
+    "finalTroops": 4203636,
+    "finalTroopCapacityPercent": 67.05745469422398,
+    "initialTileCount": 506680,
+    "initialTroops": 3682885,
+    "initialTroopCapacityPercent": 59.932525053329364,
+    "territoryChange": 19874,
+    "terminal": false
+  },
+  "componentCoverage": 0.5,
+  "taskScore": 0,
+  "artifactPath": "artifacts/0ea8130e-cdde-4128-a77b-8b540b061a38.capability.json.gz"
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "41cf072f-c069-4d7a-be63-3af8c3890c2a",
+  "trialId": "844f626b-8610-4a4f-9939-d49a60c6ac65",
+  "taskId": "cap-saturated-capacity-expansion-scored-world-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "openai/gpt-5.6-luna",
+    "resolved": "openai/gpt-5.6-luna",
+    "provider": "OpenAI",
+    "requestedProvider": "OpenAI",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T11:37:10.936Z",
+  "completedAt": "2026-08-07T11:37:12.801Z",
+  "hashes": {
+    "checkpoint": 1433033086910016,
+    "final": 1494221669685525
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1226.2135830000002,
+        "timeToFirstTokenMs": 955.4749169999999,
+        "generationMs": 270.7386660000002,
+        "completionTokens": 38,
+        "timePerOutputTokenMs": 7.317261243243249,
+        "queueMs": null,
+        "generationId": "gen-1786102631-rfiP0ODx5W2VStEhfVw4"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2860,
+    "completionTokens": 38,
+    "costUsd": 0.000380225
+  },
+  "assertions": [
+    {
+      "id": "owns-checkpoint-neutral-tile",
+      "observed": 24,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": true
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 1103,
+    "finalTileCount": 5006,
+    "finalTroops": 65620,
+    "finalTroopCapacityPercent": 15.200934538353433,
+    "initialTileCount": 52,
+    "initialTroops": 121318,
+    "initialTroopCapacityPercent": 99.92360151241783,
+    "territoryChange": 4954,
+    "terminal": false
+  },
+  "componentCoverage": 1,
+  "taskScore": 100,
+  "artifactPath": "artifacts/844f626b-8610-4a4f-9939-d49a60c6ac65.capability.json.gz"
+}

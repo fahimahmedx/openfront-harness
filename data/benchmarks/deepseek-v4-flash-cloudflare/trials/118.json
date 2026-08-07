@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "75d8ce77-ea60-4565-b24a-4383325d5ae8",
+  "trialId": "453047cd-5def-46c9-a433-94c12a5fea02",
+  "taskId": "cap-weaker-target-selection-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "deepseek/deepseek-v4-flash-0731",
+    "resolved": "deepseek/deepseek-v4-flash-0731",
+    "provider": "Cloudflare",
+    "requestedProvider": "Cloudflare",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T14:35:35.787Z",
+  "completedAt": "2026-08-07T14:35:38.902Z",
+  "hashes": {
+    "checkpoint": 7085039232693999,
+    "final": 9593153719694836
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1193.4162089999998,
+        "timeToFirstTokenMs": 709.037959,
+        "generationMs": 484.37824999999975,
+        "completionTokens": 30,
+        "timePerOutputTokenMs": 16.702698275862062,
+        "queueMs": null,
+        "generationId": "gen-1786113337-XLRBy6hgKVmV61CU2WrB"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3242,
+    "completionTokens": 30,
+    "costUsd": 0.000118216
+  },
+  "assertions": [
+    {
+      "id": "captures-target-tile",
+      "observed": 0,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 3703,
+    "finalTileCount": 273310,
+    "finalTroops": 3239033,
+    "finalTroopCapacityPercent": 76.10252129617096,
+    "initialTileCount": 273309,
+    "initialTroops": 2393873,
+    "initialTroopCapacityPercent": 56.24521717560135,
+    "territoryChange": 1,
+    "terminal": false
+  },
+  "componentCoverage": 0,
+  "taskScore": 0,
+  "artifactPath": "artifacts/453047cd-5def-46c9-a433-94c12a5fea02.capability.json.gz"
+}

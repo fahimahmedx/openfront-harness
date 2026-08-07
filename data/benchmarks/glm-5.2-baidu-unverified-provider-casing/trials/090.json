@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "49e3d63c-0c3c-48f0-92b2-570571df62d7",
+  "trialId": "fdeee009-9a3a-4c02-ab9c-28869c8225f6",
+  "taskId": "cap-split-front-prioritization-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "z-ai/glm-5.2",
+    "resolved": "z-ai/glm-5.2",
+    "provider": "baidu",
+    "requestedProvider": "baidu",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T05:45:43.973Z",
+  "completedAt": "2026-08-07T05:45:52.156Z",
+  "hashes": {
+    "checkpoint": 7085039232693999,
+    "final": 9538827549036244
+  },
+  "attempts": {
+    "failures": [
+      {
+        "attempt": 1,
+        "code": "rate_limited",
+        "message": "OpenRouter 429: {\"error\":{\"message\":\"Provider returned error\",\"code\":429,\"metadata\":{\"raw\":\"z-ai/glm-5.2 is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations\",\"provider_name\":\"Baidu\",\"is_byok\":false,\"provider_error_code\":\"tpm_rate_limit_exceeded\",\"limit_source\":\"upstream_provider_shared_pool\",\"remedy_hint\":\"Retry shortly, add your own provider key (https://openrouter.ai/settings/integrations), ",
+        "rejectedActionIds": [],
+        "httpStatus": 429,
+        "retryDelayMs": 5000
+      },
+      {
+        "attempt": 2,
+        "code": "rate_limited",
+        "message": "OpenRouter 429: {\"error\":{\"message\":\"Provider returned error\",\"code\":429,\"metadata\":{\"raw\":\"z-ai/glm-5.2 is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations\",\"provider_name\":\"Baidu\",\"is_byok\":false,\"provider_error_code\":\"tpm_rate_limit_exceeded\",\"limit_source\":\"upstream_provider_shared_pool\",\"remedy_hint\":\"Retry shortly, add your own provider key (https://openrouter.ai/settings/integrations), ",
+        "rejectedActionIds": [],
+        "httpStatus": 429
+      }
+    ],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 520.5877909999999,
+        "timeToFirstTokenMs": null,
+        "generationMs": null,
+        "completionTokens": 0,
+        "timePerOutputTokenMs": null,
+        "queueMs": null,
+        "generationId": null
+      },
+      {
+        "attempt": 2,
+        "totalMs": 480.3997500000005,
+        "timeToFirstTokenMs": null,
+        "generationMs": null,
+        "completionTokens": 0,
+        "timePerOutputTokenMs": null,
+        "queueMs": null,
+        "generationId": null
+      }
+    ],
+    "fallback": true
+  },
+  "usage": {
+    "promptTokens": 0,
+    "completionTokens": 0,
+    "costUsd": 0
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "priority-frontier-held",
+      "observed": 699,
+      "operator": "<=",
+      "threshold": 100,
+      "passed": false
+    },
+    {
+      "id": "combined-frontier-loss-limited",
+      "observed": 880,
+      "operator": "<=",
+      "threshold": 300,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 3703,
+    "finalTileCount": 262979,
+    "finalTroops": 3145451,
+    "finalTroopCapacityPercent": 75.38373896941346,
+    "initialTileCount": 273309,
+    "initialTroops": 2393873,
+    "initialTroopCapacityPercent": 56.24521717560135,
+    "territoryChange": -10330,
+    "terminal": false
+  },
+  "componentCoverage": 0.3333333333333333,
+  "taskScore": 0,
+  "artifactPath": "artifacts/fdeee009-9a3a-4c02-ab9c-28869c8225f6.capability.json.gz"
+}

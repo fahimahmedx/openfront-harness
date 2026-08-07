@@ -1,0 +1,253 @@
+{
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
+  "fixtureId": "cap-split-front-prioritization-scored-europe-classic-001",
+  "status": "accepted",
+  "sourceArtifact": "data/benchmark-fixture-sources/match-03/8df00795-1d13-4d14-8a85-64e41e45ef1c.json.gz",
+  "cleanRebuilds": [
+    {
+      "state": 7085039232693999,
+      "observation": "48473e2f0a4b719d07d44a4dc99d2fa6424bc1b39efec7b4ebff0be948b3567a",
+      "candidateMenu": "268b6093939cf235f7364c434428c2c582102b6643ef6123ff4a6701df183d76",
+      "tileState": "e0f6edde0b80a199e2f9ce21f0375ef07fa0a844ee0fbb6bfc44e807a82030ee"
+    },
+    {
+      "state": 7085039232693999,
+      "observation": "48473e2f0a4b719d07d44a4dc99d2fa6424bc1b39efec7b4ebff0be948b3567a",
+      "candidateMenu": "268b6093939cf235f7364c434428c2c582102b6643ef6123ff4a6701df183d76",
+      "tileState": "e0f6edde0b80a199e2f9ce21f0375ef07fa0a844ee0fbb6bfc44e807a82030ee"
+    },
+    {
+      "state": 7085039232693999,
+      "observation": "48473e2f0a4b719d07d44a4dc99d2fa6424bc1b39efec7b4ebff0be948b3567a",
+      "candidateMenu": "268b6093939cf235f7364c434428c2c582102b6643ef6123ff4a6701df183d76",
+      "tileState": "e0f6edde0b80a199e2f9ce21f0375ef07fa0a844ee0fbb6bfc44e807a82030ee"
+    },
+    {
+      "state": 7085039232693999,
+      "observation": "48473e2f0a4b719d07d44a4dc99d2fa6424bc1b39efec7b4ebff0be948b3567a",
+      "candidateMenu": "268b6093939cf235f7364c434428c2c582102b6643ef6123ff4a6701df183d76",
+      "tileState": "e0f6edde0b80a199e2f9ce21f0375ef07fa0a844ee0fbb6bfc44e807a82030ee"
+    },
+    {
+      "state": 7085039232693999,
+      "observation": "48473e2f0a4b719d07d44a4dc99d2fa6424bc1b39efec7b4ebff0be948b3567a",
+      "candidateMenu": "268b6093939cf235f7364c434428c2c582102b6643ef6123ff4a6701df183d76",
+      "tileState": "e0f6edde0b80a199e2f9ce21f0375ef07fa0a844ee0fbb6bfc44e807a82030ee"
+    }
+  ],
+  "machineChecks": {
+    "checkpointRequirements": true,
+    "oneActionPerDecision": true,
+    "ordinaryInputOnly": true
+  },
+  "referenceReplays": {
+    "attempted": 5,
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "counter:uaab4mt3:100",
+        "finalHash": 9081791686670040,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "priority-frontier-held",
+            "observed": 43,
+            "operator": "<=",
+            "threshold": 100,
+            "passed": true
+          },
+          {
+            "id": "combined-frontier-loss-limited",
+            "observed": 224,
+            "operator": "<=",
+            "threshold": 300,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:uaab4mt3:100",
+        "finalHash": 9081791686670040,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "priority-frontier-held",
+            "observed": 43,
+            "operator": "<=",
+            "threshold": 100,
+            "passed": true
+          },
+          {
+            "id": "combined-frontier-loss-limited",
+            "observed": 224,
+            "operator": "<=",
+            "threshold": 300,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:uaab4mt3:100",
+        "finalHash": 9081791686670040,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "priority-frontier-held",
+            "observed": 43,
+            "operator": "<=",
+            "threshold": 100,
+            "passed": true
+          },
+          {
+            "id": "combined-frontier-loss-limited",
+            "observed": 224,
+            "operator": "<=",
+            "threshold": 300,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:uaab4mt3:100",
+        "finalHash": 9081791686670040,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "priority-frontier-held",
+            "observed": 43,
+            "operator": "<=",
+            "threshold": 100,
+            "passed": true
+          },
+          {
+            "id": "combined-frontier-loss-limited",
+            "observed": 224,
+            "operator": "<=",
+            "threshold": 300,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:uaab4mt3:100",
+        "finalHash": 9081791686670040,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "priority-frontier-held",
+            "observed": 43,
+            "operator": "<=",
+            "threshold": 100,
+            "passed": true
+          },
+          {
+            "id": "combined-frontier-loss-limited",
+            "observed": 224,
+            "operator": "<=",
+            "threshold": 300,
+            "passed": true
+          }
+        ]
+      }
+    ]
+  },
+  "controls": [
+    {
+      "selectedActionId": "counter:1kvdnt58:100",
+      "finalHash": 9341481388200696,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "priority-frontier-held",
+          "observed": 699,
+          "operator": "<=",
+          "threshold": 100,
+          "passed": false
+        },
+        {
+          "id": "combined-frontier-loss-limited",
+          "observed": 710,
+          "operator": "<=",
+          "threshold": 300,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "hold",
+      "finalHash": 9538827549036244,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "priority-frontier-held",
+          "observed": 699,
+          "operator": "<=",
+          "threshold": 100,
+          "passed": false
+        },
+        {
+          "id": "combined-frontier-loss-limited",
+          "observed": 880,
+          "operator": "<=",
+          "threshold": 300,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
+  ],
+  "review": {
+    "blindedTradeoffIdentifiable": true,
+    "fairAndAttributable": true
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "75d8ce77-ea60-4565-b24a-4383325d5ae8",
+  "trialId": "fa823892-ca7b-469a-bdd0-ba608e5ab313",
+  "taskId": "cap-neutral-expansion-scored-great-lakes-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "deepseek/deepseek-v4-flash-0731",
+    "resolved": "deepseek/deepseek-v4-flash-0731",
+    "provider": "Cloudflare",
+    "requestedProvider": "Cloudflare",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T13:37:55.950Z",
+  "completedAt": "2026-08-07T13:37:57.850Z",
+  "hashes": {
+    "checkpoint": 408768051800988,
+    "final": 503142291168935
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1472.8197499999999,
+        "timeToFirstTokenMs": 731.2513329999999,
+        "generationMs": 741.568417,
+        "completionTokens": 37,
+        "timePerOutputTokenMs": 20.599122694444443,
+        "queueMs": null,
+        "generationId": "gen-1786109876-cXhfl0AEGdgCX0JAwrHD"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2665,
+    "completionTokens": 37,
+    "costUsd": 0.00009674
+  },
+  "assertions": [
+    {
+      "id": "owns-checkpoint-neutral-tile",
+      "observed": 24,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": true
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 353,
+    "finalTileCount": 4347,
+    "finalTroops": 66421,
+    "finalTroopCapacityPercent": 16.41037491261431,
+    "initialTileCount": 52,
+    "initialTroops": 105064,
+    "initialTroopCapacityPercent": 86.53599028421725,
+    "territoryChange": 4295,
+    "terminal": false
+  },
+  "componentCoverage": 1,
+  "taskScore": 100,
+  "artifactPath": "artifacts/fa823892-ca7b-469a-bdd0-ba608e5ab313.capability.json.gz"
+}

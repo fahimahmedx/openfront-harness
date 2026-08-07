@@ -1,0 +1,302 @@
+{
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
+  "fixtureId": "cap-post-expansion-recovery-scored-europe-classic-001",
+  "status": "accepted",
+  "sourceArtifact": "data/benchmark-fixture-sources/match-04/fa57ab71-3468-4945-b7ab-dc0543533298.json.gz",
+  "cleanRebuilds": [
+    {
+      "state": 127918484471915,
+      "observation": "b5a3fdd79f6687e542f929aea477f41f7dd1972d78204fd18b8c795347b5d56f",
+      "candidateMenu": "45b26e4c3774a5f89638a29b27ba7d08e4bfb99968cb3f6d01c1f0323b4be04d",
+      "tileState": "b7fdccb7a6e6fe9bffc0361a94422a756588ec4d11c2d958a3617a8b5c713f28"
+    },
+    {
+      "state": 127918484471915,
+      "observation": "b5a3fdd79f6687e542f929aea477f41f7dd1972d78204fd18b8c795347b5d56f",
+      "candidateMenu": "45b26e4c3774a5f89638a29b27ba7d08e4bfb99968cb3f6d01c1f0323b4be04d",
+      "tileState": "b7fdccb7a6e6fe9bffc0361a94422a756588ec4d11c2d958a3617a8b5c713f28"
+    },
+    {
+      "state": 127918484471915,
+      "observation": "b5a3fdd79f6687e542f929aea477f41f7dd1972d78204fd18b8c795347b5d56f",
+      "candidateMenu": "45b26e4c3774a5f89638a29b27ba7d08e4bfb99968cb3f6d01c1f0323b4be04d",
+      "tileState": "b7fdccb7a6e6fe9bffc0361a94422a756588ec4d11c2d958a3617a8b5c713f28"
+    },
+    {
+      "state": 127918484471915,
+      "observation": "b5a3fdd79f6687e542f929aea477f41f7dd1972d78204fd18b8c795347b5d56f",
+      "candidateMenu": "45b26e4c3774a5f89638a29b27ba7d08e4bfb99968cb3f6d01c1f0323b4be04d",
+      "tileState": "b7fdccb7a6e6fe9bffc0361a94422a756588ec4d11c2d958a3617a8b5c713f28"
+    },
+    {
+      "state": 127918484471915,
+      "observation": "b5a3fdd79f6687e542f929aea477f41f7dd1972d78204fd18b8c795347b5d56f",
+      "candidateMenu": "45b26e4c3774a5f89638a29b27ba7d08e4bfb99968cb3f6d01c1f0323b4be04d",
+      "tileState": "b7fdccb7a6e6fe9bffc0361a94422a756588ec4d11c2d958a3617a8b5c713f28"
+    }
+  ],
+  "machineChecks": {
+    "checkpointRequirements": true,
+    "oneActionPerDecision": true,
+    "ordinaryInputOnly": true
+  },
+  "referenceReplays": {
+    "attempted": 5,
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "hold",
+        "finalHash": 254653798908091,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "capacity-increased",
+            "observed": 47.187338852917925,
+            "operator": ">",
+            "threshold": 19.294935428730952,
+            "passed": true
+          },
+          {
+            "id": "territory-preserved",
+            "observed": 395,
+            "operator": ">=",
+            "threshold": 373,
+            "passed": true
+          },
+          {
+            "id": "recovery-avoids-new-expansion",
+            "observed": 22,
+            "operator": "<=",
+            "threshold": 100,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "hold",
+        "finalHash": 254653798908091,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "capacity-increased",
+            "observed": 47.187338852917925,
+            "operator": ">",
+            "threshold": 19.294935428730952,
+            "passed": true
+          },
+          {
+            "id": "territory-preserved",
+            "observed": 395,
+            "operator": ">=",
+            "threshold": 373,
+            "passed": true
+          },
+          {
+            "id": "recovery-avoids-new-expansion",
+            "observed": 22,
+            "operator": "<=",
+            "threshold": 100,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "hold",
+        "finalHash": 254653798908091,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "capacity-increased",
+            "observed": 47.187338852917925,
+            "operator": ">",
+            "threshold": 19.294935428730952,
+            "passed": true
+          },
+          {
+            "id": "territory-preserved",
+            "observed": 395,
+            "operator": ">=",
+            "threshold": 373,
+            "passed": true
+          },
+          {
+            "id": "recovery-avoids-new-expansion",
+            "observed": 22,
+            "operator": "<=",
+            "threshold": 100,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "hold",
+        "finalHash": 254653798908091,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "capacity-increased",
+            "observed": 47.187338852917925,
+            "operator": ">",
+            "threshold": 19.294935428730952,
+            "passed": true
+          },
+          {
+            "id": "territory-preserved",
+            "observed": 395,
+            "operator": ">=",
+            "threshold": 373,
+            "passed": true
+          },
+          {
+            "id": "recovery-avoids-new-expansion",
+            "observed": 22,
+            "operator": "<=",
+            "threshold": 100,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "hold",
+        "finalHash": 254653798908091,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "capacity-increased",
+            "observed": 47.187338852917925,
+            "operator": ">",
+            "threshold": 19.294935428730952,
+            "passed": true
+          },
+          {
+            "id": "territory-preserved",
+            "observed": 395,
+            "operator": ">=",
+            "threshold": 373,
+            "passed": true
+          },
+          {
+            "id": "recovery-avoids-new-expansion",
+            "observed": 22,
+            "operator": "<=",
+            "threshold": 100,
+            "passed": true
+          }
+        ]
+      }
+    ]
+  },
+  "controls": [
+    {
+      "selectedActionId": "expand:neutral:100",
+      "finalHash": 252183512853959,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "capacity-increased",
+          "observed": 36.44237731366844,
+          "operator": ">",
+          "threshold": 19.294935428730952,
+          "passed": true
+        },
+        {
+          "id": "territory-preserved",
+          "observed": 736,
+          "operator": ">=",
+          "threshold": 373,
+          "passed": true
+        },
+        {
+          "id": "recovery-avoids-new-expansion",
+          "observed": 363,
+          "operator": "<=",
+          "threshold": 100,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "expand:neutral:25",
+      "finalHash": 254197786988169,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "capacity-increased",
+          "observed": 44.217900871503346,
+          "operator": ">",
+          "threshold": 19.294935428730952,
+          "passed": true
+        },
+        {
+          "id": "territory-preserved",
+          "observed": 479,
+          "operator": ">=",
+          "threshold": 373,
+          "passed": true
+        },
+        {
+          "id": "recovery-avoids-new-expansion",
+          "observed": 106,
+          "operator": "<=",
+          "threshold": 100,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
+  ],
+  "review": {
+    "blindedTradeoffIdentifiable": true,
+    "fairAndAttributable": true
+  }
+}

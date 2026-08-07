@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "41cf072f-c069-4d7a-be63-3af8c3890c2a",
+  "trialId": "77794eb1-c103-4bfe-8e2a-e545b7988f5f",
+  "taskId": "cap-construction-failure-recovery-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "openai/gpt-5.6-luna",
+    "resolved": "openai/gpt-5.6-luna",
+    "provider": "OpenAI",
+    "requestedProvider": "OpenAI",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T12:49:25.322Z",
+  "completedAt": "2026-08-07T12:49:29.028Z",
+  "hashes": {
+    "checkpoint": "10050961651835828",
+    "final": 11266520856435276
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1084.7296669999996,
+        "timeToFirstTokenMs": 678.6302499999997,
+        "generationMs": 406.0994169999999,
+        "completionTokens": 46,
+        "timePerOutputTokenMs": 9.024431488888887,
+        "queueMs": null,
+        "generationId": "gen-1786106967-35av83pRvAU21ILd2gJ7"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3367,
+    "completionTokens": 46,
+    "costUsd": 0.00006154
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "active-defense-post-in-zone",
+      "observed": false,
+      "operator": "=",
+      "threshold": true,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 4703,
+    "finalTileCount": 531893,
+    "finalTroops": 3876918,
+    "finalTroopCapacityPercent": 61.5226853281681,
+    "initialTileCount": 506680,
+    "initialTroops": 3682885,
+    "initialTroopCapacityPercent": 59.932525053329364,
+    "territoryChange": 25213,
+    "terminal": false
+  },
+  "componentCoverage": 0.5,
+  "taskScore": 0,
+  "artifactPath": "artifacts/77794eb1-c103-4bfe-8e2a-e545b7988f5f.capability.json.gz"
+}

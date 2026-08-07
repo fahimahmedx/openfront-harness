@@ -1,16 +1,12 @@
 import { z } from "zod";
 import { createParser } from "eventsource-parser";
-import { DEFAULT_OPENROUTER_MODEL, SCENARIO } from "./Scenario";
+import { DEFAULT_OPENROUTER_MODEL } from "./Scenario";
 import {
-  areConflictingLegalActions,
   AgentAttemptFailure,
   AgentAttemptTiming,
   AgentDecision,
   AgentDecisionSchema,
   AgentResult,
-  isGoldSpendingLegalAction,
-  isRepeatableLegalAction,
-  legalActionConflictReason,
   LegalAction,
   Observation,
   TIMER_VICTORY_RULE,
@@ -18,13 +14,15 @@ import {
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
-const PROMPT_VERSION = "agent-v12" as const;
+const PROMPT_VERSION = "agent-v13" as const;
 const REASONING_EFFORT = "none" as const;
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_COMPLETION_TOKENS = 512;
 const MAX_RETRY_CONTENT_CHARS = 2_000;
 const MAX_FAILURE_MESSAGE_CHARS = 500;
 const MAX_STREAM_BUFFER_CHARS = 1_000_000;
+const DEFAULT_RATE_LIMIT_RETRY_DELAY_MS = 5_000;
+const MAX_RATE_LIMIT_RETRY_DELAY_MS = 60_000;
 
 const StreamChunkSchema = z
   .object({
@@ -94,49 +92,59 @@ class TimedRequestError extends Error {
   constructor(
     message: string,
     readonly timing: AgentAttemptTiming,
+    readonly httpStatus?: number,
+    readonly retryAfterMs?: number,
   ) {
     super(message);
     this.name = "TimedRequestError";
   }
 }
 
-const SlotDecisionSchema = z.object({
+class OpenRouterHttpError extends Error {
+  constructor(
+    message: string,
+    readonly httpStatus: number,
+    readonly retryAfterMs: number | null,
+  ) {
+    super(message);
+    this.name = "OpenRouterHttpError";
+  }
+}
+
+function parseRetryAfterMs(value: string | null): number | null {
+  if (value === null) return null;
+  const normalized = value.trim();
+  if (normalized.length === 0) return null;
+  const seconds = Number(normalized);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.ceil(seconds * 1_000);
+  }
+  const retryAt = Date.parse(normalized);
+  if (!Number.isFinite(retryAt)) return null;
+  return Math.max(0, retryAt - Date.now());
+}
+
+function wait(delayMs: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, delayMs));
+}
+
+const ActionDecisionSchema = z.object({
   strategy: z.string().trim().max(160),
-  action1: z.string().min(1).max(160),
-  action2: z.string().min(1).max(160),
+  action: z.string().min(1).max(160),
 });
-
-function unique(values: string[]): string[] {
-  return [...new Set(values)];
-}
-
-function actionIdsForSlot(candidates: LegalAction[], slot: 1 | 2): string[] {
-  return candidates
-    .filter(
-      (candidate) =>
-        (candidate.category !== "hold" || candidate.id === `hold:${slot}`) &&
-        (slot === 1 || !isGoldSpendingLegalAction(candidate)),
-    )
-    .map((candidate) => candidate.id);
-}
 
 export function actionResponseJsonSchema(candidates: LegalAction[]) {
   return {
     type: "object",
     properties: {
       strategy: { type: "string", maxLength: 160 },
-      action1: {
+      action: {
         type: "string",
-        description: "The legal action ID to execute in the first slot.",
-        enum: actionIdsForSlot(candidates, 1),
-      },
-      action2: {
-        type: "string",
-        description: "The legal action ID to execute in the second slot.",
-        enum: actionIdsForSlot(candidates, 2),
+        description: "The one legal action ID to execute this decision.",
+        enum: candidates.map((candidate) => candidate.id),
       },
     },
-    required: ["strategy", "action1", "action2"],
+    required: ["strategy", "action"],
     additionalProperties: false,
   } as const;
 }
@@ -174,7 +182,7 @@ export function validateDecisionContent(
     };
   }
 
-  const parsed = SlotDecisionSchema.safeParse(decoded);
+  const parsed = ActionDecisionSchema.safeParse(decoded);
   if (!parsed.success) {
     return {
       decision: null,
@@ -191,14 +199,10 @@ export function validateDecisionContent(
     };
   }
 
-  const legalIdsBySlot = [
-    new Set(actionIdsForSlot(candidates, 1)),
-    new Set(actionIdsForSlot(candidates, 2)),
-  ];
-  const selectedIds = [parsed.data.action1, parsed.data.action2];
-  const unknownIds = unique(
-    selectedIds.filter((id, slot) => !legalIdsBySlot[slot].has(id)),
-  );
+  const legalIds = new Set(candidates.map((candidate) => candidate.id));
+  const unknownIds = legalIds.has(parsed.data.action)
+    ? []
+    : [parsed.data.action];
   const failures: AttemptFailure[] = [];
   if (unknownIds.length > 0) {
     failures.push({
@@ -207,31 +211,12 @@ export function validateDecisionContent(
       rejectedActionIds: unknownIds,
     });
   }
-  if (unknownIds.length === 0) {
-    const selectedActions = selectedIds.map((id) =>
-      candidates.find((candidate) => candidate.id === id),
-    );
-    const conflictReason =
-      selectedActions[0] === undefined || selectedActions[1] === undefined
-        ? null
-        : legalActionConflictReason(selectedActions[0], selectedActions[1]);
-    if (conflictReason !== null) {
-      failures.push({
-        code: "conflicting_action_ids",
-        message:
-          conflictReason === "multi_front_proactive_offense"
-            ? `OpenRouter selected proactive attacks against multiple opponents: ${selectedIds.join(", ")}`
-            : `OpenRouter selected actions with conflicting same-target postures: ${selectedIds.join(", ")}`,
-        rejectedActionIds: selectedIds,
-      });
-    }
-  }
   return {
     decision:
       failures.length === 0
         ? AgentDecisionSchema.parse({
             strategy: parsed.data.strategy,
-            actions: selectedIds,
+            action: parsed.data.action,
           })
         : null,
     failures,
@@ -243,24 +228,15 @@ export function promptFor(observation: Observation, candidates: LegalAction[]) {
     id: candidate.id,
     category: candidate.category,
     label: candidate.label,
-    maxUses: isRepeatableLegalAction(candidate) ? SCENARIO.actionSlots : 1,
-    allowedSlots: ([1, 2] as const).filter((slot) =>
-      actionIdsForSlot([candidate], slot).includes(candidate.id),
-    ),
   }));
   return [
     "You control the human player in a deterministic OpenFront match.",
-    "Your goal is to win. Choose one legal ID for action1 and one legal ID for action2.",
-    "Both action slots execute simultaneously on the next tick. action2 cannot depend on action1's outcome.",
-    "Do not combine cooperative and hostile actions toward the same opponent in one decision (for example, alliance plus attack, embargo, or alliance break).",
-    "Do not proactively attack two different opponents in one decision. You may counter two different opponents when both are already attacking you.",
-    "Troop actions with maxUses 2 may be selected in both slots. Do not repeat actions with maxUses 1.",
-    "Build and upgrade actions are legal only in action1, so choose at most one gold-spending action per decision. Follow each action's allowedSlots.",
+    "Your goal is to win. Choose exactly one legal action ID.",
     "In free-for-all play, avoid opening proactive wars against multiple comparable opponents. An alliance can keep one front peaceful; neutral nations are more likely to accept early requests before hostilities.",
-    "Diplomacy does not spend troops or gold. A build or upgrade in action1 can be paired with a diplomacy action in action2. Use relation names and allianceRequest history instead of guessing from numeric codes.",
-    "Use hold:1 only for action1 or hold:2 only for action2 when that slot should do nothing. Never invent an ID.",
+    "Diplomacy does not spend troops or gold. Use relation names and allianceRequest history instead of guessing from numeric codes.",
+    "Use hold when no other action should be taken. Never invent an ID.",
     "self.troopCapacityPercent is current troops divided by self.maxTroops; troop growth approaches zero near 100% capacity, so holding at maximum capacity cannot rebuild or increase reserves further.",
-    "Every listed troop action already preserves self.reserveFloorTroops. self.spendableTroops is safe surplus divided across the two slots, so listed troop amounts do not violate the displayed reserve.",
+    "Every listed troop action already preserves self.reserveFloorTroops and fits within the safe action budget.",
     "Neutral expansion captures unowned land and does not require a troop advantage over opponents. Judge attacks on opponents separately using troopsRelativeToSelf.",
     `${TIMER_VICTORY_RULE} instantVictoryTerritoryPercent is the territory threshold for an immediate victory, not a probability.`,
     "Standings are explicit: isTerritoryLeader is true only while self is first; territoryLeadPercent is positive only while leading, and territoryDeficitPercent is positive only while behind. Never describe a deficit as a lead.",
@@ -411,15 +387,29 @@ export class OpenRouterAgent {
         if (error instanceof TimedRequestError) {
           attemptTimings.push(error.timing);
         }
+        const rateLimited =
+          error instanceof TimedRequestError && error.httpStatus === 429;
+        const retryDelayMs =
+          rateLimited && attempt < 2
+            ? Math.min(
+                error.retryAfterMs ?? DEFAULT_RATE_LIMIT_RETRY_DELAY_MS,
+                MAX_RATE_LIMIT_RETRY_DELAY_MS,
+              )
+            : undefined;
         attemptFailures.push({
           attempt,
-          code: "request_error",
+          code: rateLimited ? "rate_limited" : "request_error",
           message: lastError.slice(0, MAX_FAILURE_MESSAGE_CHARS),
           rejectedActionIds: [],
+          ...(error instanceof TimedRequestError && error.httpStatus
+            ? { httpStatus: error.httpStatus }
+            : {}),
+          ...(retryDelayMs === undefined ? {} : { retryDelayMs }),
         });
-        retryFeedback = {
-          error: lastError.slice(0, MAX_FAILURE_MESSAGE_CHARS),
-        };
+        retryFeedback = rateLimited
+          ? undefined
+          : { error: lastError.slice(0, MAX_FAILURE_MESSAGE_CHARS) };
+        if (retryDelayMs !== undefined) await wait(retryDelayMs);
       }
     }
     return {
@@ -475,7 +465,7 @@ export class OpenRouterAgent {
       {
         role: "system",
         content:
-          "Return only the requested JSON. Select one legal action ID for each named slot exactly as provided.",
+          "Return only the requested JSON. Select exactly one legal action ID as provided.",
       },
       { role: "user", content: promptFor(observation, candidates) },
     ];
@@ -488,7 +478,7 @@ export class OpenRouterAgent {
     if (retryFeedback) {
       messages.push({
         role: "user",
-        content: `The previous response failed validation: ${retryFeedback.error}. Return a corrected response with one legal ID in action1 and one legal ID in action2.`,
+        content: `The previous response failed validation: ${retryFeedback.error}. Return a corrected response with exactly one legal ID in action.`,
       });
     }
 
@@ -532,7 +522,11 @@ export class OpenRouterAgent {
       generationId = response.headers.get("X-Generation-Id");
       if (!response.ok) {
         const detail = (await response.text()).slice(0, 500);
-        throw new Error(`OpenRouter ${response.status}: ${detail}`);
+        throw new OpenRouterHttpError(
+          `OpenRouter ${response.status}: ${detail}`,
+          response.status,
+          parseRetryAfterMs(response.headers.get("Retry-After")),
+        );
       }
       if (!response.body) {
         throw new Error("OpenRouter returned an empty response stream");
@@ -653,7 +647,14 @@ export class OpenRouterAgent {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      throw new TimedRequestError(message, timing(performance.now(), false));
+      throw new TimedRequestError(
+        message,
+        timing(performance.now(), false),
+        error instanceof OpenRouterHttpError ? error.httpStatus : undefined,
+        error instanceof OpenRouterHttpError
+          ? (error.retryAfterMs ?? undefined)
+          : undefined,
+      );
     }
   }
 }

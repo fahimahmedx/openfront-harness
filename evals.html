@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Verified OpenFront Bench v0.1 model results across 12 full-match tasks and 10 focused capability tasks."
+    />
+    <meta name="theme-color" content="#eef1e9" />
+    <title>Model evals · OpenFront Harness</title>
+    <link rel="stylesheet" href="/src/client/evals.css" />
+  </head>
+  <body>
+    <!-- Brand marks from @lobehub/icons-static-svg v1.90.0 (MIT). -->
+    <svg class="model-logo-sprite" aria-hidden="true">
+      <symbol id="model-logo-openai" viewBox="0 0 24 24">
+        <path d="M9.205 8.658v-2.26c0-.19.072-.333.238-.428l4.543-2.616c.619-.357 1.356-.523 2.117-.523 2.854 0 4.662 2.212 4.662 4.566 0 .167 0 .357-.024.547l-4.71-2.759a.797.797 0 0 0-.856 0l-5.97 3.473zm10.609 8.8V12.06c0-.333-.143-.57-.429-.737l-5.97-3.473 1.95-1.118a.433.433 0 0 1 .476 0l4.543 2.617c1.309.76 2.189 2.378 2.189 3.948 0 1.808-1.07 3.473-2.76 4.163zM7.802 12.703l-1.95-1.142c-.167-.095-.239-.238-.239-.428V5.899c0-2.545 1.95-4.472 4.591-4.472 1 0 1.927.333 2.712.928L8.23 5.067c-.285.166-.428.404-.428.737v6.898zM12 15.128l-2.795-1.57v-3.33L12 8.658l2.795 1.57v3.33L12 15.128zm1.796 7.23c-1 0-1.927-.332-2.712-.927l4.686-2.712c.285-.166.428-.404.428-.737v-6.898l1.974 1.142c.167.095.238.238.238.428v5.233c0 2.545-1.974 4.472-4.614 4.472zm-5.637-5.303-4.544-2.617c-1.308-.761-2.188-2.378-2.188-3.948A4.482 4.482 0 0 1 4.21 6.327v5.423c0 .333.143.571.428.738l5.947 3.449-1.95 1.118a.432.432 0 0 1-.476 0zm-.262 3.9c-2.688 0-4.662-2.021-4.662-4.519 0-.19.024-.38.047-.57l4.686 2.71c.286.167.571.167.856 0l5.97-3.448v2.26c0 .19-.07.333-.237.428l-4.543 2.616c-.619.357-1.356.523-2.117.523zm5.899 2.83a5.947 5.947 0 0 0 5.827-4.756C22.287 18.339 24 15.84 24 13.296c0-1.665-.713-3.282-1.998-4.448.119-.5.19-.999.19-1.498 0-3.401-2.759-5.947-5.946-5.947-.642 0-1.26.095-1.88.31A5.962 5.962 0 0 0 10.205 0a5.947 5.947 0 0 0-5.827 4.757C1.713 5.447 0 7.945 0 10.49c0 1.666.713 3.283 1.998 4.448-.119.5-.19 1-.19 1.499 0 3.401 2.759 5.946 5.946 5.946.642 0 1.26-.095 1.88-.309a5.96 5.96 0 0 0 4.162 1.713z" />
+      </symbol>
+      <symbol id="model-logo-deepseek" viewBox="0 0 24 24">
+        <path d="M23.748 4.482c-.254-.124-.364.113-.512.234-.051.039-.094.09-.137.136-.372.397-.806.657-1.373.626-.829-.046-1.537.214-2.163.848-.133-.782-.575-1.248-1.247-1.548-.352-.156-.708-.311-.955-.65-.172-.241-.219-.51-.305-.774-.055-.16-.11-.323-.293-.35-.2-.031-.278.136-.356.276-.313.572-.434 1.202-.422 1.84.027 1.436.633 2.58 1.838 3.393.137.093.172.187.129.323-.082.28-.18.552-.266.833-.055.179-.137.217-.329.14a5.526 5.526 0 0 1-1.736-1.18c-.857-.828-1.631-1.742-2.597-2.458a11.365 11.365 0 0 0-.689-.471c-.985-.957.13-1.743.388-1.836.27-.098.093-.432-.779-.428-.872.004-1.67.295-2.687.684a3.055 3.055 0 0 1-.465.137 9.597 9.597 0 0 0-2.883-.102c-1.885.21-3.39 1.102-4.497 2.623C.082 8.606-.231 10.684.152 12.85c.403 2.284 1.569 4.175 3.36 5.653 1.858 1.533 3.997 2.284 6.438 2.14 1.482-.085 3.133-.284 4.994-1.86.47.234.962.327 1.78.397.63.059 1.236-.03 1.705-.128.735-.156.684-.837.419-.961-2.155-1.004-1.682-.595-2.113-.926 1.096-1.296 2.746-2.642 3.392-7.003.05-.347.007-.565 0-.845-.004-.17.035-.237.23-.256a4.173 4.173 0 0 0 1.545-.475c1.396-.763 1.96-2.015 2.093-3.517.02-.23-.004-.467-.247-.588zM11.581 18c-2.089-1.642-3.102-2.183-3.52-2.16-.392.024-.321.471-.235.763.09.288.207.486.371.739.114.167.192.416-.113.603-.673.416-1.842-.14-1.897-.167-1.361-.802-2.5-1.86-3.301-3.307-.774-1.393-1.224-2.887-1.298-4.482-.02-.386.093-.522.477-.592a4.696 4.696 0 0 1 1.529-.039c2.132.312 3.946 1.265 5.468 2.774.868.86 1.525 1.887 2.202 2.891.72 1.066 1.494 2.082 2.48 2.914.348.292.625.514.891.677-.802.09-2.14.11-3.054-.614zm1-6.44a.306.306 0 0 1 .415-.287.302.302 0 0 1 .2.288.306.306 0 0 1-.31.307.303.303 0 0 1-.304-.308zm3.11 1.596c-.2.081-.399.151-.59.16a1.245 1.245 0 0 1-.798-.254c-.274-.23-.47-.358-.552-.758a1.73 1.73 0 0 1 .016-.588c.07-.327-.008-.537-.239-.727-.187-.156-.426-.199-.688-.199a.559.559 0 0 1-.254-.078c-.11-.054-.2-.19-.114-.358.028-.054.16-.186.192-.21.356-.202.767-.136 1.146.016.352.144.618.408 1.001.782.391.451.462.576.685.914.176.265.336.537.445.848.067.195-.019.354-.25.452z" />
+      </symbol>
+      <symbol id="model-logo-zai" viewBox="0 0 24 24">
+        <path d="M12.105 2 9.927 4.953H.653L2.83 2h9.276zm11.149 17.048L21.078 22h-9.242l2.174-2.952h9.244zM24 2 9.264 22H0L14.736 2H24z" />
+      </symbol>
+    </svg>
+    <a class="skip-link" href="#main-content">Skip to results</a>
+
+    <header class="site-header">
+      <nav class="shell" aria-label="Primary navigation">
+        <a class="brand" href="/" aria-label="OpenFront Harness home">
+          OpenFront <span>Harness</span>
+        </a>
+        <div class="nav-links">
+          <a class="active" href="/evals" aria-current="page">Evals</a>
+          <a href="https://fahimahmed.ca/blog/openfront-harness/">Writeup</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="hero shell" aria-labelledby="eval-title">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow"
+              ><i aria-hidden="true"></i>OpenFront Bench v0.1</span
+            >
+            <h1 id="eval-title">
+              Evaluating agents<br /><span>across OpenFront</span>
+            </h1>
+          </div>
+          <p class="lede">
+            We evaluate model experiments in the real OpenFront engine, from
+            complete strategy matches to focused tactical decisions.
+          </p>
+        </div>
+      </section>
+
+      <aside class="release-notice shell" aria-label="Benchmark release status">
+        <strong>Initial research release</strong>
+        <p>
+          OpenFront Bench v0.1 is an initial research release. Task design and
+          scoring are under active review, and these results should not be
+          interpreted as general model rankings. Published v0.1 runs and
+          artifacts remain fixed; improvements will be released as a new
+          benchmark version.
+        </p>
+      </aside>
+
+      <section class="leaderboard shell" aria-labelledby="leaderboard-title">
+        <div class="leaderboard-bar">
+          <div class="view-tabs" aria-label="Results view">
+            <span class="active">Models</span
+            ><a href="#match-results">Matches</a
+            ><a href="#capability-results">Capabilities</a>
+          </div>
+          <span class="verified-label">Verified benchmark</span>
+        </div>
+        <h2 id="leaderboard-title" class="visually-hidden">
+          Model leaderboard
+        </h2>
+        <div class="table-wrap leaderboard-table">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Rank</th>
+                <th scope="col">Model</th>
+                <th scope="col">Match score</th>
+                <th scope="col">Capability score</th>
+                <th scope="col">Win rate</th>
+                <th scope="col">First-try valid</th>
+                <th scope="col">Trials</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="rank">1</span></td>
+                <td>
+                  <svg class="model-logo model-logo--openai" aria-hidden="true">
+                    <use href="#model-logo-openai"></use>
+                  </svg>
+                  <b>GPT-5.6 Luna</b>
+                  <small>Historical run · OpenAI · reasoning none · agent-v12</small>
+                </td>
+                <td>
+                  <strong class="positive">81.5%</strong
+                  ><small>73.1–90.0 CI</small>
+                </td>
+                <td>
+                  <strong class="positive">73.0%</strong
+                  ><small>69.0–77.0 CI</small>
+                </td>
+                <td><strong>47.2%</strong><small>17 / 36 wins</small></td>
+                <td><strong>94.9%</strong><small>0% fallback</small></td>
+                <td><strong>136</strong><small>all valid</small></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section
+        id="match-results"
+        class="results-section shell"
+        aria-labelledby="matches-title"
+      >
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">Suite 01 · Full matches</span>
+            <h2 id="matches-title">Result of each match task</h2>
+          </div>
+          <p>
+            Three deterministic trials per task. Placement is converted to a
+            0–100 score adjusted for lobby size: first place earns 100 and last
+            place earns 0. Trial scores are shown in run order.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <div class="results-toolbar">
+            <span>Showing benchmark results</span>
+            <label class="model-selector">
+              <span>Model</span>
+              <select
+                data-model-selector
+                aria-label="Model results for full matches"
+                aria-controls="match-results-table"
+              >
+                <option value="gpt-5.6-luna">GPT-5.6 Luna</option>
+              </select>
+            </label>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Task</th>
+                <th scope="col">Scenario</th>
+                <th scope="col">Result</th>
+                <th scope="col">Wins</th>
+                <th scope="col">Placements</th>
+                <th scope="col">Trial scores</th>
+              </tr>
+            </thead>
+            <tbody id="match-results-table" data-model-results="gpt-5.6-luna">
+              <tr>
+                <td>
+                  <b>Match 01</b
+                  ><small>Kanto spawn · 3 AI opponents (3 Nations)</small>
+                </td>
+                <td>Japan · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="100">100</meter
+                  ><strong>100.0</strong>
+                </td>
+                <td><span class="pill perfect">3 / 3</span></td>
+                <td>1 · 1 · 1</td>
+                <td>100 · 100 · 100</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 02</b
+                  ><small
+                    >Okinawa spawn · 5 AI opponents (3 Nations + 2
+                    tribes)</small
+                  >
+                </td>
+                <td>Japan · Hard</td>
+                <td>
+                  <meter min="0" max="100" value="60">60</meter
+                  ><strong>60.0</strong>
+                </td>
+                <td><span class="pill weak">0 / 3</span></td>
+                <td>3 · 3 · 3</td>
+                <td>60 · 60 · 60</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 03</b
+                  ><small>France spawn · 5 AI opponents (5 Nations)</small>
+                </td>
+                <td>Europe Classic · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="86.7">86.7</meter
+                  ><strong>86.7</strong>
+                </td>
+                <td><span class="pill">1 / 3</span></td>
+                <td>1 · 2 · 2</td>
+                <td>100 · 80 · 80</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 04</b
+                  ><small
+                    >Iceland spawn · 6 AI opponents (3 Nations + 3
+                    tribes)</small
+                  >
+                </td>
+                <td>Europe Classic · Hard</td>
+                <td>
+                  <meter min="0" max="100" value="66.7">66.7</meter
+                  ><strong>66.7</strong>
+                </td>
+                <td><span class="pill weak">0 / 3</span></td>
+                <td>2 · 3 · 4</td>
+                <td>83.3 · 66.7 · 50</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 05</b
+                  ><small>Korinthal spawn · 3 AI opponents (3 Nations)</small>
+                </td>
+                <td>Four Islands · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="100">100</meter
+                  ><strong>100.0</strong>
+                </td>
+                <td><span class="pill perfect">3 / 3</span></td>
+                <td>1 · 1 · 1</td>
+                <td>100 · 100 · 100</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 06</b
+                  ><small
+                    >Sylvoria spawn · 5 AI opponents (1 Nation + 4
+                    tribes)</small
+                  >
+                </td>
+                <td>Four Islands · Hard</td>
+                <td>
+                  <meter min="0" max="100" value="73.3">73.3</meter
+                  ><strong>73.3</strong>
+                </td>
+                <td><span class="pill weak">0 / 3</span></td>
+                <td>2 · 3 · 2</td>
+                <td>80 · 60 · 80</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 07</b
+                  ><small>Detroit spawn · 5 AI opponents (5 Nations)</small>
+                </td>
+                <td>Great Lakes · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="100">100</meter
+                  ><strong>100.0</strong>
+                </td>
+                <td><span class="pill perfect">3 / 3</span></td>
+                <td>1 · 1 · 1</td>
+                <td>100 · 100 · 100</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 08</b
+                  ><small
+                    >Duluth spawn · 6 AI opponents (3 Nations + 3 tribes)</small
+                  >
+                </td>
+                <td>Great Lakes · Hard</td>
+                <td>
+                  <meter min="0" max="100" value="83.3">83.3</meter
+                  ><strong>83.3</strong>
+                </td>
+                <td><span class="pill">1 / 3</span></td>
+                <td>1 · 3 · 2</td>
+                <td>100 · 66.7 · 83.3</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 09</b
+                  ><small
+                    >Andalusia spawn · 5 AI opponents (3 Nations + 2
+                    tribes)</small
+                  >
+                </td>
+                <td>Strait of Gibraltar · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="86.7">86.7</meter
+                  ><strong>86.7</strong>
+                </td>
+                <td><span class="pill good">2 / 3</span></td>
+                <td>1 · 1 · 3</td>
+                <td>100 · 100 · 60</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 10</b
+                  ><small
+                    >Morocco spawn · 6 AI opponents (1 Nation + 5 tribes)</small
+                  >
+                </td>
+                <td>Strait of Gibraltar · Hard</td>
+                <td>
+                  <meter min="0" max="100" value="100">100</meter
+                  ><strong>100.0</strong>
+                </td>
+                <td><span class="pill perfect">3 / 3</span></td>
+                <td>1 · 1 · 1</td>
+                <td>100 · 100 · 100</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 11</b
+                  ><small>Germany spawn · 7 AI opponents (7 Nations)</small>
+                </td>
+                <td>World · Medium</td>
+                <td>
+                  <meter min="0" max="100" value="81">81</meter
+                  ><strong>81.0</strong>
+                </td>
+                <td><span class="pill">1 / 3</span></td>
+                <td>3 · 1 · 3</td>
+                <td>71.4 · 100 · 71.4</td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Match 12</b
+                  ><small
+                    >New Zealand spawn · 9 AI opponents (5 Nations + 4
+                    tribes)</small
+                  >
+                </td>
+                <td>World · Hard</td>
+                <td>
+                  <meter class="low" min="0" max="100" value="40.7">40.7</meter
+                  ><strong>40.7</strong>
+                </td>
+                <td><span class="pill weak">0 / 3</span></td>
+                <td>6 · 6 · 7</td>
+                <td>44.4 · 44.4 · 33.3</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="leaderboard-note">
+            Nation AIs use the full strategy systems. Tribe bots mainly expand
+            and attack.
+          </p>
+        </div>
+      </section>
+
+      <section
+        id="capability-results"
+        class="results-section capability-section shell"
+        aria-labelledby="capabilities-title"
+      >
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">Suite 02 · Focused capabilities</span>
+            <h2 id="capabilities-title">Result of each capability task</h2>
+          </div>
+          <p>
+            Each checkpoint is attempted 10 times from the same verified game
+            state. Pass@1 is the percentage of trials that met every success
+            condition. For example, 7 successful trials scores 70%.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <div class="results-toolbar">
+            <span>Showing benchmark results</span>
+            <label class="model-selector">
+              <span>Model</span>
+              <select
+                data-model-selector
+                aria-label="Model results for focused capabilities"
+                aria-controls="capability-results-table"
+              >
+                <option value="gpt-5.6-luna">GPT-5.6 Luna</option>
+              </select>
+            </label>
+          </div>
+          <table class="capability-table">
+            <thead>
+              <tr>
+                <th scope="col">Task</th>
+                <th scope="col">Checkpoint</th>
+                <th scope="col">Passed</th>
+                <th scope="col">Pass@1</th>
+                <th scope="col">Component coverage</th>
+                <th scope="col">Result</th>
+              </tr>
+            </thead>
+            <tbody
+              id="capability-results-table"
+              data-model-results="gpt-5.6-luna"
+            >
+              <tr>
+                <td><b>Neutral expansion</b><small>01 · Expansion</small></td>
+                <td>Great Lakes · Hard</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Saturated capacity expansion</b
+                  ><small>02 · Expansion</small>
+                </td>
+                <td>World · Medium</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Post-expansion recovery</b><small>03 · Recovery</small>
+                </td>
+                <td>Europe Classic · Hard</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Weaker target selection</b><small>04 · Targeting</small>
+                </td>
+                <td>Europe Classic · Medium</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td><b>Frontier restraint</b><small>05 · Restraint</small></td>
+                <td>Strait of Gibraltar · Hard</td>
+                <td>0 / 10</td>
+                <td><strong class="negative">0%</strong></td>
+                <td>66.7%</td>
+                <td><span class="status failed">Failed</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Incoming attack response</b><small>06 · Defense</small>
+                </td>
+                <td>Great Lakes · Medium</td>
+                <td>9 / 10</td>
+                <td><strong class="positive">90%</strong></td>
+                <td>95%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td><b>Split-front defense</b><small>07 · Defense</small></td>
+                <td>Four Islands · Hard</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td><b>Losing-attack retreat</b><small>08 · Retreat</small></td>
+                <td>World · Hard</td>
+                <td>4 / 10</td>
+                <td><strong class="negative">40%</strong></td>
+                <td>85%</td>
+                <td><span class="status partial">Partial</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Naval target recognition</b><small>09 · Naval</small>
+                </td>
+                <td>Strait of Gibraltar · Medium</td>
+                <td>10 / 10</td>
+                <td><strong class="positive">100%</strong></td>
+                <td>100%</td>
+                <td><span class="status passed">Passed</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <b>Construction failure recovery</b
+                  ><small>10 · Recovery</small>
+                </td>
+                <td>Europe Classic · Medium</td>
+                <td>0 / 10</td>
+                <td><strong class="negative">0%</strong></td>
+                <td>50%</td>
+                <td><span class="status failed">Failed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section
+        class="method shell"
+        aria-labelledby="method-title"
+        data-model-results="gpt-5.6-luna"
+      >
+        <div>
+          <span class="section-kicker">Run integrity</span>
+          <h2 id="method-title">A complete, reproducible result</h2>
+          <p>
+            OpenFront Bench v0.1 pins the engine, prompt, task manifest,
+            resolver, seeds, and graders. The verifier accepted all 136 trials
+            with no invalid artifacts.
+          </p>
+        </div>
+        <dl>
+          <div>
+            <dt>Completed trials</dt>
+            <dd>136 / 136</dd>
+          </div>
+          <div>
+            <dt>Survival rate</dt>
+            <dd>86.1%</dd>
+          </div>
+          <div>
+            <dt>Mean placement</dt>
+            <dd>2.19</dd>
+          </div>
+          <div>
+            <dt>Total inference cost</dt>
+            <dd>$1.348</dd>
+          </div>
+          <div>
+            <dt>Median latency</dt>
+            <dd>1.10 s</dd>
+          </div>
+          <div>
+            <dt>P95 latency</dt>
+            <dd>2.88 s</dd>
+          </div>
+        </dl>
+        <div class="provenance">
+          <div>
+            <span>Benchmark version</span><code>openfront-bench-v0.1</code>
+          </div>
+          <div>
+            <span>Run ID</span><code>c57f9b3c-8ce7-4cdc-b0f4-ec326611ae83</code>
+          </div>
+          <div>
+            <span>Manifest SHA-256</span
+            ><code
+              >775ace3d60a192130f8aa7358ccaf218da633745e30320eb5d004308ac7bbe38</code
+            >
+          </div>
+          <a href="/evals/report.json" download
+            >Download verified report <span aria-hidden="true">↓</span></a
+          >
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell">
+        <span>OpenFront Harness · Built by Fahim Ahmed</span>
+        <a href="/">Back to the harness ↑</a>
+      </div>
+    </footer>
+    <script>
+      (() => {
+        const results = [
+          {
+            id: "gpt-5.6-luna",
+            label: "GPT-5.6 Luna",
+            logo: "openai",
+            model: "openai/gpt-5.6-luna",
+            provider: "OpenAI",
+            prompt: "agent-v13",
+            reasoning: "none",
+            matchScore: 69.83245149911816,
+            matchCi: [61.327050264550266, 78.43948412698413],
+            capabilityScore: 39,
+            capabilityCi: [34, 44],
+            winRate: 0.16666666666666666,
+            wins: 6,
+            firstTry: 0.9926470588235294,
+            fallback: 0,
+            trials: 136,
+            survival: 0.6944444444444444,
+            placement: 2.7222222222222223,
+            cost: 1.1059165800000001,
+            medianLatencyMs: 1228.9013750000013,
+            p95LatencyMs: 3381.3790457000014,
+            runId: "41cf072f-c069-4d7a-be63-3af8c3890c2a",
+            manifestHash:
+              "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+            reportUrl: "/evals/reports/gpt-5.6-luna-openai.json",
+            matches: [
+              { id: "match-01", mean: 88.8889, wins: 2, placements: [1, 2, 1], values: [100, 66.6667, 100] },
+              { id: "match-02", mean: 46.6667, wins: 0, placements: [3, 4, 4], values: [60, 40, 40] },
+              { id: "match-03", mean: 60, wins: 0, placements: [2, 5, 2], values: [80, 20, 80] },
+              { id: "match-04", mean: 61.1111, wins: 0, placements: [3, 3, 4], values: [66.6667, 66.6667, 50] },
+              { id: "match-05", mean: 66.6667, wins: 0, placements: [2, 2, 2], values: [66.6667, 66.6667, 66.6667] },
+              { id: "match-06", mean: 80, wins: 0, placements: [2, 2, 2], values: [80, 80, 80] },
+              { id: "match-07", mean: 86.6667, wins: 1, placements: [2, 1, 2], values: [80, 100, 80] },
+              { id: "match-08", mean: 66.6667, wins: 0, placements: [4, 3, 2], values: [50, 66.6667, 83.3333] },
+              { id: "match-09", mean: 80, wins: 1, placements: [1, 2, 3], values: [100, 80, 60] },
+              { id: "match-10", mean: 72.2222, wins: 1, placements: [5, 2, 1], values: [33.3333, 83.3333, 100] },
+              { id: "match-11", mean: 80.9524, wins: 1, placements: [4, 1, 2], values: [57.1429, 100, 85.7143] },
+              { id: "match-12", mean: 48.1481, wins: 0, placements: [7, 5, 5], values: [33.3333, 55.5556, 55.5556] },
+            ],
+            capabilities: [
+              ["neutral-expansion", 10, 1, 1],
+              ["saturated-capacity-expansion", 6, 0.6, 0.6],
+              ["post-expansion-recovery", 0, 0, 0.75],
+              ["weaker-target-selection", 9, 0.9, 0.9],
+              ["frontier-restraint", 0, 0, 0.75],
+              ["incoming-attack-response", 4, 0.4, 0.7],
+              ["split-front-prioritization", 10, 1, 1],
+              ["losing-attack-retreat", 0, 0, 0.5],
+              ["naval-target-recognition", 0, 0, 0],
+              ["construction-failure-recovery", 0, 0, 0.5],
+            ],
+          },
+          {
+            id: "deepseek-v4-flash-cloudflare",
+            label: "DeepSeek V4 Flash 0731",
+            logo: "deepseek",
+            model: "deepseek/deepseek-v4-flash-0731",
+            provider: "Cloudflare",
+            prompt: "agent-v13",
+            reasoning: "none",
+            matchScore: 65.04409171075838,
+            matchCi: [58.117063492063494, 71.79023368606703],
+            capabilityScore: 24.000000000000004,
+            capabilityCi: [17, 31],
+            winRate: 0.05555555555555555,
+            wins: 2,
+            firstTry: 0.9705882352941176,
+            fallback: 0.014705882352941176,
+            trials: 136,
+            survival: 0.6944444444444444,
+            placement: 2.9444444444444446,
+            cost: 1.096277448,
+            medianLatencyMs: 1252.6678335000033,
+            p95LatencyMs: 1850.0420315500007,
+            runId: "75d8ce77-ea60-4565-b24a-4383325d5ae8",
+            manifestHash:
+              "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+            reportUrl: "/evals/reports/deepseek-v4-flash-cloudflare.json",
+            matches: [
+              { id: "match-01", mean: 77.7778, wins: 1, placements: [2, 2, 1], values: [66.6667, 66.6667, 100] },
+              { id: "match-02", mean: 46.6667, wins: 0, placements: [3, 4, 4], values: [60, 40, 40] },
+              { id: "match-03", mean: 46.6667, wins: 0, placements: [5, 2, 4], values: [20, 80, 40] },
+              { id: "match-04", mean: 66.6667, wins: 0, placements: [3, 3, 3], values: [66.6667, 66.6667, 66.6667] },
+              { id: "match-05", mean: 66.6667, wins: 0, placements: [2, 2, 2], values: [66.6667, 66.6667, 66.6667] },
+              { id: "match-06", mean: 66.6667, wins: 0, placements: [4, 2, 2], values: [40, 80, 80] },
+              { id: "match-07", mean: 73.3333, wins: 0, placements: [2, 2, 3], values: [80, 80, 60] },
+              { id: "match-08", mean: 55.5556, wins: 0, placements: [4, 3, 4], values: [50, 66.6667, 50] },
+              { id: "match-09", mean: 80, wins: 0, placements: [2, 2, 2], values: [80, 80, 80] },
+              { id: "match-10", mean: 88.8889, wins: 1, placements: [2, 2, 1], values: [83.3333, 83.3333, 100] },
+              { id: "match-11", mean: 52.381, wins: 0, placements: [2, 7, 4], values: [85.7143, 14.2857, 57.1429] },
+              { id: "match-12", mean: 59.2593, wins: 0, placements: [5, 4, 5], values: [55.5556, 66.6667, 55.5556] },
+            ],
+            capabilities: [
+              ["neutral-expansion", 7, 0.7, 0.7],
+              ["saturated-capacity-expansion", 3, 0.3, 0.3],
+              ["post-expansion-recovery", 3, 0.3, 0.825],
+              ["weaker-target-selection", 1, 0.1, 0.1],
+              ["frontier-restraint", 4, 0.4, 0.85],
+              ["incoming-attack-response", 2, 0.2, 0.6],
+              ["split-front-prioritization", 4, 0.4, 0.6],
+              ["losing-attack-retreat", 0, 0, 0.5],
+              ["naval-target-recognition", 0, 0, 0],
+              ["construction-failure-recovery", 0, 0, 0.5],
+            ],
+          },
+          {
+            id: "glm-5.2-baidu",
+            label: "GLM-5.2",
+            logo: "zai",
+            model: "z-ai/glm-5.2",
+            provider: "Baidu",
+            prompt: "agent-v13",
+            reasoning: "none",
+            matchScore: 73.5978835978836,
+            matchCi: [65.17184744268077, 82.3015873015873],
+            capabilityScore: 56.00000000000001,
+            capabilityCi: [49, 63],
+            winRate: 0.3611111111111111,
+            wins: 13,
+            firstTry: 0.9779411764705882,
+            fallback: 0.007352941176470588,
+            trials: 136,
+            survival: 0.7777777777777778,
+            placement: 2.5277777777777777,
+            cost: 3.3493814591999995,
+            medianLatencyMs: 2685.1930835000094,
+            p95LatencyMs: 3504.8726687500152,
+            runId: "dbdeb06c-7f67-4387-b755-77e9a11e5ae0",
+            manifestHash:
+              "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+            reportUrl: "/evals/reports/glm-5.2-baidu.json",
+            matches: [
+              { id: "match-01", mean: 77.7778, wins: 2, placements: [1, 3, 1], values: [100, 33.3333, 100] },
+              { id: "match-02", mean: 53.3333, wins: 0, placements: [3, 3, 4], values: [60, 60, 40] },
+              { id: "match-03", mean: 86.6667, wins: 1, placements: [2, 2, 1], values: [80, 80, 100] },
+              { id: "match-04", mean: 61.1111, wins: 0, placements: [3, 4, 3], values: [66.6667, 50, 66.6667] },
+              { id: "match-05", mean: 77.7778, wins: 2, placements: [3, 1, 1], values: [33.3333, 100, 100] },
+              { id: "match-06", mean: 73.3333, wins: 0, placements: [3, 2, 2], values: [60, 80, 80] },
+              { id: "match-07", mean: 100, wins: 3, placements: [1, 1, 1], values: [100, 100, 100] },
+              { id: "match-08", mean: 83.3333, wins: 1, placements: [1, 3, 2], values: [100, 66.6667, 83.3333] },
+              { id: "match-09", mean: 66.6667, wins: 0, placements: [3, 3, 2], values: [60, 60, 80] },
+              { id: "match-10", mean: 100, wins: 3, placements: [1, 1, 1], values: [100, 100, 100] },
+              { id: "match-11", mean: 47.619, wins: 1, placements: [1, 7, 6], values: [100, 14.2857, 28.5714] },
+              { id: "match-12", mean: 55.5556, wins: 0, placements: [7, 3, 5], values: [33.3333, 77.7778, 55.5556] },
+            ],
+            capabilities: [
+              ["neutral-expansion", 8, 0.8, 0.8],
+              ["saturated-capacity-expansion", 10, 1, 1],
+              ["post-expansion-recovery", 1, 0.1, 0.775],
+              ["weaker-target-selection", 7, 0.7, 0.7],
+              ["frontier-restraint", 3, 0.3, 0.825],
+              ["incoming-attack-response", 9, 0.9, 0.95],
+              ["split-front-prioritization", 9, 0.9, 0.9333333],
+              ["losing-attack-retreat", 4, 0.4, 0.7],
+              ["naval-target-recognition", 5, 0.5, 0.5],
+              ["construction-failure-recovery", 0, 0, 0.5],
+            ],
+          },
+        ];
+        const matchMeta = [
+          ["match-01", "Match 01", "Kanto spawn · 3 AI opponents (3 Nations)", "Japan · Medium"],
+          ["match-02", "Match 02", "Okinawa spawn · 5 AI opponents (3 Nations + 2 tribes)", "Japan · Hard"],
+          ["match-03", "Match 03", "France spawn · 5 AI opponents (5 Nations)", "Europe Classic · Medium"],
+          ["match-04", "Match 04", "Iceland spawn · 6 AI opponents (3 Nations + 3 tribes)", "Europe Classic · Hard"],
+          ["match-05", "Match 05", "Korinthal spawn · 3 AI opponents (3 Nations)", "Four Islands · Medium"],
+          ["match-06", "Match 06", "Sylvoria spawn · 5 AI opponents (1 Nation + 4 tribes)", "Four Islands · Hard"],
+          ["match-07", "Match 07", "Detroit spawn · 5 AI opponents (5 Nations)", "Great Lakes · Medium"],
+          ["match-08", "Match 08", "Duluth spawn · 6 AI opponents (3 Nations + 3 tribes)", "Great Lakes · Hard"],
+          ["match-09", "Match 09", "Andalusia spawn · 5 AI opponents (3 Nations + 2 tribes)", "Strait of Gibraltar · Medium"],
+          ["match-10", "Match 10", "Morocco spawn · 6 AI opponents (1 Nation + 5 tribes)", "Strait of Gibraltar · Hard"],
+          ["match-11", "Match 11", "Germany spawn · 7 AI opponents (7 Nations)", "World · Medium"],
+          ["match-12", "Match 12", "New Zealand spawn · 9 AI opponents (5 Nations + 4 tribes)", "World · Hard"],
+        ];
+        const capabilityMeta = [
+          ["neutral-expansion", "Neutral expansion", "01 · Expansion", "Great Lakes · Hard"],
+          ["saturated-capacity-expansion", "Saturated capacity expansion", "02 · Expansion", "World · Medium"],
+          ["post-expansion-recovery", "Post-expansion recovery", "03 · Recovery", "Europe Classic · Hard"],
+          ["weaker-target-selection", "Weaker target selection", "04 · Targeting", "Europe Classic · Medium"],
+          ["frontier-restraint", "Frontier restraint", "05 · Restraint", "Strait of Gibraltar · Hard"],
+          ["incoming-attack-response", "Incoming attack response", "06 · Defense", "Great Lakes · Medium"],
+          ["split-front-prioritization", "Split-front defense", "07 · Defense", "Four Islands · Hard"],
+          ["losing-attack-retreat", "Losing-attack retreat", "08 · Retreat", "World · Hard"],
+          ["naval-target-recognition", "Naval target recognition", "09 · Naval", "Strait of Gibraltar · Medium"],
+          ["construction-failure-recovery", "Construction failure recovery", "10 · Recovery", "Europe Classic · Medium"],
+        ];
+        const compact = (value) =>
+          Number.isInteger(value) ? String(value) : value.toFixed(1);
+        const modelLogo = (logo) =>
+          `<svg class="model-logo model-logo--${logo}" aria-hidden="true"><use href="#model-logo-${logo}"></use></svg>`;
+        results.sort((left, right) => right.matchScore - left.matchScore);
+        document
+          .querySelectorAll("[data-model-results]")
+          .forEach((element) => element.remove());
+        document
+          .querySelectorAll("[data-model-selector]")
+          .forEach((selector) => (selector.innerHTML = ""));
+        document.querySelector(".leaderboard-table tbody").innerHTML = "";
+        for (const [resultIndex, result] of results.entries()) {
+          for (const selector of document.querySelectorAll("[data-model-selector]")) {
+            selector.insertAdjacentHTML(
+              "beforeend",
+              `<option value="${result.id}">${result.label}</option>`,
+            );
+          }
+          document.querySelector(".leaderboard-table tbody").insertAdjacentHTML(
+            "beforeend",
+            `<tr><td><span class="rank">${resultIndex + 1}</span></td><td>${modelLogo(result.logo)}<b>${result.label}</b><small>${result.model} · ${result.provider} · reasoning ${result.reasoning} · ${result.prompt}</small></td><td><strong class="positive">${result.matchScore.toFixed(1)}%</strong><small>${result.matchCi[0].toFixed(1)}–${result.matchCi[1].toFixed(1)} CI</small></td><td><strong class="positive">${result.capabilityScore.toFixed(1)}%</strong><small>${result.capabilityCi[0].toFixed(1)}–${result.capabilityCi[1].toFixed(1)} CI</small></td><td><strong>${(100 * result.winRate).toFixed(1)}%</strong><small>${result.wins} / 36 wins</small></td><td><strong>${(100 * result.firstTry).toFixed(1)}%</strong><small>${(100 * result.fallback).toFixed(1)}% fallback</small></td><td><strong>${result.trials}</strong><small>all valid</small></td></tr>`,
+          );
+          const matchBody = document.createElement("tbody");
+          matchBody.dataset.modelResults = result.id;
+          matchBody.hidden = resultIndex !== 0;
+          matchBody.innerHTML = matchMeta
+            .map(([id, title, detail, scenario]) => {
+              const item = result.matches.find((candidate) => candidate.id === id);
+              const pill = item.wins === 3 ? "perfect" : item.wins === 2 ? "good" : item.wins === 0 ? "weak" : "";
+              return `<tr><td><b>${title}</b><small>${detail}</small></td><td>${scenario}</td><td><meter class="${item.mean < 50 ? "low" : ""}" min="0" max="100" value="${item.mean}">${item.mean}</meter><strong>${item.mean.toFixed(1)}</strong></td><td><span class="pill ${pill}">${item.wins} / 3</span></td><td>${item.placements.join(" · ")}</td><td>${item.values.map(compact).join(" · ")}</td></tr>`;
+            })
+            .join("");
+          document.querySelector("#match-results table").append(matchBody);
+          const capabilityBody = document.createElement("tbody");
+          capabilityBody.dataset.modelResults = result.id;
+          capabilityBody.hidden = resultIndex !== 0;
+          capabilityBody.innerHTML = capabilityMeta
+            .map(([id, title, category, scenario]) => {
+              const item = result.capabilities.find((candidate) => candidate[0] === id);
+              const rate = 100 * item[2];
+              const status = rate >= 50 ? "Passed" : rate > 0 ? "Partial" : "Failed";
+              return `<tr><td><b>${title}</b><small>${category}</small></td><td>${scenario}</td><td>${item[1]} / 10</td><td><strong class="${rate >= 50 ? "positive" : "negative"}">${compact(rate)}%</strong></td><td>${compact(100 * item[3])}%</td><td><span class="status ${status.toLowerCase()}">${status}</span></td></tr>`;
+            })
+            .join("");
+          document.querySelector("#capability-results table").append(capabilityBody);
+          const panel = document.createElement("section");
+          panel.className = "method shell";
+          panel.dataset.modelResults = result.id;
+          panel.hidden = resultIndex !== 0;
+          panel.innerHTML = `<div><span class="section-kicker">Run integrity</span><h2>A complete, reproducible result</h2><p>${result.label} completed the frozen OpenFront Bench v0.1 runner and passed independent verification with all 136 trials valid.</p></div><dl><div><dt>Completed trials</dt><dd>136 / 136</dd></div><div><dt>Survival rate</dt><dd>${(100 * result.survival).toFixed(1)}%</dd></div><div><dt>Mean placement</dt><dd>${result.placement.toFixed(2)}</dd></div><div><dt>Total inference cost</dt><dd>$${result.cost.toFixed(3)}</dd></div><div><dt>Median latency</dt><dd>${(result.medianLatencyMs / 1000).toFixed(2)} s</dd></div><div><dt>P95 latency</dt><dd>${(result.p95LatencyMs / 1000).toFixed(2)} s</dd></div></dl><div class="provenance"><div><span>Benchmark version</span><code>openfront-bench-v0.1</code></div><div><span>Run ID</span><code>${result.runId}</code></div><div><span>Manifest SHA-256</span><code>${result.manifestHash}</code></div></div>`;
+          document.querySelector("main").append(panel);
+        }
+      })();
+    </script>
+    <script type="module" src="/src/client/evals.ts"></script>
+  </body>
+</html>

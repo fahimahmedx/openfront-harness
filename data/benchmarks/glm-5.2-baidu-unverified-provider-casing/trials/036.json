@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "49e3d63c-0c3c-48f0-92b2-570571df62d7",
+  "trialId": "4eac0d6f-ba89-4e81-8b7f-0445610a2c40",
+  "taskId": "cap-post-expansion-recovery-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "z-ai/glm-5.2",
+    "resolved": "z-ai/glm-5.2",
+    "provider": "Baidu",
+    "requestedProvider": "baidu",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T04:37:15.655Z",
+  "completedAt": "2026-08-07T04:37:18.776Z",
+  "hashes": {
+    "checkpoint": 127918484471915,
+    "final": 254653798908091
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 2681.081292,
+        "timeToFirstTokenMs": 2197.0631249999997,
+        "generationMs": 484.0181670000002,
+        "completionTokens": 38,
+        "timePerOutputTokenMs": 13.081572081081086,
+        "queueMs": null,
+        "generationId": "gen-1786077436-6C9Mx12Am6Sy5h5Oa7uC"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2397,
+    "completionTokens": 38,
+    "costUsd": 0.000962724
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "capacity-increased",
+      "observed": 47.187338852917925,
+      "operator": ">",
+      "threshold": 19.294935428730952,
+      "passed": true
+    },
+    {
+      "id": "territory-preserved",
+      "observed": 395,
+      "operator": ">=",
+      "threshold": 373,
+      "passed": true
+    },
+    {
+      "id": "recovery-avoids-new-expansion",
+      "observed": 22,
+      "operator": "<=",
+      "threshold": 100,
+      "passed": true
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 145,
+    "finalTileCount": 395,
+    "finalTroops": 81292,
+    "finalTroopCapacityPercent": 47.187338852917925,
+    "initialTileCount": 373,
+    "initialTroops": 32769,
+    "initialTroopCapacityPercent": 19.294935428730952,
+    "territoryChange": 22,
+    "terminal": false
+  },
+  "componentCoverage": 1,
+  "taskScore": 100,
+  "artifactPath": "artifacts/4eac0d6f-ba89-4e81-8b7f-0445610a2c40.capability.json.gz"
+}

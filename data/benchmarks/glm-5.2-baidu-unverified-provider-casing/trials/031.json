@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "49e3d63c-0c3c-48f0-92b2-570571df62d7",
+  "trialId": "8a5e5ef8-7b7b-4626-8da2-17c6defaa91e",
+  "taskId": "cap-naval-target-recognition-scored-strait-of-gibraltar-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "z-ai/glm-5.2",
+    "resolved": "z-ai/glm-5.2",
+    "provider": "Baidu",
+    "requestedProvider": "baidu",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T04:33:40.824Z",
+  "completedAt": "2026-08-07T04:33:47.059Z",
+  "hashes": {
+    "checkpoint": "11624210940139620",
+    "final": 9151510202852736
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 2915.552042,
+        "timeToFirstTokenMs": 1908.848042,
+        "generationMs": 1006.7039999999997,
+        "completionTokens": 46,
+        "timePerOutputTokenMs": 22.371199999999995,
+        "queueMs": null,
+        "generationId": "gen-1786077223-BU6Uisd1u69OL5lKlik9"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 2251,
+    "completionTokens": 46,
+    "costUsd": 0.0008991192
+  },
+  "assertions": [
+    {
+      "id": "captures-target-tile",
+      "observed": 179312,
+      "operator": ">=",
+      "threshold": 1,
+      "passed": true
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 5003,
+    "finalTileCount": 411690,
+    "finalTroops": 2524318,
+    "finalTroopCapacityPercent": 52.86642213181371,
+    "initialTileCount": 314238,
+    "initialTroops": 4009388,
+    "initialTroopCapacityPercent": 98.37926399977185,
+    "territoryChange": 97452,
+    "terminal": false
+  },
+  "componentCoverage": 1,
+  "taskScore": 100,
+  "artifactPath": "artifacts/8a5e5ef8-7b7b-4626-8da2-17c6defaa91e.capability.json.gz"
+}

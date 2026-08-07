@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "41cf072f-c069-4d7a-be63-3af8c3890c2a",
+  "trialId": "b3e12099-bffa-4dc4-bcb4-ea0117c7ff21",
+  "taskId": "cap-construction-failure-recovery-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "openai/gpt-5.6-luna",
+    "resolved": "openai/gpt-5.6-luna",
+    "provider": "OpenAI",
+    "requestedProvider": "OpenAI",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T11:42:11.051Z",
+  "completedAt": "2026-08-07T11:42:15.074Z",
+  "hashes": {
+    "checkpoint": "10050961651835828",
+    "final": 10694620607358246
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 1502.9123329999998,
+        "timeToFirstTokenMs": 989.775541,
+        "generationMs": 513.1367919999998,
+        "completionTokens": 51,
+        "timePerOutputTokenMs": 10.262735839999996,
+        "queueMs": null,
+        "generationId": "gen-1786102933-eOPqKUW9TsdrQoKiupfQ"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3367,
+    "completionTokens": 51,
+    "costUsd": 0.00006454
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "active-defense-post-in-zone",
+      "observed": false,
+      "operator": "=",
+      "threshold": true,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 4703,
+    "finalTileCount": 549510,
+    "finalTroops": 3554055,
+    "finalTroopCapacityPercent": 55.45205798428749,
+    "initialTileCount": 506680,
+    "initialTroops": 3682885,
+    "initialTroopCapacityPercent": 59.932525053329364,
+    "territoryChange": 42830,
+    "terminal": false
+  },
+  "componentCoverage": 0.5,
+  "taskScore": 0,
+  "artifactPath": "artifacts/b3e12099-bffa-4dc4-bcb4-ea0117c7ff21.capability.json.gz"
+}

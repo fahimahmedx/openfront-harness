@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
+  "fixtureId": "cap-naval-target-recognition-scored-strait-of-gibraltar-001",
+  "status": "accepted",
+  "sourceArtifact": "data/benchmark-fixture-sources/match-09/5c00ed89-cd4d-4ecf-894b-9d74ef6dd9ea.json.gz",
+  "cleanRebuilds": [
+    {
+      "state": "11624210940139620",
+      "observation": "34bdefda621300be9d392c93e85fcc1b853714f52fa94fabae7d088e6c2014cf",
+      "candidateMenu": "cbccb3a6b023ca78ba2e2022a8c05e8522ee152bfecfe296cf2e954fb5892cff",
+      "tileState": "3ea76c02e4e8e54af1c58aaecddba2cb97dad18a91dcd2be254c85b13c623e55"
+    },
+    {
+      "state": "11624210940139620",
+      "observation": "34bdefda621300be9d392c93e85fcc1b853714f52fa94fabae7d088e6c2014cf",
+      "candidateMenu": "cbccb3a6b023ca78ba2e2022a8c05e8522ee152bfecfe296cf2e954fb5892cff",
+      "tileState": "3ea76c02e4e8e54af1c58aaecddba2cb97dad18a91dcd2be254c85b13c623e55"
+    },
+    {
+      "state": "11624210940139620",
+      "observation": "34bdefda621300be9d392c93e85fcc1b853714f52fa94fabae7d088e6c2014cf",
+      "candidateMenu": "cbccb3a6b023ca78ba2e2022a8c05e8522ee152bfecfe296cf2e954fb5892cff",
+      "tileState": "3ea76c02e4e8e54af1c58aaecddba2cb97dad18a91dcd2be254c85b13c623e55"
+    },
+    {
+      "state": "11624210940139620",
+      "observation": "34bdefda621300be9d392c93e85fcc1b853714f52fa94fabae7d088e6c2014cf",
+      "candidateMenu": "cbccb3a6b023ca78ba2e2022a8c05e8522ee152bfecfe296cf2e954fb5892cff",
+      "tileState": "3ea76c02e4e8e54af1c58aaecddba2cb97dad18a91dcd2be254c85b13c623e55"
+    },
+    {
+      "state": "11624210940139620",
+      "observation": "34bdefda621300be9d392c93e85fcc1b853714f52fa94fabae7d088e6c2014cf",
+      "candidateMenu": "cbccb3a6b023ca78ba2e2022a8c05e8522ee152bfecfe296cf2e954fb5892cff",
+      "tileState": "3ea76c02e4e8e54af1c58aaecddba2cb97dad18a91dcd2be254c85b13c623e55"
+    }
+  ],
+  "machineChecks": {
+    "checkpointRequirements": true,
+    "oneActionPerDecision": true,
+    "ordinaryInputOnly": true
+  },
+  "referenceReplays": {
+    "attempted": 5,
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "boat:a8blddjf:100",
+        "finalHash": 9151510202852736,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 179312,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "boat:a8blddjf:100",
+        "finalHash": 9151510202852736,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 179312,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "boat:a8blddjf:100",
+        "finalHash": 9151510202852736,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 179312,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "boat:a8blddjf:100",
+        "finalHash": 9151510202852736,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 179312,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "boat:a8blddjf:100",
+        "finalHash": 9151510202852736,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 179312,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      }
+    ]
+  },
+  "controls": [
+    {
+      "selectedActionId": "hold",
+      "finalHash": 12687845576534420,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "captures-target-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "build:City:1854597",
+      "finalHash": 12880408139664108,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "captures-target-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
+  ],
+  "review": {
+    "blindedTradeoffIdentifiable": true,
+    "fairAndAttributable": true
+  }
+}

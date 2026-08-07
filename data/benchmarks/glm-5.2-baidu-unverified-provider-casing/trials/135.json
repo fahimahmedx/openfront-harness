@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "benchmark-trial-v1",
+  "benchmarkVersion": "openfront-bench-v0.1",
+  "manifestHash": "f5b931094973115a036ee8f7bea5c92d2012d62b7d77f99e97c4facd0ee66a60",
+  "runId": "49e3d63c-0c3c-48f0-92b2-570571df62d7",
+  "trialId": "d2dab862-5c43-4328-969d-597a9c17fe43",
+  "taskId": "cap-construction-failure-recovery-scored-europe-classic-001",
+  "suite": "capability",
+  "split": "scored",
+  "status": "valid",
+  "invalidReason": null,
+  "model": {
+    "requested": "z-ai/glm-5.2",
+    "resolved": "z-ai/glm-5.2",
+    "provider": "Baidu",
+    "requestedProvider": "baidu",
+    "promptVersion": "agent-v13",
+    "reasoningEffort": "none"
+  },
+  "startedAt": "2026-08-07T07:55:20.823Z",
+  "completedAt": "2026-08-07T07:55:25.634Z",
+  "hashes": {
+    "checkpoint": "10050961651835828",
+    "final": 10694620607358246
+  },
+  "attempts": {
+    "failures": [],
+    "timings": [
+      {
+        "attempt": 1,
+        "totalMs": 2205.2377919999994,
+        "timeToFirstTokenMs": 1617.2408329999994,
+        "generationMs": 587.9969590000001,
+        "completionTokens": 41,
+        "timePerOutputTokenMs": 14.699923975,
+        "queueMs": null,
+        "generationId": "gen-1786089323-df3bfTyoCodgSWMu44Qa"
+      }
+    ],
+    "fallback": false
+  },
+  "usage": {
+    "promptTokens": 3048,
+    "completionTokens": 41,
+    "costUsd": 0.0012558
+  },
+  "assertions": [
+    {
+      "id": "player-alive",
+      "observed": true,
+      "operator": "=",
+      "threshold": true,
+      "passed": true
+    },
+    {
+      "id": "active-defense-post-in-zone",
+      "observed": false,
+      "operator": "=",
+      "threshold": true,
+      "passed": false
+    }
+  ],
+  "diagnostics": {
+    "finalTick": 4703,
+    "finalTileCount": 549510,
+    "finalTroops": 3554055,
+    "finalTroopCapacityPercent": 55.45205798428749,
+    "initialTileCount": 506680,
+    "initialTroops": 3682885,
+    "initialTroopCapacityPercent": 59.932525053329364,
+    "territoryChange": 42830,
+    "terminal": false
+  },
+  "componentCoverage": 0.5,
+  "taskScore": 0,
+  "artifactPath": "artifacts/d2dab862-5c43-4328-969d-597a9c17fe43.capability.json.gz"
+}

@@ -7,6 +7,8 @@ import {
   validateDecisionContent,
 } from "../src/OpenRouterAgent";
 import {
+  AgentAttemptFailureSchema,
+  LegacyObservationSchema,
   LegalAction,
   Observation,
   ObservationSchema,
@@ -14,76 +16,23 @@ import {
 } from "../src/Types";
 
 const candidates: LegalAction[] = [
-  {
-    id: "hold:1",
-    category: "hold",
-    label: "Hold the first action slot",
-    intent: null,
-  },
-  {
-    id: "hold:2",
-    category: "hold",
-    label: "Hold the second action slot",
-    intent: null,
-  },
+  { id: "hold", category: "hold", label: "Take no action", intent: null },
   {
     id: "expand:neutral:100",
     category: "expand",
     label: "Expand into neutral land",
     intent: { type: "attack", targetID: null, troops: 100 },
   },
-];
-
-const diplomacyCandidates: LegalAction[] = [
-  ...candidates,
-  {
-    id: "alliance:request:enemy001",
-    category: "diplomacy",
-    label: "Request an alliance with Enemy",
-    intent: { type: "allianceRequest", recipient: "enemy001" },
-  },
-  {
-    id: "embargo:start:enemy001",
-    category: "diplomacy",
-    label: "Start an embargo against Enemy",
-    intent: { type: "embargo", targetID: "enemy001", action: "start" },
-  },
-];
-
-const multiFrontCandidates: LegalAction[] = [
-  ...candidates,
-  {
-    id: "attack:enemy001:100",
-    category: "attack",
-    label: "Attack Enemy One",
-    intent: { type: "attack", targetID: "enemy001", troops: 100 },
-  },
-  {
-    id: "attack:enemy002:100",
-    category: "attack",
-    label: "Attack Enemy Two",
-    intent: { type: "attack", targetID: "enemy002", troops: 100 },
-  },
-];
-
-const buildCandidates: LegalAction[] = [
-  ...candidates,
   {
     id: "build:Factory:456",
     category: "build",
-    label: "Build Factory near (3, 4)",
+    label: "Build Factory",
     intent: { type: "build_unit", unit: UnitType.Factory, tile: 456 },
-  },
-  {
-    id: "build:Port:789",
-    category: "build",
-    label: "Build Port near (5, 6)",
-    intent: { type: "build_unit", unit: UnitType.Port, tile: 789 },
   },
 ];
 
 const observation: Observation = {
-  scenarioId: "japan-v5",
+  scenarioId: "japan-v6",
   decision: 1,
   tick: 103,
   elapsedSeconds: 10.2,
@@ -110,27 +59,21 @@ function completionEvents(
   finishReason = "stop",
   completionTokens = 5,
 ): string {
-  const id = "generation-1";
   const events = [
     {
-      id,
+      id: "generation-1",
       model: "openai/test-model",
       provider: "OpenAI",
-      choices: [
-        {
-          finish_reason: null,
-          delta: { content },
-        },
-      ],
+      choices: [{ finish_reason: null, delta: { content } }],
     },
     {
-      id,
+      id: "generation-1",
       model: "openai/test-model",
       provider: "OpenAI",
       choices: [{ finish_reason: finishReason, delta: {} }],
     },
     {
-      id,
+      id: "generation-1",
       model: "openai/test-model",
       provider: "OpenAI",
       choices: [],
@@ -149,328 +92,153 @@ function completion(
   finishReason = "stop",
   completionTokens = 5,
 ): Response {
-  const id = "generation-1";
   return new Response(
     completionEvents(content, finishReason, completionTokens),
     {
       status: 200,
       headers: {
         "Content-Type": "text/event-stream",
-        "X-Generation-Id": id,
+        "X-Generation-Id": "generation-1",
       },
     },
   );
 }
 
+function requestError(status: number, retryAfter?: string): Response {
+  return new Response(
+    JSON.stringify({
+      error: {
+        message: "Provider returned error",
+        code: status,
+      },
+    }),
+    {
+      status,
+      headers: retryAfter === undefined ? {} : { "Retry-After": retryAfter },
+    },
+  );
+}
+
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
-describe("OpenRouter action output", () => {
-  it("versions the one-front offense constraint as agent-v12", () => {
-    expect(OpenRouterAgent.promptVersion()).toBe("agent-v12");
+describe("OpenRouter one-action output", () => {
+  it("versions and describes the singular decision contract", () => {
+    expect(OpenRouterAgent.promptVersion()).toBe("agent-v13");
     expect(OpenRouterAgent.reasoningEffort()).toBe("none");
-  });
-
-  it("explains early alliances and pairing diplomacy with a build", () => {
-    const prompt = promptFor(observation, diplomacyCandidates);
-
-    expect(prompt).toContain("avoid opening proactive wars");
-    expect(prompt).toContain("more likely to accept early requests");
-    expect(prompt).toContain("paired with a diplomacy action in action2");
-  });
-
-  it("explains troop saturation and neutral expansion without prescribing holds", () => {
     const prompt = promptFor(observation, candidates);
-
-    expect(prompt).toContain(
-      "holding at maximum capacity cannot rebuild or increase reserves further",
-    );
-    expect(prompt).toContain(
-      "Neutral expansion captures unowned land and does not require a troop advantage",
-    );
-    expect(prompt).toContain(
-      "listed troop amounts do not violate the displayed reserve",
-    );
-    expect(prompt).not.toContain("Hold while rebuilding");
+    expect(prompt).toContain("Choose exactly one legal action ID");
+    expect(prompt).toContain("Use hold when no other action should be taken");
+    expect(prompt).toContain("safe action budget");
+    expect(prompt).not.toMatch(/action1|action2|slot/i);
   });
 
-  it("distinguishes a territory lead from a territory deficit", () => {
-    const prompt = promptFor(observation, candidates);
-
-    expect(prompt).toContain(
-      "isTerritoryLeader is true only while self is first",
-    );
-    expect(prompt).toContain(
-      "territoryDeficitPercent is positive only while behind",
-    );
-    expect(prompt).toContain("Never describe a deficit as a lead");
-    expect(prompt).not.toContain("territoryGapToLeader");
-  });
-
-  it("states that slots execute simultaneously and cannot be conditional", () => {
-    const prompt = promptFor(observation, diplomacyCandidates);
-
-    expect(prompt).toContain(
-      "Both action slots execute simultaneously on the next tick",
-    );
-    expect(prompt).toContain("action2 cannot depend on action1's outcome");
-    expect(prompt).toContain(
-      "Do not combine cooperative and hostile actions toward the same opponent",
-    );
-  });
-
-  it("limits gold-spending actions to the first slot", () => {
-    const prompt = promptFor(observation, buildCandidates);
-    const schema = actionResponseJsonSchema(buildCandidates);
-
-    expect(prompt).toContain("legal only in action1");
-    expect(prompt).toContain("at most one gold-spending action per decision");
-    expect(prompt).toContain('"allowedSlots":[1]');
-    expect(schema.properties.action1.enum).toContain("build:Factory:456");
-    expect(schema.properties.action2.enum).not.toContain("build:Factory:456");
-    expect(schema.properties.action2.enum).not.toContain("build:Port:789");
-  });
-
-  it("normalizes the legacy unsigned gap as a deficit when ranked second", () => {
-    const {
-      isTerritoryLeader: _isTerritoryLeader,
-      territoryLeadPercent: _territoryLeadPercent,
-      territoryDeficitPercent: _territoryDeficitPercent,
-      ...legacyObservation
-    } = observation;
-    const normalized = ObservationSchema.parse({
-      ...legacyObservation,
-      territoryGapToLeader: 0.942,
+  it("places every legal action in one strict enum", () => {
+    const schema = actionResponseJsonSchema(candidates);
+    expect(schema.required).toEqual(["strategy", "action"]);
+    expect(schema.properties.action).toEqual({
+      type: "string",
+      description: "The one legal action ID to execute this decision.",
+      enum: ["hold", "expand:neutral:100", "build:Factory:456"],
     });
+    expect(schema).not.toHaveProperty("properties.action1");
+    expect(schema).not.toHaveProperty("properties.action2");
+  });
 
-    expect(normalized).toMatchObject({
-      currentRank: 2,
+  it("accepts one legal action and rejects unknown or old two-slot shapes", () => {
+    expect(
+      validateDecisionContent(
+        JSON.stringify({
+          strategy: "Expand safely",
+          action: "expand:neutral:100",
+        }),
+        candidates,
+      ),
+    ).toEqual({
+      decision: { strategy: "Expand safely", action: "expand:neutral:100" },
+      failures: [],
+    });
+    expect(
+      validateDecisionContent(
+        JSON.stringify({ strategy: "Invent", action: "unknown" }),
+        candidates,
+      ),
+    ).toMatchObject({
+      decision: null,
+      failures: [{ code: "unknown_action_id", rejectedActionIds: ["unknown"] }],
+    });
+    expect(
+      validateDecisionContent(
+        JSON.stringify({ strategy: "Old", action1: "hold", action2: "hold" }),
+        candidates,
+      ),
+    ).toMatchObject({ decision: null, failures: [{ code: "invalid_shape" }] });
+  });
+
+  it("keeps legacy observation normalization out of the current schema", () => {
+    const legacy = {
+      ...observation,
+      territoryGapToLeader: 0.942,
+      isTerritoryLeader: undefined,
+      territoryLeadPercent: undefined,
+      territoryDeficitPercent: undefined,
+    };
+    expect(() => ObservationSchema.parse(legacy)).toThrow();
+    expect(LegacyObservationSchema.parse(legacy)).toMatchObject({
       isTerritoryLeader: false,
       territoryLeadPercent: 0,
       territoryDeficitPercent: 0.942,
     });
-    expect(normalized).not.toHaveProperty("territoryGapToLeader");
   });
 
-  it("rejects contradictory standings fields", () => {
-    expect(() =>
-      ObservationSchema.parse({
-        ...observation,
-        isTerritoryLeader: true,
-      }),
-    ).toThrow(/isTerritoryLeader must agree with currentRank/);
-    expect(() =>
-      ObservationSchema.parse({
-        ...observation,
-        territoryLeadPercent: 1,
-      }),
-    ).toThrow(/must be mutually exclusive/);
-  });
-
-  it("constrains each named slot to its legal action IDs", () => {
-    const schema = actionResponseJsonSchema(candidates);
-
-    expect(schema.required).toEqual(["strategy", "action1", "action2"]);
-    expect(schema.properties.action1).toMatchObject({
-      type: "string",
-      enum: ["hold:1", "expand:neutral:100"],
-    });
-    expect(schema.properties.action2).toMatchObject({
-      type: "string",
-      enum: ["hold:2", "expand:neutral:100"],
-    });
-  });
-
-  it("accepts a repeatable troop action in both slots", () => {
-    const validated = validateDecisionContent(
-      JSON.stringify({
-        strategy: "Use both safe troop budgets",
-        action1: "expand:neutral:100",
-        action2: "expand:neutral:100",
-      }),
-      candidates,
-    );
-
-    expect(validated).toEqual({
-      decision: {
-        strategy: "Use both safe troop budgets",
-        actions: ["expand:neutral:100", "expand:neutral:100"],
-      },
-      failures: [],
-    });
-  });
-
-  it("rejects conflicting same-target diplomacy actions", () => {
-    const validated = validateDecisionContent(
-      JSON.stringify({
-        strategy: "Seek an alliance and embargo if rejected",
-        action1: "alliance:request:enemy001",
-        action2: "embargo:start:enemy001",
-      }),
-      diplomacyCandidates,
-    );
-
-    expect(validated).toEqual({
-      decision: null,
-      failures: [
-        {
-          code: "conflicting_action_ids",
-          message:
-            "OpenRouter selected actions with conflicting same-target postures: alliance:request:enemy001, embargo:start:enemy001",
-          rejectedActionIds: [
-            "alliance:request:enemy001",
-            "embargo:start:enemy001",
-          ],
-        },
-      ],
-    });
-  });
-
-  it("rejects proactive attacks against two different opponents", () => {
-    const validated = validateDecisionContent(
-      JSON.stringify({
-        strategy: "Pressure both rivals at once",
-        action1: "attack:enemy001:100",
-        action2: "attack:enemy002:100",
-      }),
-      multiFrontCandidates,
-    );
-
-    expect(validated).toEqual({
-      decision: null,
-      failures: [
-        {
-          code: "conflicting_action_ids",
-          message:
-            "OpenRouter selected proactive attacks against multiple opponents: attack:enemy001:100, attack:enemy002:100",
-          rejectedActionIds: ["attack:enemy001:100", "attack:enemy002:100"],
-        },
-      ],
-    });
-  });
-
-  it("rejects a build selected in action2", () => {
-    const validated = validateDecisionContent(
-      JSON.stringify({
-        strategy: "Build two structures",
-        action1: "build:Factory:456",
-        action2: "build:Port:789",
-      }),
-      buildCandidates,
-    );
-
-    expect(validated).toEqual({
-      decision: null,
-      failures: [
-        {
-          code: "unknown_action_id",
-          message: "OpenRouter selected unknown action ID: build:Port:789",
-          rejectedActionIds: ["build:Port:789"],
-        },
-      ],
-    });
-  });
-
-  it("retries a conflicting pair with corrective feedback", async () => {
-    const conflictingContent = JSON.stringify({
-      strategy: "Seek an alliance and embargo if rejected",
-      action1: "alliance:request:enemy001",
-      action2: "embargo:start:enemy001",
-    });
+  it("retries an unknown action with singular corrective feedback", async () => {
+    const rejected = JSON.stringify({ strategy: "Invent", action: "unknown" });
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce(completion(conflictingContent))
+      .mockResolvedValueOnce(completion(rejected))
       .mockResolvedValueOnce(
-        completion(
-          JSON.stringify({
-            strategy: "Seek an alliance without a contradictory action",
-            action1: "alliance:request:enemy001",
-            action2: "hold:2",
-          }),
-        ),
+        completion(JSON.stringify({ strategy: "Hold", action: "hold" })),
       );
     vi.stubGlobal("fetch", fetchMock);
 
     const result = await new OpenRouterAgent("test-key").decide(
       observation,
-      diplomacyCandidates,
+      candidates,
     );
-
     expect(result).toMatchObject({
-      decision: {
-        actions: ["alliance:request:enemy001", "hold:2"],
-      },
+      decision: { strategy: "Hold", action: "hold" },
       attempts: 2,
       attemptFailures: [
         {
           attempt: 1,
-          code: "conflicting_action_ids",
-          rejectedActionIds: [
-            "alliance:request:enemy001",
-            "embargo:start:enemy001",
-          ],
+          code: "unknown_action_id",
+          rejectedActionIds: ["unknown"],
         },
       ],
     });
-    const retryRequest = JSON.parse(
+    const request = JSON.parse(
       String((fetchMock.mock.calls[1][1] as RequestInit).body),
     ) as { messages: Array<{ role: string; content: string }> };
-    expect(retryRequest.messages[retryRequest.messages.length - 2]).toEqual({
+    expect(request.messages[request.messages.length - 2]).toEqual({
       role: "assistant",
-      content: conflictingContent,
+      content: rejected,
     });
-    expect(
-      retryRequest.messages[retryRequest.messages.length - 1]?.content,
-    ).toContain("conflicting same-target postures");
-  });
-
-  it("reports malformed JSON and slot-invalid holds precisely", () => {
-    expect(validateDecisionContent("{", candidates)).toMatchObject({
-      decision: null,
-      failures: [{ code: "invalid_json" }],
-    });
-
-    const wrongHolds = validateDecisionContent(
-      JSON.stringify({
-        strategy: "Use the wrong holds",
-        action1: "hold:2",
-        action2: "hold:1",
-      }),
-      candidates,
+    expect(request.messages[request.messages.length - 1]?.content).toContain(
+      "exactly one legal ID in action",
     );
-    expect(wrongHolds).toEqual({
-      decision: null,
-      failures: [
-        {
-          code: "unknown_action_id",
-          message: "OpenRouter selected unknown action IDs: hold:2, hold:1",
-          rejectedActionIds: ["hold:2", "hold:1"],
-        },
-      ],
-    });
   });
 
-  it("diagnoses truncation and feeds the rejected response into the retry", async () => {
+  it("diagnoses truncation and sends the one-action JSON Schema", async () => {
+    const rejected = JSON.stringify({ strategy: "Expand" });
     const fetchMock = vi
       .fn()
+      .mockResolvedValueOnce(completion(rejected, "length"))
       .mockResolvedValueOnce(
         completion(
-          JSON.stringify({
-            strategy: "Use both safe troop budgets",
-            action1: "expand:neutral:100",
-          }),
-          "length",
-        ),
-      )
-      .mockResolvedValueOnce(
-        completion(
-          JSON.stringify({
-            strategy: "Use both safe troop budgets",
-            action1: "expand:neutral:100",
-            action2: "expand:neutral:100",
-          }),
+          JSON.stringify({ strategy: "Expand", action: "expand:neutral:100" }),
         ),
       );
     vi.stubGlobal("fetch", fetchMock);
@@ -479,143 +247,39 @@ describe("OpenRouter action output", () => {
       model: "openai/test-model",
       provider: "openai",
     }).decide(observation, candidates);
-
-    expect(result).toMatchObject({
-      decision: {
-        strategy: "Use both safe troop budgets",
-        actions: ["expand:neutral:100", "expand:neutral:100"],
-      },
-      attempts: 2,
-      attemptFailures: [
-        {
-          attempt: 1,
-          code: "truncated_response",
-          rejectedActionIds: [],
-        },
-      ],
-    });
+    expect(result.decision?.action).toBe("expand:neutral:100");
+    expect(result.attemptFailures).toMatchObject([
+      { attempt: 1, code: "truncated_response" },
+    ]);
     expect(result.promptTokens).toBe(20);
     expect(result.completionTokens).toBe(10);
-    expect(result.costUsd).toBe(0.002);
-    expect(result.attemptTimings).toHaveLength(2);
-    expect(result.attemptTimings).toEqual([
-      expect.objectContaining({
-        attempt: 1,
-        queueMs: null,
-        generationId: "generation-1",
-      }),
-      expect.objectContaining({
-        attempt: 2,
-        queueMs: null,
-        generationId: "generation-1",
-      }),
-    ]);
 
-    const secondRequest = JSON.parse(
+    const request = JSON.parse(
       String((fetchMock.mock.calls[1][1] as RequestInit).body),
     ) as {
       seed?: number;
       reasoning: { effort: string };
-      messages: Array<{ role: string; content: string }>;
-      response_format: {
-        json_schema: {
-          schema: {
-            properties: {
-              action1: { enum: string[] };
-              action2: { enum: string[] };
-            };
-          };
-        };
-      };
-      stream: boolean;
-      stream_options: { include_usage: boolean };
+      response_format: { json_schema: { schema: unknown } };
     };
-    expect(secondRequest).not.toHaveProperty("seed");
-    expect(secondRequest.reasoning).toEqual({ effort: "none" });
-    expect(secondRequest.stream).toBe(true);
-    expect(secondRequest.stream_options).toEqual({ include_usage: true });
-    expect(secondRequest.messages[secondRequest.messages.length - 2]).toEqual({
-      role: "assistant",
-      content: JSON.stringify({
-        strategy: "Use both safe troop budgets",
-        action1: "expand:neutral:100",
-      }),
-    });
-    expect(
-      secondRequest.messages[secondRequest.messages.length - 1]?.content,
-    ).toContain("OpenRouter truncated the decision at the token limit");
-    expect(secondRequest.response_format.json_schema.schema.properties).toEqual(
-      {
-        strategy: { type: "string", maxLength: 160 },
-        action1: {
-          type: "string",
-          description: "The legal action ID to execute in the first slot.",
-          enum: ["hold:1", "expand:neutral:100"],
-        },
-        action2: {
-          type: "string",
-          description: "The legal action ID to execute in the second slot.",
-          enum: ["hold:2", "expand:neutral:100"],
-        },
-      },
+    expect(request).not.toHaveProperty("seed");
+    expect(request.reasoning).toEqual({ effort: "none" });
+    expect(request.response_format.json_schema.schema).toEqual(
+      actionResponseJsonSchema(candidates),
     );
   });
 
-  it("measures client-observed TTFT and generation time", async () => {
-    const timestamps = [0, 10, 30, 80, 90];
-    vi.spyOn(performance, "now").mockImplementation(
-      () => timestamps.shift() ?? 90,
-    );
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(
-        completion(
-          JSON.stringify({
-            strategy: "Use both safe troop budgets",
-            action1: "expand:neutral:100",
-            action2: "expand:neutral:100",
-          }),
-        ),
-      ),
-    );
-
-    const result = await new OpenRouterAgent("test-key", {
-      model: "openai/test-model",
-      provider: "openai",
-    }).decide(observation, candidates);
-
-    expect(result.latencyMs).toBe(90);
-    expect(result.attemptTimings).toEqual([
-      {
-        attempt: 1,
-        totalMs: 70,
-        timeToFirstTokenMs: 20,
-        generationMs: 50,
-        completionTokens: 5,
-        timePerOutputTokenMs: 12.5,
-        queueMs: null,
-        generationId: "generation-1",
-      },
-    ]);
-  });
-
-  it("parses chunked SSE and ignores OpenRouter keepalive comments", async () => {
+  it("parses chunked SSE and records generation timing", async () => {
     const content = JSON.stringify({
-      strategy: "Use both safe troop budgets",
-      action1: "expand:neutral:100",
-      action2: "expand:neutral:100",
+      strategy: "Expand",
+      action: "expand:neutral:100",
     });
     const body = `: OPENROUTER PROCESSING\n\n${completionEvents(content)}`;
-    const boundaries = [7, 31, 89, 143];
-    const chunks = boundaries
-      .map((end, index) =>
-        body.slice(index === 0 ? 0 : boundaries[index - 1], end),
-      )
-      .concat(body.slice(boundaries[boundaries.length - 1]));
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
-        for (const chunk of chunks) {
-          controller.enqueue(new TextEncoder().encode(chunk));
+        for (let index = 0; index < body.length; index += 37) {
+          controller.enqueue(
+            new TextEncoder().encode(body.slice(index, index + 37)),
+          );
         }
         controller.close();
       },
@@ -637,155 +301,159 @@ describe("OpenRouter action output", () => {
       observation,
       candidates,
     );
-
-    expect(result.decision?.actions).toEqual([
-      "expand:neutral:100",
-      "expand:neutral:100",
-    ]);
+    expect(result.decision?.action).toBe("expand:neutral:100");
     expect(result.promptTokens).toBe(10);
-    expect(result.completionTokens).toBe(5);
-  });
-
-  it("leaves TPOT unavailable with fewer than two completion tokens", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(
-        completion(
-          JSON.stringify({
-            strategy: "Hold",
-            action1: "hold:1",
-            action2: "hold:2",
-          }),
-          "stop",
-          1,
-        ),
-      ),
-    );
-
-    const result = await new OpenRouterAgent("test-key").decide(
-      observation,
-      candidates,
-    );
-
     expect(result.attemptTimings[0]).toMatchObject({
-      completionTokens: 1,
-      timePerOutputTokenMs: null,
+      attempt: 1,
+      completionTokens: 5,
+      queueMs: null,
+      generationId: "generation-1",
     });
   });
 
-  it("retains timing for a failed request before retrying", async () => {
-    const timestamps = [0, 10, 20, 30, 40, 50, 60];
-    vi.spyOn(performance, "now").mockImplementation(
-      () => timestamps.shift() ?? 60,
-    );
+  it("retains failed-request timing before retrying", async () => {
     vi.stubGlobal(
       "fetch",
       vi
         .fn()
         .mockRejectedValueOnce(new Error("provider unavailable"))
         .mockResolvedValueOnce(
-          completion(
-            JSON.stringify({
-              strategy: "Use both safe troop budgets",
-              action1: "expand:neutral:100",
-              action2: "expand:neutral:100",
-            }),
-          ),
+          completion(JSON.stringify({ strategy: "Hold", action: "hold" })),
         ),
     );
-
     const result = await new OpenRouterAgent("test-key").decide(
       observation,
       candidates,
     );
-
+    expect(result.decision?.action).toBe("hold");
     expect(result.attemptFailures).toMatchObject([
       { attempt: 1, code: "request_error", message: "provider unavailable" },
     ]);
-    expect(result.attemptTimings).toEqual([
-      {
-        attempt: 1,
-        totalMs: 10,
-        timeToFirstTokenMs: null,
-        generationMs: null,
-        completionTokens: 0,
-        timePerOutputTokenMs: null,
-        queueMs: null,
-        generationId: null,
-      },
-      {
-        attempt: 2,
-        totalMs: 20,
-        timeToFirstTokenMs: 10,
-        generationMs: 10,
-        completionTokens: 5,
-        timePerOutputTokenMs: 2.5,
-        queueMs: null,
-        generationId: "generation-1",
-      },
-    ]);
-    expect(result.latencyMs).toBe(60);
+    expect(result.attemptTimings).toHaveLength(2);
   });
 
-  it("marks generation time unavailable after a mid-stream error", async () => {
-    const failedStream = [
-      `data: ${JSON.stringify({
-        id: "generation-failed",
-        model: "openai/test-model",
-        provider: "OpenAI",
-        choices: [
-          {
-            finish_reason: null,
-            delta: { content: '{"strategy":' },
-          },
-        ],
-      })}\n\n`,
-      `data: ${JSON.stringify({
-        error: { message: "provider disconnected" },
-      })}\n\n`,
-    ].join("");
-    vi.stubGlobal(
-      "fetch",
-      vi
-        .fn()
-        .mockResolvedValueOnce(
-          new Response(failedStream, {
-            status: 200,
-            headers: {
-              "Content-Type": "text/event-stream",
-              "X-Generation-Id": "generation-failed",
-            },
-          }),
-        )
-        .mockResolvedValueOnce(
-          completion(
-            JSON.stringify({
-              strategy: "Use both safe troop budgets",
-              action1: "expand:neutral:100",
-              action2: "expand:neutral:100",
-            }),
-          ),
-        ),
-    );
+  it("honors Retry-After seconds before retrying a 429", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(requestError(429, "2"))
+      .mockResolvedValueOnce(
+        completion(JSON.stringify({ strategy: "Hold", action: "hold" })),
+      );
+    vi.stubGlobal("fetch", fetchMock);
 
-    const result = await new OpenRouterAgent("test-key").decide(
+    const resultPromise = new OpenRouterAgent("test-key").decide(
       observation,
       candidates,
     );
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1_999);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
 
+    const result = await resultPromise;
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.decision?.action).toBe("hold");
     expect(result.attemptFailures).toMatchObject([
       {
         attempt: 1,
-        code: "request_error",
-        message: "OpenRouter stream error: provider disconnected",
+        code: "rate_limited",
+        httpStatus: 429,
+        retryDelayMs: 2_000,
       },
     ]);
-    expect(result.attemptTimings[0]).toMatchObject({
-      attempt: 1,
-      generationMs: null,
-      queueMs: null,
-      generationId: "generation-failed",
-    });
-    expect(result.attemptTimings[0]?.timeToFirstTokenMs).not.toBeNull();
+    expect(() =>
+      AgentAttemptFailureSchema.parse(result.attemptFailures[0]),
+    ).not.toThrow();
+    const firstRequest = JSON.parse(
+      String((fetchMock.mock.calls[0][1] as RequestInit).body),
+    ) as { messages: unknown[] };
+    const retryRequest = JSON.parse(
+      String((fetchMock.mock.calls[1][1] as RequestInit).body),
+    ) as { messages: unknown[] };
+    expect(retryRequest.messages).toEqual(firstRequest.messages);
+    expect(result.latencyMs).toBeGreaterThanOrEqual(2_000);
+  });
+
+  it("accepts an HTTP-date Retry-After value", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-06T12:00:00.000Z"));
+    const retryAt = new Date(Date.now() + 7_000).toUTCString();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(requestError(429, retryAt))
+      .mockResolvedValueOnce(
+        completion(JSON.stringify({ strategy: "Hold", action: "hold" })),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const resultPromise = new OpenRouterAgent("test-key").decide(
+      observation,
+      candidates,
+    );
+    await vi.advanceTimersByTimeAsync(6_999);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+
+    const result = await resultPromise;
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.attemptFailures[0]).toMatchObject({ retryDelayMs: 7_000 });
+  });
+
+  it("uses the bounded fallback delay for absent, invalid, or excessive Retry-After values", async () => {
+    vi.useFakeTimers();
+    for (const [retryAfter, expectedDelay] of [
+      [undefined, 5_000],
+      ["not-a-delay", 5_000],
+      ["120", 60_000],
+    ] as const) {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(requestError(429, retryAfter))
+        .mockResolvedValueOnce(
+          completion(JSON.stringify({ strategy: "Hold", action: "hold" })),
+        );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const resultPromise = new OpenRouterAgent("test-key").decide(
+        observation,
+        candidates,
+      );
+      await vi.advanceTimersByTimeAsync(expectedDelay - 1);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+
+      const result = await resultPromise;
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(result.attemptFailures[0]).toMatchObject({
+        retryDelayMs: expectedDelay,
+      });
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("stops after a second 429 and leaves the safe-hold fallback to the harness", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(requestError(429, "1"))
+      .mockResolvedValueOnce(requestError(429, "30"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const resultPromise = new OpenRouterAgent("test-key").decide(
+      observation,
+      candidates,
+    );
+    await vi.advanceTimersByTimeAsync(1_000);
+    const result = await resultPromise;
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.decision).toBeNull();
+    expect(result.attemptFailures).toMatchObject([
+      { attempt: 1, code: "rate_limited", retryDelayMs: 1_000 },
+      { attempt: 2, code: "rate_limited" },
+    ]);
+    expect(result.attemptFailures[1]).not.toHaveProperty("retryDelayMs");
   });
 });

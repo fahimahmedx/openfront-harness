@@ -1,5 +1,10 @@
 # Building and Evaluating a Reliable Agent Harness for OpenFront
 
+> Historical interface note (August 2026): this retrospective and its charts
+> analyze the former two-action agent-v12 harness. The current agent-v13
+> harness requires exactly one action per decision; legacy runs remain
+> replayable and are not treated as current benchmark results.
+
 Written by Fahim Ahmed
 
 August 5, 2026

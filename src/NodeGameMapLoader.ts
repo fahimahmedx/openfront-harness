@@ -8,13 +8,27 @@ import {
 import { MapManifest } from "../OpenFrontIO/src/core/game/TerrainMapLoader";
 
 export class NodeGameMapLoader implements GameMapLoader {
-  constructor(private readonly mapsDir: string) {}
+  private readonly allowedMaps: ReadonlySet<GameMapType>;
+
+  constructor(
+    private readonly mapsDir: string,
+    allowedMaps: readonly GameMapType[] = [GameMapType.Japan],
+  ) {
+    this.allowedMaps = new Set(allowedMaps);
+  }
 
   getMapData(map: GameMapType): MapData {
-    if (map !== GameMapType.Japan) {
-      throw new Error(`Harness only supports the Japan map, received ${map}`);
+    if (!this.allowedMaps.has(map)) {
+      throw new Error(`Map ${map} is not in this loader's allowlist`);
     }
-    const dir = path.join(this.mapsDir, "japan");
+    // Generated map enum names differ from their labels only by spaces and
+    // punctuation. Map asset directories use the same normalized spelling.
+    const slug = map.toLowerCase().replace(/[^a-z0-9]+/g, "");
+    const dir = path.resolve(this.mapsDir, slug);
+    const root = path.resolve(this.mapsDir);
+    if (path.dirname(dir) !== root) {
+      throw new Error(`Invalid map asset path for ${map}`);
+    }
     const readBin = (name: string) => async () =>
       new Uint8Array(fs.readFileSync(path.join(dir, name)));
     return {

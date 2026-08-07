@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
+  "fixtureId": "cap-weaker-target-selection-scored-europe-classic-001",
+  "status": "accepted",
+  "sourceArtifact": "data/benchmark-fixture-sources/match-03/8df00795-1d13-4d14-8a85-64e41e45ef1c.json.gz",
+  "cleanRebuilds": [
+    {
+      "state": 7085039232693999,
+      "observation": "58be41357c0d79e7625ab94a6f3405de260b6a6866a269bfb440c060855516e3",
+      "candidateMenu": "43abe1761cf70d2c284ac6c7a2b8d648daf18383d786ebd7ff69b75d53a0436e",
+      "tileState": "e0f6edde0b80a199e2f9ce21f0375ef07fa0a844ee0fbb6bfc44e807a82030ee"
+    },
+    {
+      "state": 7085039232693999,
+      "observation": "58be41357c0d79e7625ab94a6f3405de260b6a6866a269bfb440c060855516e3",
+      "candidateMenu": "43abe1761cf70d2c284ac6c7a2b8d648daf18383d786ebd7ff69b75d53a0436e",
+      "tileState": "e0f6edde0b80a199e2f9ce21f0375ef07fa0a844ee0fbb6bfc44e807a82030ee"
+    },
+    {
+      "state": 7085039232693999,
+      "observation": "58be41357c0d79e7625ab94a6f3405de260b6a6866a269bfb440c060855516e3",
+      "candidateMenu": "43abe1761cf70d2c284ac6c7a2b8d648daf18383d786ebd7ff69b75d53a0436e",
+      "tileState": "e0f6edde0b80a199e2f9ce21f0375ef07fa0a844ee0fbb6bfc44e807a82030ee"
+    },
+    {
+      "state": 7085039232693999,
+      "observation": "58be41357c0d79e7625ab94a6f3405de260b6a6866a269bfb440c060855516e3",
+      "candidateMenu": "43abe1761cf70d2c284ac6c7a2b8d648daf18383d786ebd7ff69b75d53a0436e",
+      "tileState": "e0f6edde0b80a199e2f9ce21f0375ef07fa0a844ee0fbb6bfc44e807a82030ee"
+    },
+    {
+      "state": 7085039232693999,
+      "observation": "58be41357c0d79e7625ab94a6f3405de260b6a6866a269bfb440c060855516e3",
+      "candidateMenu": "43abe1761cf70d2c284ac6c7a2b8d648daf18383d786ebd7ff69b75d53a0436e",
+      "tileState": "e0f6edde0b80a199e2f9ce21f0375ef07fa0a844ee0fbb6bfc44e807a82030ee"
+    }
+  ],
+  "machineChecks": {
+    "checkpointRequirements": true,
+    "oneActionPerDecision": true,
+    "ordinaryInputOnly": true
+  },
+  "referenceReplays": {
+    "attempted": 5,
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "attack:ap9not8e:100",
+        "finalHash": 8556972751410073,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 1222,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "attack:ap9not8e:100",
+        "finalHash": 8556972751410073,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 1222,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "attack:ap9not8e:100",
+        "finalHash": 8556972751410073,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 1222,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "attack:ap9not8e:100",
+        "finalHash": 8556972751410073,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 1222,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "attack:ap9not8e:100",
+        "finalHash": 8556972751410073,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 1222,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      }
+    ]
+  },
+  "controls": [
+    {
+      "selectedActionId": "attack:1kvdnt58:100",
+      "finalHash": 8531709876416261,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "captures-target-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "hold",
+      "finalHash": 9593153719694836,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "captures-target-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
+  ],
+  "review": {
+    "blindedTradeoffIdentifiable": true,
+    "fairAndAttributable": true
+  }
+}

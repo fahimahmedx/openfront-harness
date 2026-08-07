@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/fahimahmedx/openfront-harness/schemas/openfront-bench-v0.1/manifest.schema.json",
+  "title": "OpenFront Bench v0.1 release manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "benchmarkVersion",
+    "releaseDate",
+    "license",
+    "maintainer",
+    "engine",
+    "mapAssets",
+    "harnessCommit",
+    "harnessSourceHash",
+    "promptVersion",
+    "promptHash",
+    "schemaVersions",
+    "resolverVersion",
+    "troopPolicy",
+    "graderPackageHash",
+    "taskOrder",
+    "bootstrap",
+    "tasks"
+  ],
+  "properties": {
+    "benchmarkVersion": { "const": "openfront-bench-v0.1" },
+    "releaseDate": { "type": "string", "format": "date" },
+    "license": { "type": "string", "minLength": 1 },
+    "maintainer": { "type": "string", "minLength": 1 },
+    "engine": {
+      "type": "object",
+      "required": ["version", "commit"],
+      "properties": {
+        "version": { "const": "v0.32.9" },
+        "commit": { "const": "dcc18d5231af6253b0e991bf04a4c764982fe262" }
+      }
+    },
+    "mapAssets": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/sha256" }
+    },
+    "harnessCommit": { "type": "string", "minLength": 7 },
+    "harnessSourceHash": { "$ref": "#/$defs/sha256" },
+    "promptVersion": { "const": "agent-v13" },
+    "promptHash": { "$ref": "#/$defs/sha256" },
+    "schemaVersions": { "type": "object" },
+    "resolverVersion": { "const": "single-action-v1" },
+    "troopPolicy": { "type": "object" },
+    "graderPackageHash": { "$ref": "#/$defs/sha256" },
+    "taskOrder": { "type": "object" },
+    "bootstrap": { "type": "object" },
+    "tasks": {
+      "type": "array",
+      "minItems": 22,
+      "maxItems": 22,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "suite",
+          "split",
+          "map",
+          "seed",
+          "spawn",
+          "resolvedConfigHash",
+          "ceilings"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "suite": { "enum": ["match", "capability"] },
+          "split": { "const": "scored" },
+          "resolvedConfigHash": { "$ref": "#/$defs/sha256" },
+          "ceilings": {
+            "type": "object",
+            "required": ["actionsPerDecision"],
+            "properties": { "actionsPerDecision": { "const": 1 } },
+            "not": { "required": ["actionSlots"] }
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "suite": { "const": "capability" } } },
+            "then": {
+              "required": [
+                "family",
+                "graderVersion",
+                "recentDecisions",
+                "acceptanceReportPath",
+                "acceptanceReportHash"
+              ],
+              "properties": {
+                "acceptanceReportHash": { "$ref": "#/$defs/sha256" },
+                "family": {
+                  "enum": [
+                    "neutral-expansion",
+                    "saturated-capacity-expansion",
+                    "post-expansion-recovery",
+                    "weaker-target-selection",
+                    "frontier-restraint",
+                    "incoming-attack-response",
+                    "split-front-prioritization",
+                    "losing-attack-retreat",
+                    "naval-target-recognition",
+                    "construction-failure-recovery"
+                  ]
+                },
+                "graderVersion": { "const": "capability-grader-v2" },
+                "recentDecisions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "selectedActionIds",
+                      "appliedActionIds",
+                      "actionOutcomes"
+                    ],
+                    "properties": {
+                      "selectedActionIds": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 1
+                      },
+                      "appliedActionIds": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 1
+                      },
+                      "actionOutcomes": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

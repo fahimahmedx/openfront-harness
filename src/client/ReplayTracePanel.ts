@@ -46,6 +46,8 @@ type PublicDecision = {
     code: string;
     message: string;
     rejectedActionIds: string[];
+    httpStatus?: number;
+    retryDelayMs?: number;
   }>;
   observation: {
     elapsedSeconds: number;
@@ -664,11 +666,15 @@ class HarnessReplayPanel extends HTMLElement {
             const ids = failure.rejectedActionIds.length
               ? ` (${failure.rejectedActionIds.join(", ")})`
               : "";
-            return `Attempt ${failure.attempt}: ${failure.code}${ids}`;
+            const retryDelay =
+              failure.retryDelayMs === undefined
+                ? ""
+                : ` · retry in ${formatLatency(failure.retryDelayMs)}`;
+            return `Attempt ${failure.attempt}: ${failure.code}${ids}${retryDelay}`;
           })
           .join(" · ") ?? "";
       const status = decision.fallback
-        ? "Validation fallback used"
+        ? "Safe-hold fallback used"
         : "Recovered after retry";
       const timingSummary = decision.attemptTimings
         ?.map(formatAttemptTiming)

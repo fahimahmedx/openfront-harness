@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
+  "fixtureId": "cap-construction-failure-recovery-scored-europe-classic-001",
+  "status": "accepted",
+  "sourceArtifact": "data/benchmark-fixture-sources/match-03/8df00795-1d13-4d14-8a85-64e41e45ef1c.json.gz",
+  "cleanRebuilds": [
+    {
+      "state": "10050961651835828",
+      "observation": "2126355b449ac3d16d23840e35c252a9939cb629b97fb60a16777d4902af117e",
+      "candidateMenu": "495ff4b3ab4c63a1871d462387922b170844fd69b58b45a985970db3ab24bfaa",
+      "tileState": "71002351561ae58430a4a9c323b9db322cc48ebc0e1c7a0404057480d56a79c5"
+    },
+    {
+      "state": "10050961651835828",
+      "observation": "2126355b449ac3d16d23840e35c252a9939cb629b97fb60a16777d4902af117e",
+      "candidateMenu": "495ff4b3ab4c63a1871d462387922b170844fd69b58b45a985970db3ab24bfaa",
+      "tileState": "71002351561ae58430a4a9c323b9db322cc48ebc0e1c7a0404057480d56a79c5"
+    },
+    {
+      "state": "10050961651835828",
+      "observation": "2126355b449ac3d16d23840e35c252a9939cb629b97fb60a16777d4902af117e",
+      "candidateMenu": "495ff4b3ab4c63a1871d462387922b170844fd69b58b45a985970db3ab24bfaa",
+      "tileState": "71002351561ae58430a4a9c323b9db322cc48ebc0e1c7a0404057480d56a79c5"
+    },
+    {
+      "state": "10050961651835828",
+      "observation": "2126355b449ac3d16d23840e35c252a9939cb629b97fb60a16777d4902af117e",
+      "candidateMenu": "495ff4b3ab4c63a1871d462387922b170844fd69b58b45a985970db3ab24bfaa",
+      "tileState": "71002351561ae58430a4a9c323b9db322cc48ebc0e1c7a0404057480d56a79c5"
+    },
+    {
+      "state": "10050961651835828",
+      "observation": "2126355b449ac3d16d23840e35c252a9939cb629b97fb60a16777d4902af117e",
+      "candidateMenu": "495ff4b3ab4c63a1871d462387922b170844fd69b58b45a985970db3ab24bfaa",
+      "tileState": "71002351561ae58430a4a9c323b9db322cc48ebc0e1c7a0404057480d56a79c5"
+    }
+  ],
+  "machineChecks": {
+    "checkpointRequirements": true,
+    "oneActionPerDecision": true,
+    "ordinaryInputOnly": true
+  },
+  "referenceReplays": {
+    "attempted": 5,
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "build:Defense Post:7408",
+        "finalHash": 12340275119256124,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "active-defense-post-in-zone",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "build:Defense Post:7408",
+        "finalHash": 12340275119256124,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "active-defense-post-in-zone",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "build:Defense Post:7408",
+        "finalHash": 12340275119256124,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "active-defense-post-in-zone",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "build:Defense Post:7408",
+        "finalHash": 12340275119256124,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "active-defense-post-in-zone",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "build:Defense Post:7408",
+        "finalHash": 12340275119256124,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "active-defense-post-in-zone",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          }
+        ]
+      }
+    ]
+  },
+  "controls": [
+    {
+      "selectedActionId": "hold",
+      "finalHash": 12340206064520244,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "active-defense-post-in-zone",
+          "observed": false,
+          "operator": "=",
+          "threshold": true,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "build:City:7408",
+      "finalHash": 12459595820051104,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "active-defense-post-in-zone",
+          "observed": false,
+          "operator": "=",
+          "threshold": true,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
+  ],
+  "review": {
+    "blindedTradeoffIdentifiable": true,
+    "fairAndAttributable": true
+  }
+}

@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
+  "fixtureId": "cap-incoming-attack-response-scored-great-lakes-001",
+  "status": "accepted",
+  "sourceArtifact": "data/benchmark-fixture-sources/match-07/d21d149d-c652-48ef-baf4-0225c0ed7648.json.gz",
+  "cleanRebuilds": [
+    {
+      "state": 3736637310375356,
+      "observation": "34ca93cc967c8b22412b5d19c3f19747500cc1a2a629c726af55846961bfb33a",
+      "candidateMenu": "4ccd6194e940fbddaf5492b10fcd3950eb95b3fb54b4a744d55ae1119af98364",
+      "tileState": "e416bb05be93569a6b62ab532cf673f1b7c1a11dc4f0f2de5aba8d1e3a50012d"
+    },
+    {
+      "state": 3736637310375356,
+      "observation": "34ca93cc967c8b22412b5d19c3f19747500cc1a2a629c726af55846961bfb33a",
+      "candidateMenu": "4ccd6194e940fbddaf5492b10fcd3950eb95b3fb54b4a744d55ae1119af98364",
+      "tileState": "e416bb05be93569a6b62ab532cf673f1b7c1a11dc4f0f2de5aba8d1e3a50012d"
+    },
+    {
+      "state": 3736637310375356,
+      "observation": "34ca93cc967c8b22412b5d19c3f19747500cc1a2a629c726af55846961bfb33a",
+      "candidateMenu": "4ccd6194e940fbddaf5492b10fcd3950eb95b3fb54b4a744d55ae1119af98364",
+      "tileState": "e416bb05be93569a6b62ab532cf673f1b7c1a11dc4f0f2de5aba8d1e3a50012d"
+    },
+    {
+      "state": 3736637310375356,
+      "observation": "34ca93cc967c8b22412b5d19c3f19747500cc1a2a629c726af55846961bfb33a",
+      "candidateMenu": "4ccd6194e940fbddaf5492b10fcd3950eb95b3fb54b4a744d55ae1119af98364",
+      "tileState": "e416bb05be93569a6b62ab532cf673f1b7c1a11dc4f0f2de5aba8d1e3a50012d"
+    },
+    {
+      "state": 3736637310375356,
+      "observation": "34ca93cc967c8b22412b5d19c3f19747500cc1a2a629c726af55846961bfb33a",
+      "candidateMenu": "4ccd6194e940fbddaf5492b10fcd3950eb95b3fb54b4a744d55ae1119af98364",
+      "tileState": "e416bb05be93569a6b62ab532cf673f1b7c1a11dc4f0f2de5aba8d1e3a50012d"
+    }
+  ],
+  "machineChecks": {
+    "checkpointRequirements": true,
+    "oneActionPerDecision": true,
+    "ordinaryInputOnly": true
+  },
+  "referenceReplays": {
+    "attempted": 5,
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "counter:bjhm4vs8:100",
+        "finalHash": 2315780367427505,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 118,
+            "operator": "<=",
+            "threshold": 200,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:bjhm4vs8:100",
+        "finalHash": 2315780367427505,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 118,
+            "operator": "<=",
+            "threshold": 200,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:bjhm4vs8:100",
+        "finalHash": 2315780367427505,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 118,
+            "operator": "<=",
+            "threshold": 200,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:bjhm4vs8:100",
+        "finalHash": 2315780367427505,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 118,
+            "operator": "<=",
+            "threshold": 200,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:bjhm4vs8:100",
+        "finalHash": 2315780367427505,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 118,
+            "operator": "<=",
+            "threshold": 200,
+            "passed": true
+          }
+        ]
+      }
+    ]
+  },
+  "controls": [
+    {
+      "selectedActionId": "hold",
+      "finalHash": 2347420079613425,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "protected-frontier-held",
+          "observed": 331,
+          "operator": "<=",
+          "threshold": 200,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "build:City:1624998",
+      "finalHash": 2352445942425621,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "protected-frontier-held",
+          "observed": 328,
+          "operator": "<=",
+          "threshold": 200,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
+  ],
+  "review": {
+    "blindedTradeoffIdentifiable": true,
+    "fairAndAttributable": true
+  }
+}
