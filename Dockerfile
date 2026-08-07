@@ -25,7 +25,7 @@ RUN npm ci --ignore-scripts
 COPY --from=openfront-source /OpenFrontIO/package*.json ./OpenFrontIO/
 RUN npm --prefix OpenFrontIO ci --ignore-scripts
 COPY --from=openfront-source /OpenFrontIO ./OpenFrontIO
-COPY tsconfig.json vite.config.ts vitest.config.ts harness.html replay.html ./
+COPY tsconfig.json vite.config.ts vitest.config.ts harness.html evals.html replay.html ./
 COPY src ./src
 COPY resources ./resources
 COPY videos ./videos
@@ -57,7 +57,7 @@ COPY data/deepseek-v4-flash ./resources/harness/deepseek-v4-flash
 COPY data/glm-5.2 ./resources/harness/glm-5.2
 COPY data/gpt-5.6-luna ./resources/harness/gpt-5.6-luna
 COPY data/baseline ./data/baseline
-COPY README.md design-decision.md writeup.md ./
+COPY README.md specs/design-decision.md writeup.md ./
 COPY --from=build /app/static ./static
 RUN mkdir -p /data
 EXPOSE 3000
