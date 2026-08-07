@@ -9,8 +9,19 @@ import {
   createObservation,
 } from "../src/ObservationActions";
 import { BENCHMARK_CAPABILITY_TASKS } from "../src/benchmark/BenchmarkCapabilities";
+import {
+  ACCEPTANCE_CONTROL_MODES,
+  acceptancePolicy,
+  acceptancePolicyHash,
+  CapabilityTask,
+} from "../src/benchmark/BenchmarkAcceptance";
+import { runBenchmarkCapabilityTrial } from "../src/benchmark/BenchmarkCapabilityRunner";
 import { createReleaseManifestInput } from "../src/benchmark/BenchmarkManifest";
-import { BenchmarkManifestSchema } from "../src/benchmark/BenchmarkSchemas";
+import {
+  BenchmarkAcceptanceReportSchema,
+  BenchmarkManifestSchema,
+} from "../src/benchmark/BenchmarkSchemas";
+import { benchmarkHarnessSourceHash } from "../src/benchmark/BenchmarkReleaseValidation";
 import {
   canonicalHash,
   canonicalJson,
@@ -408,7 +419,9 @@ async function buildFixture(
     const ownershipSets: Record<string, number[]> = {};
     const semanticRoles: Record<string, unknown> = { sourceArtifact: file };
     const thresholds: Record<string, unknown> = {};
-    if (
+    if (definition.family === "post-expansion-recovery") {
+      thresholds.maximumRecoveryTerritoryGain = 100;
+    } else if (
       ["neutral-expansion", "saturated-capacity-expansion"].includes(
         definition.family,
       )
@@ -445,6 +458,9 @@ async function buildFixture(
         definition.family === "incoming-attack-response"
           ? 200
           : Math.max(25, Math.ceil(ownershipSets.protectedTiles.length * 0.2));
+      if (definition.family === "frontier-restraint") {
+        thresholds.maximumTotalTileLoss = 5_000;
+      }
     } else if (definition.family === "split-front-prioritization") {
       const attacks = player.incomingAttacks();
       const attackers = [...new Set(attacks.map((item) => item.attacker()))]
@@ -501,28 +517,9 @@ async function buildFixture(
       candidateMenu: canonicalHash(candidates),
       tileState: tileStateHash(session.game.tileStateBuffer()),
     };
-    const report = {
-      schemaVersion: "benchmark-fixture-acceptance-v1",
-      fixtureId: definition.fixtureId,
-      status: "accepted",
-      sourceArtifact: file,
-      cleanRebuilds: Array.from({ length: 5 }, () => hashes),
-      machineChecks: {
-        checkpointRequirements: true,
-        oneActionPerDecision: true,
-        ordinaryInputOnly: true,
-      },
-      referenceReplays: { attempted: 5, passed: 5 },
-      controls: ["hold", "plausible-distractor"],
-      review: { blindedTradeoffIdentifiable: true, fairAndAttributable: true },
-    };
-    const reportPath = `resources/benchmark/acceptance/${definition.fixtureId}.json`;
-    await fs.writeFile(
-      path.join(ROOT, reportPath),
-      `${JSON.stringify(report, null, 2)}\n`,
-    );
     return {
       fixtureId: definition.fixtureId,
+      sourceArtifact: file,
       preparationTurns,
       decisionIndex: Number(nearestDecision?.index ?? 0),
       recentDecisions,
@@ -531,12 +528,6 @@ async function buildFixture(
       semanticRoles,
       thresholds,
       ownershipSets,
-      referencePolicyHash: sha256(`reference:${definition.family}:v2`),
-      controlPolicyHashes: [
-        sha256(`hold:${definition.family}:v2`),
-        sha256(`distractor:${definition.family}:v2`),
-      ],
-      acceptanceReportPath: reportPath,
     };
   } finally {
     session.close();
@@ -547,7 +538,95 @@ await fs.mkdir(path.join(OUT, "acceptance"), { recursive: true });
 const capabilities = [];
 for (const definition of BENCHMARK_CAPABILITY_TASKS) {
   process.stdout.write(`Freezing ${definition.fixtureId}\n`);
-  capabilities.push(await buildFixture(definition));
+  const rebuilds = [];
+  for (let rebuild = 0; rebuild < 5; rebuild++) {
+    rebuilds.push(await buildFixture(definition));
+  }
+  const fixture = rebuilds[0];
+  if (new Set(rebuilds.map((item) => canonicalHash(item.hashes))).size !== 1) {
+    throw new Error(`${definition.fixtureId}: five clean rebuilds drifted`);
+  }
+  const acceptanceTask = {
+    id: definition.fixtureId,
+    suite: "capability",
+    family: definition.family,
+    sourceTaskId: definition.sourceTaskId,
+    horizonTicks: definition.horizonTicks,
+    ...fixture,
+  } as unknown as CapabilityTask;
+  const references = [];
+  for (let replay = 0; replay < 5; replay++) {
+    references.push(
+      await runBenchmarkCapabilityTrial(
+        acceptanceTask,
+        acceptancePolicy(acceptanceTask, "reference"),
+      ),
+    );
+  }
+  if (references.some((result) => !result.taskPass)) {
+    throw new Error(
+      `${definition.fixtureId}: reference policy did not pass 5/5`,
+    );
+  }
+  const controls = [];
+  for (const mode of ACCEPTANCE_CONTROL_MODES) {
+    const result = await runBenchmarkCapabilityTrial(
+      acceptanceTask,
+      acceptancePolicy(acceptanceTask, mode),
+    );
+    if (result.taskPass) {
+      throw new Error(`${definition.fixtureId}: ${mode} unexpectedly passed`);
+    }
+    controls.push({ mode, result });
+  }
+  if (
+    new Set(controls.map(({ result }) => result.selectedActionIds[0])).size !==
+    controls.length
+  ) {
+    throw new Error(
+      `${definition.fixtureId}: controls are not distinct actions`,
+    );
+  }
+  const acceptedRun = (result: (typeof references)[number]) => ({
+    selectedActionId: result.selectedActionIds[0],
+    finalHash: result.finalHash,
+    passed: result.taskPass,
+    assertions: result.assertions,
+  });
+  const report = BenchmarkAcceptanceReportSchema.parse({
+    schemaVersion: "benchmark-fixture-acceptance-v2",
+    fixtureId: definition.fixtureId,
+    status: "accepted",
+    sourceArtifact: fixture.sourceArtifact,
+    cleanRebuilds: rebuilds.map((item) => item.hashes),
+    machineChecks: {
+      checkpointRequirements: true,
+      oneActionPerDecision: true,
+      ordinaryInputOnly: true,
+    },
+    referenceReplays: {
+      attempted: 5,
+      passed: references.filter((result) => result.taskPass).length,
+      runs: references.map(acceptedRun),
+    },
+    controls: controls.map(({ mode, result }) => ({
+      name: mode,
+      ...acceptedRun(result),
+    })),
+    review: { blindedTradeoffIdentifiable: true, fairAndAttributable: true },
+  });
+  const reportPath = `resources/benchmark/acceptance/${definition.fixtureId}.json`;
+  const reportBuffer = Buffer.from(`${JSON.stringify(report, null, 2)}\n`);
+  await fs.writeFile(path.join(ROOT, reportPath), reportBuffer);
+  capabilities.push({
+    ...fixture,
+    referencePolicyHash: acceptancePolicyHash(acceptanceTask, "reference"),
+    controlPolicyHashes: ACCEPTANCE_CONTROL_MODES.map((mode) =>
+      acceptancePolicyHash(acceptanceTask, mode),
+    ),
+    acceptanceReportPath: reportPath,
+    acceptanceReportHash: sha256(reportBuffer),
+  });
 }
 const harnessCommit = execFileSync("git", ["rev-parse", "HEAD"], {
   encoding: "utf8",
@@ -561,6 +640,7 @@ const manifest = BenchmarkManifestSchema.parse(
   await createReleaseManifestInput({
     mapsDir: MAPS,
     harnessCommit,
+    harnessSourceHash: await benchmarkHarnessSourceHash(ROOT),
     releaseDate: "2026-08-06",
     graderPackageHash,
     capabilities,

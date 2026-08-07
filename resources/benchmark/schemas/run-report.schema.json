@@ -9,6 +9,7 @@
     "benchmarkVersion",
     "classification",
     "complete",
+    "configuration",
     "manifestHash",
     "runId",
     "runnerSeed",
@@ -33,6 +34,22 @@
       ]
     },
     "complete": { "type": "boolean" },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestedModel",
+        "requestedProvider",
+        "promptVersion",
+        "reasoningEffort"
+      ],
+      "properties": {
+        "requestedModel": { "type": "string", "minLength": 1 },
+        "requestedProvider": { "type": ["string", "null"] },
+        "promptVersion": { "const": "agent-v13" },
+        "reasoningEffort": { "const": "none" }
+      }
+    },
     "manifestHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "runId": { "type": "string", "format": "uuid" },
     "runnerSeed": { "type": "string", "minLength": 1 },

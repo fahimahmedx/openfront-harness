@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "benchmark-fixture-acceptance-v1",
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
   "fixtureId": "cap-frontier-restraint-scored-strait-of-gibraltar-001",
   "status": "accepted",
   "sourceArtifact": "data/benchmark-fixture-sources/match-10/59e577f3-645b-40b7-baf9-a578f2ee8396.json.gz",
@@ -42,11 +42,258 @@
   },
   "referenceReplays": {
     "attempted": 5,
-    "passed": 5
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "hold",
+        "finalHash": 10878108186100706,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "capacity-increased",
+            "observed": 75.45336476114713,
+            "operator": ">",
+            "threshold": 57.12651895689639,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 0,
+            "operator": "<=",
+            "threshold": 1038,
+            "passed": true
+          },
+          {
+            "id": "total-territory-loss-limited",
+            "observed": 0,
+            "operator": "<=",
+            "threshold": 5000,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "hold",
+        "finalHash": 10878108186100706,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "capacity-increased",
+            "observed": 75.45336476114713,
+            "operator": ">",
+            "threshold": 57.12651895689639,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 0,
+            "operator": "<=",
+            "threshold": 1038,
+            "passed": true
+          },
+          {
+            "id": "total-territory-loss-limited",
+            "observed": 0,
+            "operator": "<=",
+            "threshold": 5000,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "hold",
+        "finalHash": 10878108186100706,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "capacity-increased",
+            "observed": 75.45336476114713,
+            "operator": ">",
+            "threshold": 57.12651895689639,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 0,
+            "operator": "<=",
+            "threshold": 1038,
+            "passed": true
+          },
+          {
+            "id": "total-territory-loss-limited",
+            "observed": 0,
+            "operator": "<=",
+            "threshold": 5000,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "hold",
+        "finalHash": 10878108186100706,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "capacity-increased",
+            "observed": 75.45336476114713,
+            "operator": ">",
+            "threshold": 57.12651895689639,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 0,
+            "operator": "<=",
+            "threshold": 1038,
+            "passed": true
+          },
+          {
+            "id": "total-territory-loss-limited",
+            "observed": 0,
+            "operator": "<=",
+            "threshold": 5000,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "hold",
+        "finalHash": 10878108186100706,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "capacity-increased",
+            "observed": 75.45336476114713,
+            "operator": ">",
+            "threshold": 57.12651895689639,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 0,
+            "operator": "<=",
+            "threshold": 1038,
+            "passed": true
+          },
+          {
+            "id": "total-territory-loss-limited",
+            "observed": 0,
+            "operator": "<=",
+            "threshold": 5000,
+            "passed": true
+          }
+        ]
+      }
+    ]
   },
   "controls": [
-    "hold",
-    "plausible-distractor"
+    {
+      "selectedActionId": "attack:6g7uuf82:100",
+      "finalHash": 8630539248363140,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "capacity-increased",
+          "observed": 57.07038282521317,
+          "operator": ">",
+          "threshold": 57.12651895689639,
+          "passed": false
+        },
+        {
+          "id": "protected-frontier-held",
+          "observed": 112,
+          "operator": "<=",
+          "threshold": 1038,
+          "passed": true
+        },
+        {
+          "id": "total-territory-loss-limited",
+          "observed": 0,
+          "operator": "<=",
+          "threshold": 5000,
+          "passed": true
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "boat:0x51vq33:100",
+      "finalHash": 8687059014292037,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "capacity-increased",
+          "observed": 57.218001169615675,
+          "operator": ">",
+          "threshold": 57.12651895689639,
+          "passed": true
+        },
+        {
+          "id": "protected-frontier-held",
+          "observed": 985,
+          "operator": "<=",
+          "threshold": 1038,
+          "passed": true
+        },
+        {
+          "id": "total-territory-loss-limited",
+          "observed": 20533,
+          "operator": "<=",
+          "threshold": 5000,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
   ],
   "review": {
     "blindedTradeoffIdentifiable": true,

@@ -28,6 +28,11 @@ import {
 } from "../src/benchmark/BenchmarkManifest";
 import { NodeGameMapLoader } from "../src/NodeGameMapLoader";
 import { BenchmarkManifestSchema } from "../src/benchmark/BenchmarkSchemas";
+import { BenchmarkAcceptanceReportSchema } from "../src/benchmark/BenchmarkSchemas";
+import {
+  benchmarkHarnessSourceHash,
+  validateBenchmarkRelease,
+} from "../src/benchmark/BenchmarkReleaseValidation";
 
 describe("public benchmark contract", () => {
   test("contains the exact scored suite dimensions", () => {
@@ -92,6 +97,57 @@ describe("public benchmark contract", () => {
     ).toThrow();
   });
 
+  test("fails closed when frozen runtime configuration drifts", async () => {
+    const root = path.resolve(".");
+    const raw = JSON.parse(
+      readFileSync(
+        path.join(root, "resources/benchmark/manifest.json"),
+        "utf8",
+      ),
+    );
+    await expect(validateBenchmarkRelease(raw, root)).resolves.toBeTruthy();
+    await expect(
+      validateBenchmarkRelease(
+        {
+          ...raw,
+          tasks: raw.tasks.map((task: { ceilings: object }, index: number) =>
+            index === 0
+              ? { ...task, ceilings: { ...task.ceilings, maxWallClockMs: 1 } }
+              : task,
+          ),
+        },
+        root,
+      ),
+    ).rejects.toThrow(/configuration mismatch/);
+    expect(raw.harnessSourceHash).toBe(await benchmarkHarnessSourceHash(root));
+  });
+
+  test("records real five-run acceptance evidence and distinct failing controls", () => {
+    const manifest = BenchmarkManifestSchema.parse(
+      JSON.parse(
+        readFileSync(path.resolve("resources/benchmark/manifest.json"), "utf8"),
+      ),
+    );
+    for (const task of manifest.tasks) {
+      if (task.suite !== "capability") continue;
+      const report = BenchmarkAcceptanceReportSchema.parse(
+        JSON.parse(
+          readFileSync(path.resolve(task.acceptanceReportPath), "utf8"),
+        ),
+      );
+      expect(report.referenceReplays.runs).toHaveLength(5);
+      expect(report.referenceReplays.runs.every((run) => run.passed)).toBe(
+        true,
+      );
+      expect(report.controls).toHaveLength(2);
+      expect(
+        new Set(report.controls.map((control) => control.selectedActionId))
+          .size,
+      ).toBe(2);
+      expect(report.controls.every((control) => !control.passed)).toBe(true);
+    }
+  });
+
   test("fully resolves every game config without relying on benchmark-changing defaults", () => {
     for (const task of BENCHMARK_MATCH_TASKS) {
       const config = benchmarkGameConfig(task);
@@ -145,6 +201,7 @@ describe("public benchmark contract", () => {
       createReleaseManifestInput({
         mapsDir: path.resolve("OpenFrontIO/resources/maps"),
         harnessCommit: "0123456789abcdef",
+        harnessSourceHash: "0".repeat(64),
         releaseDate: "2026-08-05",
         graderPackageHash: "0".repeat(64),
         capabilities: [],

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "benchmark-fixture-acceptance-v1",
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
   "fixtureId": "cap-losing-attack-retreat-scored-world-001",
   "status": "accepted",
   "sourceArtifact": "data/benchmark-fixture-sources/match-12/0847e54a-a795-423b-b15b-29c76ae34062.json.gz",
@@ -42,11 +42,258 @@
   },
   "referenceReplays": {
     "attempted": 5,
-    "passed": 5
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "retreat:mjqk9xhf",
+        "finalHash": 7466144346151414,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "original-attack-ended",
+            "observed": false,
+            "operator": "=",
+            "threshold": false,
+            "passed": true
+          },
+          {
+            "id": "troops-recovered",
+            "observed": 277482,
+            "operator": ">=",
+            "threshold": 250000,
+            "passed": true
+          },
+          {
+            "id": "territory-preserved",
+            "observed": 2141,
+            "operator": ">=",
+            "threshold": 2124,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "retreat:mjqk9xhf",
+        "finalHash": 7466144346151414,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "original-attack-ended",
+            "observed": false,
+            "operator": "=",
+            "threshold": false,
+            "passed": true
+          },
+          {
+            "id": "troops-recovered",
+            "observed": 277482,
+            "operator": ">=",
+            "threshold": 250000,
+            "passed": true
+          },
+          {
+            "id": "territory-preserved",
+            "observed": 2141,
+            "operator": ">=",
+            "threshold": 2124,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "retreat:mjqk9xhf",
+        "finalHash": 7466144346151414,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "original-attack-ended",
+            "observed": false,
+            "operator": "=",
+            "threshold": false,
+            "passed": true
+          },
+          {
+            "id": "troops-recovered",
+            "observed": 277482,
+            "operator": ">=",
+            "threshold": 250000,
+            "passed": true
+          },
+          {
+            "id": "territory-preserved",
+            "observed": 2141,
+            "operator": ">=",
+            "threshold": 2124,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "retreat:mjqk9xhf",
+        "finalHash": 7466144346151414,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "original-attack-ended",
+            "observed": false,
+            "operator": "=",
+            "threshold": false,
+            "passed": true
+          },
+          {
+            "id": "troops-recovered",
+            "observed": 277482,
+            "operator": ">=",
+            "threshold": 250000,
+            "passed": true
+          },
+          {
+            "id": "territory-preserved",
+            "observed": 2141,
+            "operator": ">=",
+            "threshold": 2124,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "retreat:mjqk9xhf",
+        "finalHash": 7466144346151414,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "original-attack-ended",
+            "observed": false,
+            "operator": "=",
+            "threshold": false,
+            "passed": true
+          },
+          {
+            "id": "troops-recovered",
+            "observed": 277482,
+            "operator": ">=",
+            "threshold": 250000,
+            "passed": true
+          },
+          {
+            "id": "territory-preserved",
+            "observed": 2141,
+            "operator": ">=",
+            "threshold": 2124,
+            "passed": true
+          }
+        ]
+      }
+    ]
   },
   "controls": [
-    "hold",
-    "plausible-distractor"
+    {
+      "selectedActionId": "hold",
+      "finalHash": 7314113338152560,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "original-attack-ended",
+          "observed": true,
+          "operator": "=",
+          "threshold": false,
+          "passed": false
+        },
+        {
+          "id": "troops-recovered",
+          "observed": 163509,
+          "operator": ">=",
+          "threshold": 250000,
+          "passed": false
+        },
+        {
+          "id": "territory-preserved",
+          "observed": 2918,
+          "operator": ">=",
+          "threshold": 2124,
+          "passed": true
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "build:City:1515896",
+      "finalHash": 7336656143594287,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "original-attack-ended",
+          "observed": true,
+          "operator": "=",
+          "threshold": false,
+          "passed": false
+        },
+        {
+          "id": "troops-recovered",
+          "observed": 184062,
+          "operator": ">=",
+          "threshold": 250000,
+          "passed": false
+        },
+        {
+          "id": "territory-preserved",
+          "observed": 2918,
+          "operator": ">=",
+          "threshold": 2124,
+          "passed": true
+        }
+      ],
+      "name": "control2"
+    }
   ],
   "review": {
     "blindedTradeoffIdentifiable": true,

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "benchmark-fixture-acceptance-v1",
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
   "fixtureId": "cap-saturated-capacity-expansion-scored-world-001",
   "status": "accepted",
   "sourceArtifact": "data/benchmark-fixture-sources/match-11/5924f438-b911-4903-a2a1-4c476bec129d.json.gz",
@@ -42,11 +42,111 @@
   },
   "referenceReplays": {
     "attempted": 5,
-    "passed": 5
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "expand:neutral:100",
+        "finalHash": 1494221669685525,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "owns-checkpoint-neutral-tile",
+            "observed": 24,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "expand:neutral:100",
+        "finalHash": 1494221669685525,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "owns-checkpoint-neutral-tile",
+            "observed": 24,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "expand:neutral:100",
+        "finalHash": 1494221669685525,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "owns-checkpoint-neutral-tile",
+            "observed": 24,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "expand:neutral:100",
+        "finalHash": 1494221669685525,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "owns-checkpoint-neutral-tile",
+            "observed": 24,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "expand:neutral:100",
+        "finalHash": 1494221669685525,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "owns-checkpoint-neutral-tile",
+            "observed": 24,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      }
+    ]
   },
   "controls": [
-    "hold",
-    "plausible-distractor"
+    {
+      "selectedActionId": "hold",
+      "finalHash": 1558841707493609,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "owns-checkpoint-neutral-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "build:Defense Post:390990",
+      "finalHash": 1558844321241783,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "owns-checkpoint-neutral-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
   ],
   "review": {
     "blindedTradeoffIdentifiable": true,

@@ -81,6 +81,7 @@ export const BenchmarkManifestTaskSchema = z.discriminatedUnion("suite", [
     referencePolicyHash: LowerHexSha256Schema,
     controlPolicyHashes: z.array(LowerHexSha256Schema).min(2),
     acceptanceReportPath: z.string().min(1),
+    acceptanceReportHash: LowerHexSha256Schema,
   }),
 ]);
 
@@ -95,6 +96,7 @@ export const BenchmarkManifestSchema = z.object({
   }),
   mapAssets: z.record(z.string(), LowerHexSha256Schema),
   harnessCommit: z.string().min(7),
+  harnessSourceHash: LowerHexSha256Schema,
   promptVersion: z.literal("agent-v13"),
   promptHash: LowerHexSha256Schema,
   schemaVersions: z.record(z.string(), z.string().min(1)),
@@ -122,6 +124,79 @@ export const BenchmarkAssertionSchema = z.object({
 });
 export type BenchmarkAssertion = z.infer<typeof BenchmarkAssertionSchema>;
 
+const AcceptanceRunSchema = z.object({
+  selectedActionId: z.string().min(1),
+  finalHash: z.union([z.number(), z.string(), z.null()]),
+  passed: z.boolean(),
+  assertions: z.array(BenchmarkAssertionSchema),
+});
+
+export const BenchmarkAcceptanceReportSchema = z.object({
+  schemaVersion: z.literal("benchmark-fixture-acceptance-v2"),
+  fixtureId: z.string().min(1),
+  status: z.literal("accepted"),
+  sourceArtifact: z.string().min(1),
+  cleanRebuilds: z
+    .array(
+      z.object({
+        state: z.union([z.number().int(), z.string()]),
+        observation: LowerHexSha256Schema,
+        candidateMenu: LowerHexSha256Schema,
+        tileState: LowerHexSha256Schema,
+      }),
+    )
+    .length(5),
+  machineChecks: z.object({
+    checkpointRequirements: z.literal(true),
+    oneActionPerDecision: z.literal(true),
+    ordinaryInputOnly: z.literal(true),
+  }),
+  referenceReplays: z.object({
+    attempted: z.literal(5),
+    passed: z.literal(5),
+    runs: z
+      .array(AcceptanceRunSchema.extend({ passed: z.literal(true) }))
+      .length(5),
+  }),
+  controls: z
+    .array(
+      AcceptanceRunSchema.extend({
+        name: z.string().min(1),
+        passed: z.literal(false),
+      }),
+    )
+    .min(2)
+    .refine(
+      (controls) =>
+        new Set(controls.map((control) => control.selectedActionId)).size ===
+        controls.length,
+      { message: "Acceptance controls must select distinct legal actions" },
+    ),
+  review: z.object({
+    blindedTradeoffIdentifiable: z.literal(true),
+    fairAndAttributable: z.literal(true),
+  }),
+});
+export type BenchmarkAcceptanceReport = z.infer<
+  typeof BenchmarkAcceptanceReportSchema
+>;
+
+export const BenchmarkModelSchema = z.object({
+  requested: z.string().min(1),
+  resolved: z.string().min(1),
+  provider: z.string().nullable(),
+  requestedProvider: z.string().nullable(),
+  promptVersion: z.literal("agent-v13"),
+  reasoningEffort: z.literal("none"),
+});
+
+export const BenchmarkConfigurationSchema = z.object({
+  requestedModel: z.string().min(1),
+  requestedProvider: z.string().nullable(),
+  promptVersion: z.literal("agent-v13"),
+  reasoningEffort: z.literal("none"),
+});
+
 export const BenchmarkTrialSchema = z.object({
   schemaVersion: z.literal("benchmark-trial-v1"),
   benchmarkVersion: z.literal(BENCHMARK_VERSION),
@@ -133,7 +208,7 @@ export const BenchmarkTrialSchema = z.object({
   split: BenchmarkSplitSchema,
   status: z.enum(["valid", "invalid", "needs-review"]),
   invalidReason: z.string().nullable(),
-  model: z.record(z.string(), z.unknown()),
+  model: BenchmarkModelSchema,
   startedAt: z.string().datetime(),
   completedAt: z.string().datetime(),
   hashes: z.record(z.string(), z.union([z.string(), z.number(), z.null()])),
@@ -164,6 +239,7 @@ export const BenchmarkRunReportSchema = z.object({
     "unofficial-custom-agent",
   ]),
   complete: z.boolean(),
+  configuration: BenchmarkConfigurationSchema,
   manifestHash: LowerHexSha256Schema,
   runId: z.uuid(),
   runnerSeed: z.string().min(1),

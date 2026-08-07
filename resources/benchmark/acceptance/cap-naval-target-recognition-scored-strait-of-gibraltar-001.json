@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "benchmark-fixture-acceptance-v1",
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
   "fixtureId": "cap-naval-target-recognition-scored-strait-of-gibraltar-001",
   "status": "accepted",
   "sourceArtifact": "data/benchmark-fixture-sources/match-09/5c00ed89-cd4d-4ecf-894b-9d74ef6dd9ea.json.gz",
@@ -42,11 +42,111 @@
   },
   "referenceReplays": {
     "attempted": 5,
-    "passed": 5
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "boat:a8blddjf:100",
+        "finalHash": 9151510202852736,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 179312,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "boat:a8blddjf:100",
+        "finalHash": 9151510202852736,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 179312,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "boat:a8blddjf:100",
+        "finalHash": 9151510202852736,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 179312,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "boat:a8blddjf:100",
+        "finalHash": 9151510202852736,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 179312,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "boat:a8blddjf:100",
+        "finalHash": 9151510202852736,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 179312,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      }
+    ]
   },
   "controls": [
-    "hold",
-    "plausible-distractor"
+    {
+      "selectedActionId": "hold",
+      "finalHash": 12687845576534420,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "captures-target-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "build:City:1854597",
+      "finalHash": 12880408139664108,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "captures-target-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
   ],
   "review": {
     "blindedTradeoffIdentifiable": true,

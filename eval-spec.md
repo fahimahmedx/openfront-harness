@@ -518,8 +518,9 @@ MUST contain:
 
 - benchmark semantic version, release date, license, and maintainer;
 - OpenFront version/commit and SHA-256 for every map asset;
-- harness commit, prompt version/hash, schema versions, resolver version, troop
-  policy, grader package hash, and complete resolved configuration;
+- harness commit and benchmark-runtime source hash, prompt version/hash, schema
+  versions, resolver version, troop policy, grader package hash, and complete
+  resolved configuration;
 - every task ID, suite, split, map enum/path, seed, fixed spawn, difficulty,
   Nation/tribe counts, ordered expected roster, and all ceilings;
 - capability preparation turns, checkpoint tick and hashes, horizon, semantic
@@ -576,6 +577,7 @@ cd openfront-harness
 npm run inst
 cp example.env .env
 # Set OPENROUTER_API_KEY, OPENROUTER_MODEL, and optionally OPENROUTER_PROVIDER.
+npm run benchmark:acceptance
 npm run benchmark:smoke
 npm run benchmark:run -- --profile official
 npm run benchmark:verify -- data/benchmarks/<run-id>
@@ -655,6 +657,22 @@ Before `openfront-bench-v0.1` release, the maintainer MUST also complete:
   maintainer/contact; and
 - a release candidate with no unresolved impossible, ambiguous, leaking, or
   nondeterministic task.
+
+The maintainer release sequence is:
+
+```bash
+# After the executable benchmark changes and release checks are committed:
+npm run benchmark:freeze
+npm run benchmark:validate-tasks
+npm run benchmark:acceptance
+npm run benchmark:smoke
+```
+
+The generated acceptance reports and manifest are then committed as a separate
+artifact-only commit. The manifest's `harnessCommit` MUST identify the preceding
+executable-code commit, because a Git commit cannot contain its own hash. The
+exact runtime is enforced by `harnessSourceHash`; the commit field supplies
+fetchable repository provenance and MUST be an ancestor of the release checkout.
 
 A 0% model pass rate triggers an audit before being called model failure. An
 impossible reference, valid creative solution rejected by the grader, ambiguous

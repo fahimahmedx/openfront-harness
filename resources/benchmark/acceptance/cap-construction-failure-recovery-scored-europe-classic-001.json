@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "benchmark-fixture-acceptance-v1",
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
   "fixtureId": "cap-construction-failure-recovery-scored-europe-classic-001",
   "status": "accepted",
   "sourceArtifact": "data/benchmark-fixture-sources/match-03/8df00795-1d13-4d14-8a85-64e41e45ef1c.json.gz",
@@ -42,11 +42,160 @@
   },
   "referenceReplays": {
     "attempted": 5,
-    "passed": 5
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "build:Defense Post:7408",
+        "finalHash": 12340275119256124,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "active-defense-post-in-zone",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "build:Defense Post:7408",
+        "finalHash": 12340275119256124,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "active-defense-post-in-zone",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "build:Defense Post:7408",
+        "finalHash": 12340275119256124,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "active-defense-post-in-zone",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "build:Defense Post:7408",
+        "finalHash": 12340275119256124,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "active-defense-post-in-zone",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "build:Defense Post:7408",
+        "finalHash": 12340275119256124,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "active-defense-post-in-zone",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          }
+        ]
+      }
+    ]
   },
   "controls": [
-    "hold",
-    "plausible-distractor"
+    {
+      "selectedActionId": "hold",
+      "finalHash": 12340206064520244,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "active-defense-post-in-zone",
+          "observed": false,
+          "operator": "=",
+          "threshold": true,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "build:City:7408",
+      "finalHash": 12459595820051104,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "active-defense-post-in-zone",
+          "observed": false,
+          "operator": "=",
+          "threshold": true,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
   ],
   "review": {
     "blindedTradeoffIdentifiable": true,

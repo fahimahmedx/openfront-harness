@@ -71,11 +71,13 @@ export type FrozenCapabilityData = {
   referencePolicyHash: string;
   controlPolicyHashes: string[];
   acceptanceReportPath: string;
+  acceptanceReportHash: string;
 };
 
 export async function createReleaseManifestInput(options: {
   mapsDir: string;
   harnessCommit: string;
+  harnessSourceHash: string;
   releaseDate: string;
   graderPackageHash: string;
   capabilities: readonly FrozenCapabilityData[];
@@ -110,9 +112,10 @@ export async function createReleaseManifestInput(options: {
     engine: { version: OPENFRONT_VERSION, commit: OPENFRONT_COMMIT },
     mapAssets: await benchmarkMapAssetHashes(options.mapsDir),
     harnessCommit: options.harnessCommit,
+    harnessSourceHash: options.harnessSourceHash,
     promptVersion: OpenRouterAgent.promptVersion(),
     // The prompt serializer is code, so hash a stable representative rendering;
-    // verification additionally pins the harness commit.
+    // verification additionally pins the complete benchmark runtime source.
     promptHash: sha256(promptFor({} as never, [])),
     schemaVersions: {
       manifest: "benchmark-manifest-v1",
@@ -162,6 +165,7 @@ export async function createReleaseManifestInput(options: {
           referencePolicyHash: frozen.referencePolicyHash,
           controlPolicyHashes: frozen.controlPolicyHashes,
           acceptanceReportPath: frozen.acceptanceReportPath,
+          acceptanceReportHash: frozen.acceptanceReportHash,
         };
       }),
     ],

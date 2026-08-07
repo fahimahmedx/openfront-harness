@@ -16,6 +16,8 @@ import {
   BENCHMARK_MATCH_TASKS,
   benchmarkTask,
 } from "../src/benchmark/BenchmarkConfig";
+import { summarizeBenchmarkTrials } from "../src/benchmark/BenchmarkReport";
+import { validateBenchmarkRelease } from "../src/benchmark/BenchmarkReleaseValidation";
 import {
   BenchmarkManifestSchema,
   BenchmarkRunReport,
@@ -24,14 +26,7 @@ import {
   BenchmarkTrialSchema,
 } from "../src/benchmark/BenchmarkSchemas";
 import { canonicalHash, canonicalJson } from "../src/benchmark/CanonicalJson";
-import {
-  deterministicShuffle,
-  mean,
-  percentile,
-  percentileBootstrap95,
-  stratifiedBootstrap95,
-  wilson95,
-} from "../src/benchmark/BenchmarkStatistics";
+import { deterministicShuffle } from "../src/benchmark/BenchmarkStatistics";
 
 const gzipAsync = promisify(gzip);
 const PROJECT_ROOT = path.resolve(
@@ -75,8 +70,10 @@ async function worker(): Promise<void> {
   if (task.suite === "match") {
     const store = new RunStore(path.join(runDir, "artifacts"));
     await store.init();
-    const artifact = await HarnessRunner.benchmarkFromEnvironment(
+    const artifact = await new HarnessRunner(
       store,
+      agent,
+      path.join(PROJECT_ROOT, "OpenFrontIO/resources/maps"),
       benchmarkTask(task.id),
     ).run(trialId);
     if (
@@ -98,7 +95,10 @@ async function worker(): Promise<void> {
       split: "scored",
       status: "valid",
       invalidReason: null,
-      model: artifact.model,
+      model: {
+        ...artifact.model,
+        requestedProvider: agent.provider ?? null,
+      },
       startedAt: artifact.startedAt,
       completedAt: artifact.completedAt,
       hashes: { final: artifact.outcome.finalHash },
@@ -154,6 +154,7 @@ async function worker(): Promise<void> {
         requested: agent.requestedModel,
         resolved: result.agent.model,
         provider: result.agent.provider,
+        requestedProvider: agent.provider ?? null,
         promptVersion: agent.promptVersion,
         reasoningEffort: OpenRouterAgent.reasoningEffort(),
       },
@@ -207,134 +208,6 @@ function child(args: string[]): Promise<void> {
   });
 }
 
-function summarize(trials: BenchmarkTrial[], seed: string) {
-  const valid = trials.filter((trial) => trial.status === "valid");
-  const match = valid.filter((trial) => trial.suite === "match");
-  const capability = valid.filter((trial) => trial.suite === "capability");
-  const matchTasks = BENCHMARK_MATCH_TASKS.map((task) => {
-    const values = match
-      .filter((trial) => trial.taskId === task.id)
-      .map((trial) => trial.taskScore);
-    return values.length === 0
-      ? null
-      : {
-          taskId: task.id,
-          mean: mean(values),
-          interval95: percentileBootstrap95(values, `${seed}:${task.id}`),
-          values,
-          stratum: task.mapStratum,
-        };
-  }).filter((value): value is NonNullable<typeof value> => value !== null);
-  const capabilities = Object.fromEntries(
-    BENCHMARK_CAPABILITY_TASKS.flatMap((task) => {
-      const values = capability.filter(
-        (trial) => trial.taskId === task.fixtureId,
-      );
-      if (values.length === 0) return [];
-      const successes = values.filter(
-        (trial) => trial.taskScore === 100,
-      ).length;
-      const rate = successes / values.length;
-      return [
-        [
-          task.family,
-          {
-            successes,
-            validTrials: values.length,
-            passAt1: rate,
-            wilson95: wilson95(successes, values.length),
-            estimatedPassPower3: rate ** 3,
-            meanComponentCoverage: mean(
-              values.map((trial) => trial.componentCoverage ?? 0),
-            ),
-          },
-        ],
-      ];
-    }),
-  );
-  const latencies = valid.flatMap((trial) =>
-    trial.attempts.timings.map((timing) => timing.totalMs),
-  );
-  const costs = valid
-    .map((trial) => trial.usage.costUsd)
-    .filter((cost): cost is number => cost !== null);
-  const capabilityRates = Object.values(capabilities).map(
-    (value) => (value as { passAt1: number }).passAt1,
-  );
-  return {
-    matchScore:
-      matchTasks.length === 0
-        ? null
-        : mean(matchTasks.map((task) => task.mean)),
-    matchBootstrap95:
-      matchTasks.length === 0
-        ? null
-        : stratifiedBootstrap95(
-            matchTasks.map((task) => ({
-              taskId: task.taskId,
-              stratum: task.stratum,
-              values: task.values,
-            })),
-            `${seed}:match`,
-          ),
-    capabilityScore:
-      capabilityRates.length === 0 ? null : 100 * mean(capabilityRates),
-    capabilityBootstrap95:
-      capabilityRates.length === 0
-        ? null
-        : stratifiedBootstrap95(
-            BENCHMARK_CAPABILITY_TASKS.flatMap((task) => {
-              const values = capability
-                .filter((trial) => trial.taskId === task.fixtureId)
-                .map((trial) => trial.taskScore);
-              return values.length === 0
-                ? []
-                : [{ taskId: task.fixtureId, stratum: task.family, values }];
-            }),
-            `${seed}:capability`,
-          ),
-    winRate:
-      match.length === 0
-        ? null
-        : match.filter((trial) => trial.diagnostics.won === true).length /
-          match.length,
-    meanPlacement:
-      match.length === 0
-        ? null
-        : mean(
-            match.map((trial) => {
-              const placement = trial.diagnostics.placement;
-              if (typeof placement !== "number")
-                throw new Error("Missing placement diagnostic");
-              return placement;
-            }),
-          ),
-    survivalRate:
-      match.length === 0
-        ? null
-        : match.filter((trial) => trial.diagnostics.survived === true).length /
-          match.length,
-    matchTasks,
-    capabilities,
-    firstAttemptValidityRate:
-      valid.length === 0
-        ? 0
-        : valid.filter(
-            (trial) =>
-              !trial.attempts.failures.some((failure) => failure.attempt === 1),
-          ).length / valid.length,
-    fallbackRate:
-      valid.length === 0
-        ? 0
-        : valid.filter((trial) => trial.attempts.fallback).length /
-          valid.length,
-    medianLatencyMs: latencies.length === 0 ? 0 : percentile(latencies, 0.5),
-    p95LatencyMs: latencies.length === 0 ? 0 : percentile(latencies, 0.95),
-    totalCostUsd: costs.reduce((sum, cost) => sum + cost, 0),
-    meanCostUsd: costs.length === 0 ? null : mean(costs),
-  };
-}
-
 async function main(): Promise<void> {
   if (option("profile") !== "official")
     throw new Error("--profile official is required");
@@ -351,7 +224,16 @@ async function main(): Promise<void> {
     );
   });
   const manifestValue = JSON.parse(manifestRaw);
-  const manifest = BenchmarkManifestSchema.parse(manifestValue);
+  const manifest = await validateBenchmarkRelease(manifestValue, PROJECT_ROOT);
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) throw new Error("OPENROUTER_API_KEY is required");
+  const configuredAgent = new OpenRouterAgent(apiKey);
+  const configuration = {
+    requestedModel: configuredAgent.requestedModel,
+    requestedProvider: configuredAgent.provider ?? null,
+    promptVersion: configuredAgent.promptVersion,
+    reasoningEffort: OpenRouterAgent.reasoningEffort(),
+  } as const;
   const resumedReport = resumeDir
     ? BenchmarkRunReportSchema.parse(
         JSON.parse(
@@ -361,6 +243,12 @@ async function main(): Promise<void> {
     : null;
   if (resumedReport?.complete)
     throw new Error("Cannot resume an already complete run");
+  if (
+    resumedReport &&
+    canonicalHash(resumedReport.configuration) !== canonicalHash(configuration)
+  ) {
+    throw new Error("Cannot resume with a different model configuration");
+  }
   const runId = resumedReport?.runId ?? randomUUID();
   const runnerSeed =
     resumedReport?.runnerSeed ?? option("runner-seed") ?? runId;
@@ -379,31 +267,55 @@ async function main(): Promise<void> {
     path.join(runDir, "manifest.json"),
     canonicalJson(manifestValue),
   );
+  const frozenManifestPath = path.join(runDir, "manifest.json");
   const manifestHash = canonicalHash(manifestValue);
   if (resumedReport && resumedReport.manifestHash !== manifestHash) {
     throw new Error("Resume manifest does not match the partial run");
   }
-  const schedule =
-    resumedReport?.taskOrder ??
-    deterministicShuffle(
-      [
-        ...BENCHMARK_MATCH_TASKS.flatMap((task) =>
-          Array.from({ length: 3 }, () => task.id),
-        ),
-        ...BENCHMARK_CAPABILITY_TASKS.flatMap((task) =>
-          Array.from({ length: 10 }, () => task.fixtureId),
-        ),
-      ],
-      runnerSeed,
-    );
+  const schedule = deterministicShuffle(
+    [
+      ...BENCHMARK_MATCH_TASKS.flatMap((task) =>
+        Array.from({ length: 3 }, () => task.id),
+      ),
+      ...BENCHMARK_CAPABILITY_TASKS.flatMap((task) =>
+        Array.from({ length: 10 }, () => task.fixtureId),
+      ),
+    ],
+    runnerSeed,
+  );
+  if (
+    resumedReport &&
+    canonicalHash(resumedReport.taskOrder) !== canonicalHash(schedule)
+  ) {
+    throw new Error("Resume report task order is not the canonical schedule");
+  }
   const trialReferences = [...(resumedReport?.trialReferences ?? [])];
+  if (
+    new Set(trialReferences).size !== trialReferences.length ||
+    trialReferences.some(
+      (reference, index) =>
+        reference !== `trials/${String(index).padStart(3, "0")}.json`,
+    )
+  ) {
+    throw new Error("Resume report contains invalid trial references");
+  }
   const invalidTrials = [...(resumedReport?.invalidTrials ?? [])];
   const trials: BenchmarkTrial[] = await Promise.all(
-    trialReferences.map(async (reference) =>
-      BenchmarkTrialSchema.parse(
+    trialReferences.map(async (reference, index) => {
+      const trial = BenchmarkTrialSchema.parse(
         JSON.parse(await fs.readFile(path.join(runDir, reference), "utf8")),
-      ),
-    ),
+      );
+      if (
+        trial.taskId !== schedule[index] ||
+        trial.model.requested !== configuration.requestedModel ||
+        trial.model.requestedProvider !== configuration.requestedProvider ||
+        trial.model.promptVersion !== configuration.promptVersion ||
+        trial.model.reasoningEffort !== configuration.reasoningEffort
+      ) {
+        throw new Error(`Resume trial mismatch: ${reference}`);
+      }
+      return trial;
+    }),
   );
   const invocation = process.argv
     .map((value) =>
@@ -416,6 +328,7 @@ async function main(): Promise<void> {
       benchmarkVersion: manifest.benchmarkVersion,
       classification: resumedReport?.classification ?? "external-self-run",
       complete,
+      configuration,
       manifestHash,
       runId,
       runnerSeed,
@@ -433,7 +346,7 @@ async function main(): Promise<void> {
       taskOrder: schedule,
       trialReferences,
       invalidTrials,
-      summaries: summarize(trials, bootstrapSeed),
+      summaries: summarizeBenchmarkTrials(trials, bootstrapSeed),
       exactInvocation: invocation,
     } satisfies BenchmarkRunReport);
     await atomicJson(path.join(runDir, "report.json"), report);
@@ -448,7 +361,7 @@ async function main(): Promise<void> {
       const trialId = randomUUID();
       try {
         await child([
-          `--manifest=${manifestPath}`,
+          `--manifest=${frozenManifestPath}`,
           `--output=${runDir}`,
           `--run-id=${runId}`,
           `--trial-id=${trialId}`,

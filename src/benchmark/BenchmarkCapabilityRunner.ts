@@ -133,7 +133,12 @@ function grade(
         assertion("owns-checkpoint-neutral-tile", gained, ">=", 1, gained >= 1),
       ];
     }
-    case "post-expansion-recovery":
+    case "post-expansion-recovery": {
+      const maximumGain = numeric(
+        fixture.thresholds,
+        "maximumRecoveryTerritoryGain",
+      );
+      const territoryGain = tiles - initial.tileCount;
       return [
         aliveAssertion(),
         assertion(
@@ -144,7 +149,15 @@ function grade(
           capacity > initial.capacityPercent,
         ),
         territoryAssertion(),
+        assertion(
+          "recovery-avoids-new-expansion",
+          territoryGain,
+          "<=",
+          maximumGain,
+          territoryGain <= maximumGain,
+        ),
       ];
+    }
     case "weaker-target-selection":
     case "naval-target-recognition": {
       const captured = ownedCount(
@@ -179,6 +192,18 @@ function grade(
           maximum,
           lost <= maximum,
         ),
+        ...(fixture.family === "frontier-restraint"
+          ? [
+              assertion(
+                "total-territory-loss-limited",
+                Math.max(0, initial.tileCount - tiles),
+                "<=",
+                numeric(fixture.thresholds, "maximumTotalTileLoss"),
+                Math.max(0, initial.tileCount - tiles) <=
+                  numeric(fixture.thresholds, "maximumTotalTileLoss"),
+              ),
+            ]
+          : []),
       ];
     }
     case "split-front-prioritization": {

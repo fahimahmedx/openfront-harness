@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "benchmark-fixture-acceptance-v1",
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
   "fixtureId": "cap-weaker-target-selection-scored-europe-classic-001",
   "status": "accepted",
   "sourceArtifact": "data/benchmark-fixture-sources/match-03/8df00795-1d13-4d14-8a85-64e41e45ef1c.json.gz",
@@ -42,11 +42,111 @@
   },
   "referenceReplays": {
     "attempted": 5,
-    "passed": 5
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "attack:ap9not8e:100",
+        "finalHash": 8556972751410073,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 1222,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "attack:ap9not8e:100",
+        "finalHash": 8556972751410073,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 1222,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "attack:ap9not8e:100",
+        "finalHash": 8556972751410073,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 1222,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "attack:ap9not8e:100",
+        "finalHash": 8556972751410073,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 1222,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "attack:ap9not8e:100",
+        "finalHash": 8556972751410073,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "captures-target-tile",
+            "observed": 1222,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      }
+    ]
   },
   "controls": [
-    "hold",
-    "plausible-distractor"
+    {
+      "selectedActionId": "attack:1kvdnt58:100",
+      "finalHash": 8531709876416261,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "captures-target-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "hold",
+      "finalHash": 9593153719694836,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "captures-target-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
   ],
   "review": {
     "blindedTradeoffIdentifiable": true,

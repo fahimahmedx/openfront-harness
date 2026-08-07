@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "benchmark-fixture-acceptance-v1",
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
   "fixtureId": "cap-incoming-attack-response-scored-great-lakes-001",
   "status": "accepted",
   "sourceArtifact": "data/benchmark-fixture-sources/match-07/d21d149d-c652-48ef-baf4-0225c0ed7648.json.gz",
@@ -42,11 +42,160 @@
   },
   "referenceReplays": {
     "attempted": 5,
-    "passed": 5
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "counter:bjhm4vs8:100",
+        "finalHash": 2315780367427505,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 118,
+            "operator": "<=",
+            "threshold": 200,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:bjhm4vs8:100",
+        "finalHash": 2315780367427505,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 118,
+            "operator": "<=",
+            "threshold": 200,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:bjhm4vs8:100",
+        "finalHash": 2315780367427505,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 118,
+            "operator": "<=",
+            "threshold": 200,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:bjhm4vs8:100",
+        "finalHash": 2315780367427505,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 118,
+            "operator": "<=",
+            "threshold": 200,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "counter:bjhm4vs8:100",
+        "finalHash": 2315780367427505,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "player-alive",
+            "observed": true,
+            "operator": "=",
+            "threshold": true,
+            "passed": true
+          },
+          {
+            "id": "protected-frontier-held",
+            "observed": 118,
+            "operator": "<=",
+            "threshold": 200,
+            "passed": true
+          }
+        ]
+      }
+    ]
   },
   "controls": [
-    "hold",
-    "plausible-distractor"
+    {
+      "selectedActionId": "hold",
+      "finalHash": 2347420079613425,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "protected-frontier-held",
+          "observed": 331,
+          "operator": "<=",
+          "threshold": 200,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "build:City:1624998",
+      "finalHash": 2352445942425621,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "player-alive",
+          "observed": true,
+          "operator": "=",
+          "threshold": true,
+          "passed": true
+        },
+        {
+          "id": "protected-frontier-held",
+          "observed": 328,
+          "operator": "<=",
+          "threshold": 200,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
   ],
   "review": {
     "blindedTradeoffIdentifiable": true,

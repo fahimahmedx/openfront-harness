@@ -12,6 +12,7 @@
     "engine",
     "mapAssets",
     "harnessCommit",
+    "harnessSourceHash",
     "promptVersion",
     "promptHash",
     "schemaVersions",
@@ -40,6 +41,7 @@
       "additionalProperties": { "$ref": "#/$defs/sha256" }
     },
     "harnessCommit": { "type": "string", "minLength": 7 },
+    "harnessSourceHash": { "$ref": "#/$defs/sha256" },
     "promptVersion": { "const": "agent-v13" },
     "promptHash": { "$ref": "#/$defs/sha256" },
     "schemaVersions": { "type": "object" },
@@ -80,8 +82,15 @@
           {
             "if": { "properties": { "suite": { "const": "capability" } } },
             "then": {
-              "required": ["family", "graderVersion", "recentDecisions"],
+              "required": [
+                "family",
+                "graderVersion",
+                "recentDecisions",
+                "acceptanceReportPath",
+                "acceptanceReportHash"
+              ],
               "properties": {
+                "acceptanceReportHash": { "$ref": "#/$defs/sha256" },
                 "family": {
                   "enum": [
                     "neutral-expansion",

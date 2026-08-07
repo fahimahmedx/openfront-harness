@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "benchmark-fixture-acceptance-v1",
+  "schemaVersion": "benchmark-fixture-acceptance-v2",
   "fixtureId": "cap-neutral-expansion-scored-great-lakes-001",
   "status": "accepted",
   "sourceArtifact": "data/benchmark-fixture-sources/match-08/b126879a-67a0-4831-9efe-5c79748d1b95.json.gz",
@@ -42,11 +42,111 @@
   },
   "referenceReplays": {
     "attempted": 5,
-    "passed": 5
+    "passed": 5,
+    "runs": [
+      {
+        "selectedActionId": "expand:neutral:100",
+        "finalHash": 503142291168935,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "owns-checkpoint-neutral-tile",
+            "observed": 24,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "expand:neutral:100",
+        "finalHash": 503142291168935,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "owns-checkpoint-neutral-tile",
+            "observed": 24,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "expand:neutral:100",
+        "finalHash": 503142291168935,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "owns-checkpoint-neutral-tile",
+            "observed": 24,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "expand:neutral:100",
+        "finalHash": 503142291168935,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "owns-checkpoint-neutral-tile",
+            "observed": 24,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "selectedActionId": "expand:neutral:100",
+        "finalHash": 503142291168935,
+        "passed": true,
+        "assertions": [
+          {
+            "id": "owns-checkpoint-neutral-tile",
+            "observed": 24,
+            "operator": ">=",
+            "threshold": 1,
+            "passed": true
+          }
+        ]
+      }
+    ]
   },
   "controls": [
-    "hold",
-    "plausible-distractor"
+    {
+      "selectedActionId": "hold",
+      "finalHash": 544547431992735,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "owns-checkpoint-neutral-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control1"
+    },
+    {
+      "selectedActionId": "alliance:request:4rfrmk3y",
+      "finalHash": 544547431992735,
+      "passed": false,
+      "assertions": [
+        {
+          "id": "owns-checkpoint-neutral-tile",
+          "observed": 0,
+          "operator": ">=",
+          "threshold": 1,
+          "passed": false
+        }
+      ],
+      "name": "control2"
+    }
   ],
   "review": {
     "blindedTradeoffIdentifiable": true,

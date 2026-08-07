@@ -37,7 +37,26 @@
     "split": { "const": "scored" },
     "status": { "enum": ["valid", "invalid", "needs-review"] },
     "invalidReason": { "type": ["string", "null"] },
-    "model": { "type": "object" },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested",
+        "resolved",
+        "provider",
+        "requestedProvider",
+        "promptVersion",
+        "reasoningEffort"
+      ],
+      "properties": {
+        "requested": { "type": "string", "minLength": 1 },
+        "resolved": { "type": "string", "minLength": 1 },
+        "provider": { "type": ["string", "null"] },
+        "requestedProvider": { "type": ["string", "null"] },
+        "promptVersion": { "const": "agent-v13" },
+        "reasoningEffort": { "const": "none" }
+      }
+    },
     "startedAt": { "type": "string", "format": "date-time" },
     "completedAt": { "type": "string", "format": "date-time" },
     "hashes": { "type": "object" },

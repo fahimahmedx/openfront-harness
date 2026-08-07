@@ -14,6 +14,8 @@
     "eval:fixtures": "tsx scripts/ExtractMicroEvalFixtures.ts",
     "eval:add-replays": "tsx --tsconfig OpenFrontIO/tsconfig.json scripts/AddEvalReplays.ts",
     "benchmark:validate-tasks": "tsx --tsconfig OpenFrontIO/tsconfig.json scripts/ValidateBenchmarkTasks.ts",
+    "benchmark:acceptance": "tsx --tsconfig OpenFrontIO/tsconfig.json scripts/AcceptBenchmarkFixtures.ts",
+    "benchmark:freeze": "tsx --tsconfig OpenFrontIO/tsconfig.json scripts/FreezeBenchmarkFixtures.ts",
     "benchmark:smoke": "tsx --tsconfig OpenFrontIO/tsconfig.json scripts/BenchmarkSmoke.ts",
     "benchmark:verify": "tsx --tsconfig OpenFrontIO/tsconfig.json scripts/VerifyBenchmark.ts",
     "benchmark:run": "tsx --tsconfig OpenFrontIO/tsconfig.json scripts/RunBenchmark.ts",
