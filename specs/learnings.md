@@ -27,6 +27,15 @@ Three comparison runs changed only the pinned provider to StreamLake. They compl
 
 Three clean StreamLake runs do not prove the route can never violate the schema, but the controlled comparison shows that the repeated Baidu behavior is not inherent to the DeepSeek model or the harness request alone. The evidence points to provider-route schema enforcement or provider-specific serving behavior.
 
+### Later StreamLake rate limiting
+
+Two additional StreamLake runs on August 5 preserved strict JSON Schema, disabled reasoning, and pinned routing, but exposed a separate availability failure. Across 240 decisions, StreamLake returned 23 HTTP 429 responses in 12 decisions. Only one immediate retry recovered; 11 decisions exhausted both attempts and safely held:
+
+- [Replay `22c50f53-2626-4c51-b8c6-ec8180226886`](/replay/22c50f53-2626-4c51-b8c6-ec8180226886) — 12 rate-limit responses across six failed decisions.
+- [Replay `bdb2c0c4-2d54-4216-9555-f0238a85e5cc`](/replay/bdb2c0c4-2d54-4216-9555-f0238a85e5cc) — 11 rate-limit responses; one retry recovered and five decisions fell back.
+
+The recorded OpenRouter metadata identifies StreamLake's upstream shared pool as the limit source and recommends retrying shortly. The failed retries began immediately after the first responses, so the harness now honors `Retry-After` for 429s, uses a bounded fallback delay when it is absent, and retains the pinned-provider and two-attempt policies.
+
 ### Harness implication
 
 Local validation remains the authority boundary for action IDs. Unknown actions must continue to be rejected rather than guessed or coerced. The public `strategy` note is non-authoritative, however, so an oversized strategy should be truncated deterministically to 160 characters and recorded as a nonfatal provider-conformance diagnostic instead of causing a paid retry or safe-hold fallback.

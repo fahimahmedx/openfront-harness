@@ -21,6 +21,8 @@ const MAX_COMPLETION_TOKENS = 512;
 const MAX_RETRY_CONTENT_CHARS = 2_000;
 const MAX_FAILURE_MESSAGE_CHARS = 500;
 const MAX_STREAM_BUFFER_CHARS = 1_000_000;
+const DEFAULT_RATE_LIMIT_RETRY_DELAY_MS = 5_000;
+const MAX_RATE_LIMIT_RETRY_DELAY_MS = 60_000;
 
 const StreamChunkSchema = z
   .object({
@@ -90,10 +92,40 @@ class TimedRequestError extends Error {
   constructor(
     message: string,
     readonly timing: AgentAttemptTiming,
+    readonly httpStatus?: number,
+    readonly retryAfterMs?: number,
   ) {
     super(message);
     this.name = "TimedRequestError";
   }
+}
+
+class OpenRouterHttpError extends Error {
+  constructor(
+    message: string,
+    readonly httpStatus: number,
+    readonly retryAfterMs: number | null,
+  ) {
+    super(message);
+    this.name = "OpenRouterHttpError";
+  }
+}
+
+function parseRetryAfterMs(value: string | null): number | null {
+  if (value === null) return null;
+  const normalized = value.trim();
+  if (normalized.length === 0) return null;
+  const seconds = Number(normalized);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.ceil(seconds * 1_000);
+  }
+  const retryAt = Date.parse(normalized);
+  if (!Number.isFinite(retryAt)) return null;
+  return Math.max(0, retryAt - Date.now());
+}
+
+function wait(delayMs: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
 const ActionDecisionSchema = z.object({
@@ -355,15 +387,29 @@ export class OpenRouterAgent {
         if (error instanceof TimedRequestError) {
           attemptTimings.push(error.timing);
         }
+        const rateLimited =
+          error instanceof TimedRequestError && error.httpStatus === 429;
+        const retryDelayMs =
+          rateLimited && attempt < 2
+            ? Math.min(
+                error.retryAfterMs ?? DEFAULT_RATE_LIMIT_RETRY_DELAY_MS,
+                MAX_RATE_LIMIT_RETRY_DELAY_MS,
+              )
+            : undefined;
         attemptFailures.push({
           attempt,
-          code: "request_error",
+          code: rateLimited ? "rate_limited" : "request_error",
           message: lastError.slice(0, MAX_FAILURE_MESSAGE_CHARS),
           rejectedActionIds: [],
+          ...(error instanceof TimedRequestError && error.httpStatus
+            ? { httpStatus: error.httpStatus }
+            : {}),
+          ...(retryDelayMs === undefined ? {} : { retryDelayMs }),
         });
-        retryFeedback = {
-          error: lastError.slice(0, MAX_FAILURE_MESSAGE_CHARS),
-        };
+        retryFeedback = rateLimited
+          ? undefined
+          : { error: lastError.slice(0, MAX_FAILURE_MESSAGE_CHARS) };
+        if (retryDelayMs !== undefined) await wait(retryDelayMs);
       }
     }
     return {
@@ -476,7 +522,11 @@ export class OpenRouterAgent {
       generationId = response.headers.get("X-Generation-Id");
       if (!response.ok) {
         const detail = (await response.text()).slice(0, 500);
-        throw new Error(`OpenRouter ${response.status}: ${detail}`);
+        throw new OpenRouterHttpError(
+          `OpenRouter ${response.status}: ${detail}`,
+          response.status,
+          parseRetryAfterMs(response.headers.get("Retry-After")),
+        );
       }
       if (!response.body) {
         throw new Error("OpenRouter returned an empty response stream");
@@ -597,7 +647,14 @@ export class OpenRouterAgent {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      throw new TimedRequestError(message, timing(performance.now(), false));
+      throw new TimedRequestError(
+        message,
+        timing(performance.now(), false),
+        error instanceof OpenRouterHttpError ? error.httpStatus : undefined,
+        error instanceof OpenRouterHttpError
+          ? (error.retryAfterMs ?? undefined)
+          : undefined,
+      );
     }
   }
 }

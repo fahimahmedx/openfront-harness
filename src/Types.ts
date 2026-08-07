@@ -36,11 +36,14 @@ export const AgentAttemptFailureSchema = z.object({
     "unknown_action_id",
     "truncated_response",
     "refusal",
+    "rate_limited",
     "request_error",
     "cost_limit",
   ]),
   message: z.string().min(1).max(500),
   rejectedActionIds: z.array(z.string().min(1).max(160)).max(2).default([]),
+  httpStatus: z.number().int().min(100).max(599).optional(),
+  retryDelayMs: z.number().int().min(0).max(60_000).optional(),
 });
 export type AgentAttemptFailure = z.infer<typeof AgentAttemptFailureSchema>;
 

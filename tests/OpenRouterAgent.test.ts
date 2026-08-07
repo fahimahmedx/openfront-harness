@@ -7,6 +7,7 @@ import {
   validateDecisionContent,
 } from "../src/OpenRouterAgent";
 import {
+  AgentAttemptFailureSchema,
   LegacyObservationSchema,
   LegalAction,
   Observation,
@@ -103,7 +104,23 @@ function completion(
   );
 }
 
+function requestError(status: number, retryAfter?: string): Response {
+  return new Response(
+    JSON.stringify({
+      error: {
+        message: "Provider returned error",
+        code: status,
+      },
+    }),
+    {
+      status,
+      headers: retryAfter === undefined ? {} : { "Retry-After": retryAfter },
+    },
+  );
+}
+
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -313,5 +330,130 @@ describe("OpenRouter one-action output", () => {
       { attempt: 1, code: "request_error", message: "provider unavailable" },
     ]);
     expect(result.attemptTimings).toHaveLength(2);
+  });
+
+  it("honors Retry-After seconds before retrying a 429", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(requestError(429, "2"))
+      .mockResolvedValueOnce(
+        completion(JSON.stringify({ strategy: "Hold", action: "hold" })),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const resultPromise = new OpenRouterAgent("test-key").decide(
+      observation,
+      candidates,
+    );
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1_999);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+
+    const result = await resultPromise;
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.decision?.action).toBe("hold");
+    expect(result.attemptFailures).toMatchObject([
+      {
+        attempt: 1,
+        code: "rate_limited",
+        httpStatus: 429,
+        retryDelayMs: 2_000,
+      },
+    ]);
+    expect(() =>
+      AgentAttemptFailureSchema.parse(result.attemptFailures[0]),
+    ).not.toThrow();
+    const firstRequest = JSON.parse(
+      String((fetchMock.mock.calls[0][1] as RequestInit).body),
+    ) as { messages: unknown[] };
+    const retryRequest = JSON.parse(
+      String((fetchMock.mock.calls[1][1] as RequestInit).body),
+    ) as { messages: unknown[] };
+    expect(retryRequest.messages).toEqual(firstRequest.messages);
+    expect(result.latencyMs).toBeGreaterThanOrEqual(2_000);
+  });
+
+  it("accepts an HTTP-date Retry-After value", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-06T12:00:00.000Z"));
+    const retryAt = new Date(Date.now() + 7_000).toUTCString();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(requestError(429, retryAt))
+      .mockResolvedValueOnce(
+        completion(JSON.stringify({ strategy: "Hold", action: "hold" })),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const resultPromise = new OpenRouterAgent("test-key").decide(
+      observation,
+      candidates,
+    );
+    await vi.advanceTimersByTimeAsync(6_999);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+
+    const result = await resultPromise;
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.attemptFailures[0]).toMatchObject({ retryDelayMs: 7_000 });
+  });
+
+  it("uses the bounded fallback delay for absent, invalid, or excessive Retry-After values", async () => {
+    vi.useFakeTimers();
+    for (const [retryAfter, expectedDelay] of [
+      [undefined, 5_000],
+      ["not-a-delay", 5_000],
+      ["120", 60_000],
+    ] as const) {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(requestError(429, retryAfter))
+        .mockResolvedValueOnce(
+          completion(JSON.stringify({ strategy: "Hold", action: "hold" })),
+        );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const resultPromise = new OpenRouterAgent("test-key").decide(
+        observation,
+        candidates,
+      );
+      await vi.advanceTimersByTimeAsync(expectedDelay - 1);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+
+      const result = await resultPromise;
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(result.attemptFailures[0]).toMatchObject({
+        retryDelayMs: expectedDelay,
+      });
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("stops after a second 429 and leaves the safe-hold fallback to the harness", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(requestError(429, "1"))
+      .mockResolvedValueOnce(requestError(429, "30"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const resultPromise = new OpenRouterAgent("test-key").decide(
+      observation,
+      candidates,
+    );
+    await vi.advanceTimersByTimeAsync(1_000);
+    const result = await resultPromise;
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.decision).toBeNull();
+    expect(result.attemptFailures).toMatchObject([
+      { attempt: 1, code: "rate_limited", retryDelayMs: 1_000 },
+      { attempt: 2, code: "rate_limited" },
+    ]);
+    expect(result.attemptFailures[1]).not.toHaveProperty("retryDelayMs");
   });
 });
