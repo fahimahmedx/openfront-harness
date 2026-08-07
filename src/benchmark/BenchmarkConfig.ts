@@ -26,7 +26,7 @@ export const BENCHMARK_LIMITS = Object.freeze({
   maxCandidates: 64,
   maxDecisionCount: 120,
   maxSimulatedMinutes: 20,
-  maxWallClockMs: 10 * 60 * 1000,
+  maxWallClockMs: 15 * 60 * 1000,
   maxCapabilityWallClockMs: 2 * 60 * 1000,
   maxMatchCostUsd: 1,
   maxCapabilityCostUsd: 0.1,
