@@ -13,7 +13,12 @@ RUN git clone --depth 1 --branch v0.32.9 --filter=blob:none --sparse \
     '/proprietary/' \
     '/resources/*' \
     '!/resources/maps/*/' \
+    '/resources/maps/europeclassic/' \
+    '/resources/maps/fourislands/' \
+    '/resources/maps/greatlakes/' \
     '/resources/maps/japan/' \
+    '/resources/maps/straitofgibraltar/' \
+    '/resources/maps/world/' \
   && test "$(git rev-parse HEAD)" = "dcc18d5231af6253b0e991bf04a4c764982fe262" \
   && rm -rf .git
 
@@ -56,6 +61,9 @@ COPY videos ./videos
 COPY data/deepseek-v4-flash ./resources/harness/deepseek-v4-flash
 COPY data/glm-5.2 ./resources/harness/glm-5.2
 COPY data/gpt-5.6-luna ./resources/harness/gpt-5.6-luna
+COPY data/benchmarks/deepseek-v4-flash-cloudflare ./data/benchmarks/deepseek-v4-flash-cloudflare
+COPY data/benchmarks/glm-5.2-baidu ./data/benchmarks/glm-5.2-baidu
+COPY data/benchmarks/gpt-5.6-luna-openai ./data/benchmarks/gpt-5.6-luna-openai
 COPY data/baseline ./data/baseline
 COPY README.md specs/design-decision.md writeup.md ./
 COPY --from=build /app/static ./static

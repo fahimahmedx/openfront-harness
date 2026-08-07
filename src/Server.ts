@@ -18,6 +18,11 @@ import {
   evalTrialDecision,
   evalTrialSummary,
 } from "./EvalReplayStore";
+import {
+  BenchmarkReplayStore,
+  capabilityReplayDecision,
+  capabilityReplaySummary,
+} from "./BenchmarkReplayStore";
 import { HarnessRunner } from "./HarnessRunner";
 import { DailyRateLimiter } from "./RateLimiter";
 import { artifactSummary, RunStore } from "./RunStore";
@@ -147,6 +152,7 @@ const localDataRoot = path.join(projectRoot, "data");
 const evalDataRoot = path.resolve(
   process.env.EVAL_DATA_DIR ?? path.join(localDataRoot, "evals"),
 );
+const benchmarkDataRoot = path.join(localDataRoot, "benchmarks");
 const artifactRoot =
   dataDir === localDataRoot || dataDir.startsWith(`${localDataRoot}${path.sep}`)
     ? localDataRoot
@@ -223,6 +229,7 @@ if (!process.env.RATE_LIMIT_SALT) {
 
 const store = new RunStore(dataDir, bundledRunFiles, artifactRoot);
 const evalStore = new EvalReplayStore(evalDataRoot);
+const benchmarkReplayStore = new BenchmarkReplayStore(benchmarkDataRoot);
 const limiter = new DailyRateLimiter(
   path.join(dataDir, "rate-limits.json"),
   rateSalt,
@@ -256,6 +263,15 @@ app.get("/api/health", (_req, res) => {
     generationAvailable: Boolean(process.env.OPENROUTER_API_KEY),
     activeRun: store.activeRun()?.runId ?? null,
   });
+});
+
+app.get("/api/evals/replays", async (_req, res, next) => {
+  try {
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.json(await benchmarkReplayStore.index());
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.get("/api/scenario", (_req, res) => {
@@ -387,17 +403,48 @@ app.get("/api/runs/:runId", async (req, res, next) => {
       });
     }
     const evalTrial = await evalStore.getTrial(req.params.runId);
-    if (!evalTrial) return res.status(404).json({ error: "Run not found" });
+    if (evalTrial) {
+      return res.json({
+        run: {
+          ...evalTrialSummary(evalTrial),
+          usage: {
+            promptTokens: evalTrial.trace.promptTokens,
+            completionTokens: evalTrial.trace.completionTokens,
+            costUsd: evalTrial.trace.costUsd,
+          },
+          outcome: evalTrial.outcome,
+          decisions: [evalTrialDecision(evalTrial)],
+        },
+      });
+    }
+    const benchmarkReplay = await benchmarkReplayStore.getArtifact(
+      req.params.runId,
+    );
+    if (!benchmarkReplay)
+      return res.status(404).json({ error: "Run not found" });
+    if (benchmarkReplay.suite === "match") {
+      return res.json({
+        run: {
+          ...artifactSummary(benchmarkReplay.artifact),
+          usage: benchmarkReplay.artifact.usage,
+          outcome: benchmarkReplay.artifact.outcome,
+          decisions: benchmarkReplay.artifact.decisions,
+        },
+      });
+    }
     return res.json({
       run: {
-        ...evalTrialSummary(evalTrial),
+        ...capabilityReplaySummary(
+          benchmarkReplay.trial,
+          benchmarkReplay.artifact,
+        ),
         usage: {
-          promptTokens: evalTrial.trace.promptTokens,
-          completionTokens: evalTrial.trace.completionTokens,
-          costUsd: evalTrial.trace.costUsd,
+          promptTokens: benchmarkReplay.artifact.agent.promptTokens,
+          completionTokens: benchmarkReplay.artifact.agent.completionTokens,
+          costUsd: benchmarkReplay.artifact.agent.costUsd,
         },
-        outcome: evalTrial.outcome,
-        decisions: [evalTrialDecision(evalTrial)],
+        outcome: { taskPass: benchmarkReplay.artifact.taskPass },
+        decisions: [capabilityReplayDecision(benchmarkReplay.artifact)],
       },
     });
   } catch (error) {
@@ -434,9 +481,19 @@ app.get("/api/runs/:runId/replay", async (req, res, next) => {
       );
     }
     const evalTrial = await evalStore.getTrial(req.params.runId);
-    if (!evalTrial) return res.status(404).json({ error: "Run not found" });
+    if (evalTrial) {
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      return res.json(JSON.parse(JSON.stringify(evalTrial.replay, replacer)));
+    }
+    const benchmarkReplay = await benchmarkReplayStore.getArtifact(
+      req.params.runId,
+    );
+    if (!benchmarkReplay)
+      return res.status(404).json({ error: "Run not found" });
     res.setHeader("Cache-Control", "public, max-age=3600");
-    return res.json(JSON.parse(JSON.stringify(evalTrial.replay, replacer)));
+    return res.json(
+      JSON.parse(JSON.stringify(benchmarkReplay.artifact.replay, replacer)),
+    );
   } catch (error) {
     next(error);
   }
@@ -450,7 +507,12 @@ app.get("/api/runs/:runId/artifact", async (req, res, next) => {
       : await getVisualBaselineArtifact(req.params.runId);
     const evalTrial =
       artifact || baseline ? null : await evalStore.getTrial(req.params.runId);
-    const downloadable = artifact ?? baseline ?? evalTrial;
+    const benchmarkReplay =
+      artifact || baseline || evalTrial
+        ? null
+        : await benchmarkReplayStore.getArtifact(req.params.runId);
+    const downloadable =
+      artifact ?? baseline ?? evalTrial ?? benchmarkReplay?.artifact;
     if (!downloadable) return res.status(404).json({ error: "Run not found" });
     res.setHeader(
       "Content-Disposition",
