@@ -15,12 +15,13 @@ const gzipAsync = promisify(gzip);
 const gunzipAsync = promisify(gunzip);
 
 export function artifactSummary(artifact: ReplayRunArtifact) {
+  const scenarioId =
+    typeof artifact.scenario.id === "string" ? artifact.scenario.id : "unknown";
   return {
     runId: artifact.runId,
-    scenarioId:
-      typeof artifact.scenario.id === "string"
-        ? artifact.scenario.id
-        : "unknown",
+    scenarioId,
+    benchmarkTrial:
+      /^match-\d+$/.test(scenarioId) || scenarioId.startsWith("cap-"),
     status: artifact.status,
     startedAt: artifact.startedAt,
     completedAt: artifact.completedAt,

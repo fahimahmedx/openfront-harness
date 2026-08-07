@@ -3,6 +3,7 @@ import "./dashboard.css";
 type RunSummary = {
   runId: string;
   scenarioId: string;
+  benchmarkTrial?: boolean;
   status: string;
   startedAt: string;
   model: string;
@@ -76,18 +77,16 @@ function ordinal(value: number): string {
 }
 
 function scenarioLabel(scenarioId: string): string {
-  if (
-    scenarioId === "japan-v2" ||
-    scenarioId === "japan-v3" ||
-    scenarioId === "japan-v5" ||
-    scenarioId === "japan-v6"
-  )
-    return "Japan";
+  if (scenarioId.startsWith("japan-v")) return "Japan";
 
   return scenarioId
     .split("-")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function scenarioFamily(scenarioId: string): string {
+  return scenarioId.startsWith("japan-v") ? "japan" : scenarioId;
 }
 
 function outcomeLabel(
@@ -166,18 +165,24 @@ function baselineRunRow(run: BaselineRunSummary): string {
 }
 
 function renderRuns(): void {
-  if (!cachedRuns.length) {
+  const frontPageRuns = cachedRuns.filter((run) => !run.benchmarkTrial);
+  if (!frontPageRuns.length) {
     recentRuns.innerHTML =
       '<div class="loading">No completed trials are available.</div>';
     runArchive.hidden = true;
     return;
   }
 
-  const scenarioRuns = currentScenarioId
-    ? cachedRuns.filter((run) => run.scenarioId === currentScenarioId)
-    : cachedRuns;
+  const currentScenarioFamily = currentScenarioId
+    ? scenarioFamily(currentScenarioId)
+    : null;
+  const scenarioRuns = currentScenarioFamily
+    ? frontPageRuns.filter(
+        (run) => scenarioFamily(run.scenarioId) === currentScenarioFamily,
+      )
+    : frontPageRuns;
   const sample = scenarioRuns.find((run) => run.status === "sample");
-  const heroRun = cachedRuns.find((run) => run.runId === heroRunId);
+  const heroRun = frontPageRuns.find((run) => run.runId === heroRunId);
 
   if (heroRun) updateHeroRun(heroRun);
 
@@ -190,7 +195,7 @@ function renderRuns(): void {
     : '<div class="loading">No completed trials yet.</div>';
 
   const recentIds = new Set(recent.map((run) => run.runId));
-  const archived = cachedRuns.filter((run) => !recentIds.has(run.runId));
+  const archived = frontPageRuns.filter((run) => !recentIds.has(run.runId));
   archiveRuns.innerHTML = archived.map((run) => runRow(run)).join("");
   runArchive.hidden = archived.length === 0;
 }
