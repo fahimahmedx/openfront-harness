@@ -4,6 +4,7 @@ import {
   formatAttemptTiming,
   formatLatency,
   presentReplayAction,
+  presentReplayStrategy,
   ReplayActionCandidate,
   statDelta,
 } from "./ReplayTraceState";
@@ -649,7 +650,7 @@ class HarnessReplayPanel extends HTMLElement {
     strategyLabel.className = "section-label";
     strategyLabel.textContent = "Agent Decision";
     const title = document.createElement("h2");
-    title.textContent = decision.strategy;
+    title.textContent = presentReplayStrategy(decision.strategy, decision);
     const provider = document.createElement("p");
     provider.className = "provider";
     provider.textContent = `${decision.model}${decision.provider ? ` via ${decision.provider}` : ""}`;

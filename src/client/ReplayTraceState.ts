@@ -21,6 +21,121 @@ export type StatDelta = {
   description: string;
 };
 
+type ReplayStrategyContext = {
+  observation?: {
+    self?: Record<string, unknown>;
+    opponents?: Array<Record<string, unknown>>;
+  };
+  candidates?: ReplayActionCandidate[];
+};
+
+const NUMERIC_QUANTITY =
+  /\b(\d[\d,]*(?:\.\d+)?)(?:\s*([KMB]))?(?![\dA-Za-z]|\.\d)/gi;
+
+function parseCompactNumber(value: string, suffix: string | undefined): number {
+  const amount = Number(value.replaceAll(",", ""));
+  const multiplier =
+    suffix?.toUpperCase() === "B"
+      ? 1_000_000_000
+      : suffix?.toUpperCase() === "M"
+        ? 1_000_000
+        : suffix?.toUpperCase() === "K"
+          ? 1_000
+          : 1;
+  return amount * multiplier;
+}
+
+function knownTroopValues(context: ReplayStrategyContext | undefined): number[] {
+  const values: number[] = [];
+  const visit = (value: unknown, key = "") => {
+    if (
+      typeof value === "number" &&
+      /troops?/i.test(key) &&
+      !/(?:percent|ratio|relative)/i.test(key)
+    ) {
+      values.push(value);
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((entry) => visit(entry, key));
+      return;
+    }
+    if (value && typeof value === "object") {
+      Object.entries(value).forEach(([childKey, child]) =>
+        visit(child, childKey),
+      );
+    }
+  };
+  visit(context?.observation?.self);
+  visit(context?.observation?.opponents);
+  visit(context?.candidates);
+  return values.filter(Number.isFinite);
+}
+
+function matchesKnownTroopValue(
+  rawValue: number,
+  value: string,
+  suffix: string | undefined,
+  knownValues: number[],
+): boolean {
+  const decimalPlaces = value.includes(".")
+    ? (value.split(".")[1]?.length ?? 0)
+    : 0;
+  const multiplier = suffix
+    ? suffix.toUpperCase() === "B"
+      ? 1_000_000_000
+      : suffix.toUpperCase() === "M"
+        ? 1_000_000
+        : 1_000
+    : 1;
+  const tolerance = suffix
+    ? multiplier / 10 ** decimalPlaces / 2 + 1
+    : 0.5 / 10 ** decimalPlaces;
+  return knownValues.some((known) => Math.abs(known - rawValue) <= tolerance);
+}
+
+/**
+ * Agent-v13 observations used OpenFront's raw engine troop units. Replays keep
+ * those exact responses in the artifact, but present troop quantities on the
+ * same one-tenth scale as the game HUD.
+ */
+export function presentReplayStrategy(
+  strategy: string,
+  context?: ReplayStrategyContext,
+): string {
+  const knownValues = knownTroopValues(context);
+  return strategy.replace(
+    NUMERIC_QUANTITY,
+    (
+      match,
+      value: string,
+      suffix: string | undefined,
+      offset: number,
+      source: string,
+    ) => {
+      const before = source.slice(Math.max(0, offset - 28), offset);
+      const after = source.slice(offset + match.length, offset + match.length + 28);
+      const isUnscaledQuantity =
+        /^\s*(?:%|x\b|(?:st|nd|rd|th)\b|s(?:ec(?:onds?)?)?\b|min(?:utes?)?\b|h(?:ours?)?\b|(?:tiles?|gold|coins?|tokens?)\b)/i.test(
+          after,
+        ) ||
+        /(?:gold|coins?|tokens?)\s*(?::|=|at|of|is|has|with)?\s*$/i.test(
+          before,
+        );
+      if (isUnscaledQuantity) return match;
+      const rawTroops = parseCompactNumber(value, suffix);
+      const explicitlyTroops = /^\s*-?\s*troops?\b/i.test(after);
+      const shouldScale =
+        suffix !== undefined ||
+        explicitlyTroops ||
+        matchesKnownTroopValue(rawTroops, value, suffix, knownValues);
+      return shouldScale && Number.isFinite(rawTroops)
+        ? renderTroops(rawTroops)
+        : match;
+    },
+  );
+}
+
 export function presentReplayAction(
   id: string,
   candidates: ReplayActionCandidate[],

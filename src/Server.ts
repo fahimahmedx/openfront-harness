@@ -165,9 +165,10 @@ const bundledRunFiles = (await fs.readdir(bundledRunRoot, { recursive: true }))
 
 const htmlCache = new Map<string, Promise<string>>();
 function renderShell(fileName: "replay.html" | "harness.html" | "evals.html") {
-  let rendered = htmlCache.get(fileName);
-  if (rendered) return rendered;
-  rendered = (async () => {
+  const cacheHtml = process.env.NODE_ENV === "production";
+  const cached = cacheHtml ? htmlCache.get(fileName) : undefined;
+  if (cached) return cached;
+  const rendered = (async () => {
     const [template, manifestBody] = await Promise.all([
       fs.readFile(path.join(staticDir, fileName), "utf8"),
       fs
@@ -202,7 +203,7 @@ function renderShell(fileName: "replay.html" | "harness.html" | "evals.html") {
     htmlCache.delete(fileName);
     throw error;
   });
-  htmlCache.set(fileName, rendered);
+  if (cacheHtml) htmlCache.set(fileName, rendered);
   return rendered;
 }
 
